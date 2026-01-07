@@ -1,0 +1,324 @@
+This program provides rebar lap splice calculations in accordance with EN 1992-1-1 (Eurocode 2)
+Vui lòng nhập tên sản phẩm (Reo 502 Xtrem / Epcon G5 Xtrem): Epcon G5 Xtrem
+Sản phẩm 'Epcon G5 Xtrem' đã được xác nhận. Tiếp tục tính toán...
+=== INPUT CHO BÊ TÔNG MỚI ===
+Bạn muốn tính cho dầm, cột tròn, cột chữ nhật, hay cột phức tạp? (dam / cottron / cotchunhat / cotphuctap): cotphuctap
+>>> Bước 1: Khởi tạo 2 hình chữ nhật (tâm ban đầu tại gốc 0,0)
+Rect #1 -> b1 (mm): 800
+Rect #1 -> h1 (mm): 400
+Rect #2 -> b2 (mm): 400
+Rect #2 -> h2 (mm): 1000
+
+>>> Bước 2: Tịnh tiến hình #2 để tạo giao nhau (T, L, thập, ...)
+Vector tịnh tiến dx (mm): 0
+Vector tịnh tiến dy (mm): -300
+Rect #1: C=(0.00,0.00), b=800.00, h=400.00
+Rect #2: C=(0.00,-300.00), b=400.00, h=1000.00
+
+>>> Bước 3: Boolean UNION -> lấy đường bao ngoài cùng (chu vi tiết diện)
+Chu vi ngoài (điểm theo thứ tự CCW):
+ P1: (-200.00,-800.00)
+ P2: (200.00,-800.00)
+ P3: (200.00,-200.00)
+ P4: (400.00,-200.00)
+ P5: (400.00,200.00)
+ P6: (-400.00,200.00)
+ P7: (-400.00,-200.00)
+ P8: (-200.00,-200.00)
+ P9: (-200.00,-800.00)
+
+>>> Bước 4: Offset chu vi vào trong a (dùng co rút từng rect rồi union)
+Lớp bảo vệ a (mm): 40
+Rect #1 (offset): b=720.00, h=320.00
+Rect #2 (offset): b=320.00, h=920.00
+Chu vi 'vùng đặt thép' (CCW):
+ Q1: (-160.00,-760.00)
+ Q2: (160.00,-760.00)
+ Q3: (160.00,-160.00)
+ Q4: (360.00,-160.00)
+ Q5: (360.00,160.00)
+ Q6: (-360.00,160.00)
+ Q7: (-360.00,-160.00)
+ Q8: (-160.00,-160.00)
+ Q9: (-160.00,-760.00)
+
+>>> Bước 5: Khai báo thép tự động theo biên offset của MỖI HCN
+Rect #1: số thanh theo phương X mỗi cạnh (trên/dưới) nx1: 7
+Rect #1: số thanh theo phương Y mỗi cạnh (trái/phải) ny1: 3
+Rect #2: số thanh theo phương X mỗi cạnh (trên/dưới) nx2: 3
+Rect #2: số thanh theo phương Y mỗi cạnh (trái/phải) ny2: 7
+Đường kính thép φ (mm) cho auto: 20
+
+Danh sách THÉP TỰ ĐỘNG ban đầu:
+Thanh #1: (-360.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #2: (-240.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #3: (-120.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #4: (0.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #5: (120.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #6: (240.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #7: (360.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #8: (-360.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #9: (-240.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #10: (-120.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #11: (0.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #12: (120.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #13: (240.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #14: (360.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #15: (-360.00, 0.00), φ=20, [auto-y-left-r1]
+Thanh #16: (360.00, 0.00), φ=20, [auto-y-right-r1]
+Thanh #17: (-160.00, 160.00), φ=20, [auto-x-top-r2]
+Thanh #18: (160.00, 160.00), φ=20, [auto-x-top-r2]
+Thanh #19: (-160.00, -760.00), φ=20, [auto-x-bot-r2]
+Thanh #20: (0.00, -760.00), φ=20, [auto-x-bot-r2]
+Thanh #21: (160.00, -760.00), φ=20, [auto-x-bot-r2]
+Thanh #22: (-160.00, -606.67), φ=20, [auto-y-left-r2]
+Thanh #23: (-160.00, -453.33), φ=20, [auto-y-left-r2]
+Thanh #24: (-160.00, -300.00), φ=20, [auto-y-left-r2]
+Thanh #25: (-160.00, -146.67), φ=20, [auto-y-left-r2]
+Thanh #26: (-160.00, 6.67), φ=20, [auto-y-left-r2]
+Thanh #27: (160.00, -606.67), φ=20, [auto-y-right-r2]
+Thanh #28: (160.00, -453.33), φ=20, [auto-y-right-r2]
+Thanh #29: (160.00, -300.00), φ=20, [auto-y-right-r2]
+Thanh #30: (160.00, -146.67), φ=20, [auto-y-right-r2]
+Thanh #31: (160.00, 6.67), φ=20, [auto-y-right-r2]
+
+Bạn có muốn THÊM thanh thép? (Yes/No): no
+
+Bạn có muốn XÓA thanh theo SỐ THỨ TỰ? (Yes/No): no
+
+>>> Bước 8: Kết quả cuối cùng
+- Chu vi ngoài (union 2 rect): 8 cạnh.
+- Chu vi vùng đặt thép (union 2 rect co rút a): 8 cạnh.
+- Số thanh thép tổng: 31
+
+Danh sách toàn bộ thanh thép:
+Thanh #1: (-360.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #2: (-240.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #3: (-120.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #4: (0.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #5: (120.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #6: (240.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #7: (360.00, 160.00), φ=20, [auto-x-top-r1]
+Thanh #8: (-360.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #9: (-240.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #10: (-120.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #11: (0.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #12: (120.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #13: (240.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #14: (360.00, -160.00), φ=20, [auto-x-bot-r1]
+Thanh #15: (-360.00, 0.00), φ=20, [auto-y-left-r1]
+Thanh #16: (360.00, 0.00), φ=20, [auto-y-right-r1]
+Thanh #17: (-160.00, 160.00), φ=20, [auto-x-top-r2]
+Thanh #18: (160.00, 160.00), φ=20, [auto-x-top-r2]
+Thanh #19: (-160.00, -760.00), φ=20, [auto-x-bot-r2]
+Thanh #20: (0.00, -760.00), φ=20, [auto-x-bot-r2]
+Thanh #21: (160.00, -760.00), φ=20, [auto-x-bot-r2]
+Thanh #22: (-160.00, -606.67), φ=20, [auto-y-left-r2]
+Thanh #23: (-160.00, -453.33), φ=20, [auto-y-left-r2]
+Thanh #24: (-160.00, -300.00), φ=20, [auto-y-left-r2]
+Thanh #25: (-160.00, -146.67), φ=20, [auto-y-left-r2]
+Thanh #26: (-160.00, 6.67), φ=20, [auto-y-left-r2]
+Thanh #27: (160.00, -606.67), φ=20, [auto-y-right-r2]
+Thanh #28: (160.00, -453.33), φ=20, [auto-y-right-r2]
+Thanh #29: (160.00, -300.00), φ=20, [auto-y-right-r2]
+Thanh #30: (160.00, -146.67), φ=20, [auto-y-right-r2]
+Thanh #31: (160.00, 6.67), φ=20, [auto-y-right-r2]
+Loại bê tông MỚI (ví dụ C30/37): C30/37
+[BT MỚI] C30/37: fck=30.00 MPa; fck=30.00 MPa; fcd=20.00 MPa
+fy (MPa): 500
+Es (MPa): 200000
+[THÉP MỚI] fy=500.00 MPa; fyd=434.78 MPa; Es=200000 MPa
+
+=== SỨC CHỊU TỐI ĐA CỦA 1 THANH THÉP MỚI (kéo/nén) ===
+ φ auto (φ=20 mm): 136.591 kN
+
+=== INPUT CHO BÊ TÔNG HIỆN HỮU ===
+Bạn muốn tính cho  hiện hữu (chỉ cottron/cotchunhat/cotphuctap): cotchunhat
+b_exist (mm) – bề rộng tiết diện hiện hữu: 1000
+h_exist (mm) – chiều cao tiết diện hiện hữu: 1100
+a_exist (mm) – lớp bảo vệ bê tông hiện hữu: 40
+n1_exist – số thanh theo chiều cao hiện hữu: 5
+n2_exist – số thanh theo chiều rộng hiện hữu: 5
+φ_exist (mm) – đường kính thanh hiện hữu: 22
+
+Bạn có muốn THÊM thanh thép? (Yes/No): no
+
+Bạn có muốn XÓA thanh theo SỐ THỨ TỰ? (Yes/No): no
+
+Tọa độ của các thanh thép hiện hữu (theo lớp):
+Thanh_exist 1: (-460.00, -510.00) [nb_exist1], φ_exist=22
+Thanh_exist 2: (-230.00, -510.00) [nb_exist2], φ_exist=22
+Thanh_exist 3: (0.00, -510.00) [nb_exist3], φ_exist=22
+Thanh_exist 4: (230.00, -510.00) [nb_exist4], φ_exist=22
+Thanh_exist 5: (460.00, -510.00) [nb_exist5], φ_exist=22
+Thanh_exist 6: (460.00, -255.00) [nb_exist6], φ_exist=22
+Thanh_exist 7: (460.00, 0.00) [nb_exist7], φ_exist=22
+Thanh_exist 8: (460.00, 255.00) [nt_exist1], φ_exist=22
+Thanh_exist 9: (460.00, 510.00) [nt_exist2], φ_exist=22
+Thanh_exist 10: (230.00, 510.00) [nt_exist3], φ_exist=22
+Thanh_exist 11: (0.00, 510.00) [nt_exist4], φ_exist=22
+Thanh_exist 12: (-230.00, 510.00) [nt_exist5], φ_exist=22
+Thanh_exist 13: (-460.00, 510.00) [nt_exist6], φ_exist=22
+Thanh_exist 14: (-460.00, 255.00) [nt_exist7], φ_exist=22
+Thanh_exist 15: (-460.00, 0.00) [nb_exist8], φ_exist=22
+Thanh_exist 16: (-460.00, -255.00) [nb_exist9], φ_exist=22
+
+>>> Input cốt thép đai cho bê tông hiện hữu:
+Đường kính thép đai hiện hữu φ (mm): 10
+Khoảng cách giữa các thép đai hiện hữu s (mm): 150
+[THÉP ĐAI EXIST] φ=10.0 mm, s=150.0 mm
+Loại bê tông HIỆN HỮU (ví dụ C30/37): C25/30
+[BT HIỆN HỮU] C25/30: fck_exist=25.00 MPa; fcd_exist=16.67 MPa
+
+>>> Input bê tông bảo vệ phía trước cho thép hiện hữu:
+FC (mm) – bê tông bảo vệ hiện hữu: 50
+fy_exist (MPa): 500
+Es_exist (MPa): 200000
+[THÉP EXIST] fy_exist=500.00 MPa; fyd_exist=434.78 MPa; Es_exist=200000 MPa
+
+>>> Tịnh tiến cấu kiện hiện hữu (bê tông và thép hiện hữu) từ gốc (0,0)
+Tịnh tiến cấu kiện hiện hữu theo phương x một khoảng (mm, >0 dương, <0 âm): 0
+Tịnh tiến cấu kiện hiện hữu theo phương y một khoảng (mm, >0 dương, <0 âm): -300
+
+Danh sách thanh thép hiện hữu sau tịnh tiến:
+Thanh_exist 1: (-460.00, -810.00) [nb_exist1], φ_exist=22
+Thanh_exist 2: (-230.00, -810.00) [nb_exist2], φ_exist=22
+Thanh_exist 3: (0.00, -810.00) [nb_exist3], φ_exist=22
+Thanh_exist 4: (230.00, -810.00) [nb_exist4], φ_exist=22
+Thanh_exist 5: (460.00, -810.00) [nb_exist5], φ_exist=22
+Thanh_exist 6: (460.00, -555.00) [nb_exist6], φ_exist=22
+Thanh_exist 7: (460.00, -300.00) [nb_exist7], φ_exist=22
+Thanh_exist 8: (460.00, -45.00) [nt_exist1], φ_exist=22
+Thanh_exist 9: (460.00, 210.00) [nt_exist2], φ_exist=22
+Thanh_exist 10: (230.00, 210.00) [nt_exist3], φ_exist=22
+Thanh_exist 11: (0.00, 210.00) [nt_exist4], φ_exist=22
+Thanh_exist 12: (-230.00, 210.00) [nt_exist5], φ_exist=22
+Thanh_exist 13: (-460.00, 210.00) [nt_exist6], φ_exist=22
+Thanh_exist 14: (-460.00, -45.00) [nt_exist7], φ_exist=22
+Thanh_exist 15: (-460.00, -300.00) [nb_exist8], φ_exist=22
+Thanh_exist 16: (-460.00, -555.00) [nb_exist9], φ_exist=22
+
+
+Danh sách thanh thép hiện hữu sau tịnh tiến:
+Thanh_exist 1: (-460.00, -810.00) [nb_exist1], φ_exist=22
+Thanh_exist 2: (-230.00, -810.00) [nb_exist2], φ_exist=22
+Thanh_exist 3: (0.00, -810.00) [nb_exist3], φ_exist=22
+Thanh_exist 4: (230.00, -810.00) [nb_exist4], φ_exist=22
+Thanh_exist 5: (460.00, -810.00) [nb_exist5], φ_exist=22
+Thanh_exist 6: (460.00, -555.00) [nb_exist6], φ_exist=22
+Thanh_exist 7: (460.00, -300.00) [nb_exist7], φ_exist=22
+Thanh_exist 8: (460.00, -45.00) [nt_exist1], φ_exist=22
+Thanh_exist 9: (460.00, 210.00) [nt_exist2], φ_exist=22
+Thanh_exist 10: (230.00, 210.00) [nt_exist3], φ_exist=22
+Thanh_exist 11: (0.00, 210.00) [nt_exist4], φ_exist=22
+Thanh_exist 12: (-230.00, 210.00) [nt_exist5], φ_exist=22
+Thanh_exist 13: (-460.00, 210.00) [nt_exist6], φ_exist=22
+Thanh_exist 14: (-460.00, -45.00) [nt_exist7], φ_exist=22
+Thanh_exist 15: (-460.00, -300.00) [nb_exist8], φ_exist=22
+Thanh_exist 16: (-460.00, -555.00) [nb_exist9], φ_exist=22
+=== INPUT CHUNG CHO TOÀN BỘ LIÊN KẾT ===
+Vui lòng nhập loại tải (static / seismic): static
+Lỗ khoan (dry / water): water
+Phương pháp khoan (hammer / diamond): diamond
+Working life (50 / 100 năm): 50
+Điều kiện liên kết (good / other): good
+Mx (kN·m): -929
+My (kN·m): 5
+N (kN; dương = kéo, âm = nén): -161
+Thiết lập mesh tự động: h_min = 0.8, h_max = 5, RrefMul = 2
+Chọn cách tạo lưới: 1 (chia lưới tam giác) hoặc 2 (gmsh.exe để chia lưới): 1
+Đang tạo lưới tam giác nội bộ...
+Số cell bê tông (mixed tri/quad): 30798
+Đang gửi dữ liệu lên server để tính toán, vui lòng chờ... (Nhấn ESC để hủy)
+Thời gian xử lý: 164.36 giây.
+Kết quả đã sẵn sàng từ server. Đang hiển thị...
+✅ Hội tụ (tổng 0 vòng Newton): ε0=8.125719E-004, κx=-2.033777E-006 1/mm, κy=-4.039349E-008 1/mm
+N_calc=-161.000 kN | Mx_calc=-929.000 kN.m | My_calc=5.000 kN.m
+Max σc (dấu kỹ sư, nén âm) = -13.02 MPa | Max εc=1.231345E-003 | Max |σs|=230.50 (≤ fyd=434.78?)
+
+[THÔNG BÁO]: Max εc = 1.231345E-003 ≤ ε_cu2 (0.0035) → Bê tông an toàn, không có vùng nghiền nát.
+✔ Giới hạn an toàn thép được thỏa mãn: Max |σs| ≤ fyd.
+
+Các giao điểm giữa trục trung hòa và chu vi tiết diện bê tông mới:
+ Giao điểm 1: (-200.00, -403.51) mm
+ Giao điểm 2: (200.00, -395.57) mm
+
+Lực trong từng thanh thép (dấu kỹ sư: dương = KÉO, âm = NÉN):
+
+Lực kéo/nén từng thanh thép (dấu kỹ sư: dương = KÉO, âm = NÉN):
+ Thanh 1: (-360.00, 160.00) [auto-x-top-r1] → F = 72.415 kN (KÉO)
+ Thanh 2: (-240.00, 160.00) [auto-x-top-r1] → F = 72.110 kN (KÉO)
+ Thanh 3: (-120.00, 160.00) [auto-x-top-r1] → F = 71.806 kN (KÉO)
+ Thanh 4: (0.00, 160.00) [auto-x-top-r1] → F = 71.501 kN (KÉO)
+ Thanh 5: (120.00, 160.00) [auto-x-top-r1] → F = 71.197 kN (KÉO)
+ Thanh 6: (240.00, 160.00) [auto-x-top-r1] → F = 70.892 kN (KÉO)
+ Thanh 7: (360.00, 160.00) [auto-x-top-r1] → F = 70.587 kN (KÉO)
+ Thanh 8: (-360.00, -160.00) [auto-x-bot-r1] → F = 31.523 kN (KÉO)
+ Thanh 9: (-240.00, -160.00) [auto-x-bot-r1] → F = 31.219 kN (KÉO)
+ Thanh 10: (-120.00, -160.00) [auto-x-bot-r1] → F = 30.914 kN (KÉO)
+ Thanh 11: (0.00, -160.00) [auto-x-bot-r1] → F = 30.610 kN (KÉO)
+ Thanh 12: (120.00, -160.00) [auto-x-bot-r1] → F = 30.305 kN (KÉO)
+ Thanh 13: (240.00, -160.00) [auto-x-bot-r1] → F = 30.001 kN (KÉO)
+ Thanh 14: (360.00, -160.00) [auto-x-bot-r1] → F = 29.696 kN (KÉO)
+ Thanh 15: (-360.00, 0.00) [auto-y-left-r1] → F = 51.969 kN (KÉO)
+ Thanh 16: (360.00, 0.00) [auto-y-right-r1] → F = 50.142 kN (KÉO)
+ Thanh 17: (-160.00, 160.00) [auto-x-top-r2] → F = 71.907 kN (KÉO)
+ Thanh 18: (160.00, 160.00) [auto-x-top-r2] → F = 71.095 kN (KÉO)
+ Thanh 19: (-160.00, -760.00) [auto-x-bot-r2] → F = -45.656 kN (NÉN)
+ Thanh 20: (0.00, -760.00) [auto-x-bot-r2] → F = -46.062 kN (NÉN)
+ Thanh 21: (160.00, -760.00) [auto-x-bot-r2] → F = -46.468 kN (NÉN)
+ Thanh 22: (-160.00, -606.67) [auto-y-left-r2] → F = -26.062 kN (NÉN)
+ Thanh 23: (-160.00, -453.33) [auto-y-left-r2] → F = -6.468 kN (NÉN)
+ Thanh 24: (-160.00, -300.00) [auto-y-left-r2] → F = 13.126 kN (KÉO)
+ Thanh 25: (-160.00, -146.67) [auto-y-left-r2] → F = 32.720 kN (KÉO)
+ Thanh 26: (-160.00, 6.67) [auto-y-left-r2] → F = 52.313 kN (KÉO)
+ Thanh 27: (160.00, -606.67) [auto-y-right-r2] → F = -26.874 kN (NÉN)
+ Thanh 28: (160.00, -453.33) [auto-y-right-r2] → F = -7.280 kN (NÉN)
+ Thanh 29: (160.00, -300.00) [auto-y-right-r2] → F = 12.314 kN (KÉO)
+ Thanh 30: (160.00, -146.67) [auto-y-right-r2] → F = 31.907 kN (KÉO)
+ Thanh 31: (160.00, 6.67) [auto-y-right-r2] → F = 51.501 kN (KÉO)
+
+A_s_tension = 7539.8 mm² | A_s_compression = 2199.1 mm² | A_s_total = 9738.9 mm²
+μ = 0.0174
+A_smin = 1120.0 mm² | A_smax = 22400.0 mm²
+
+Tổng lực: Tk (kéo) = 1153.769 kN
+ Tn_thép = -204.870 kN | Tn_bê tông = -1109.899 kN
+ Tn (tổng)=-1314.769 kN
+Centroid Tk = (-2.79, 45.30) mm
+Centroid Tn = (1.35, -666.84) mm
+Khoảng lệch tâm Tk–Tn: (lever arm Z=712.15 mm)
+Đường đường chia gần trục T/N: y = 0.0199·x + -399.5384
+
+=== KẾT QUẢ PIR CHO EXIST ===
+f_bdPIR = 2.70 MPa
+alpha_lb = 1.0000
+
+=== TÍNH TOÁN CHIỀU SÂU KHOAN CẤY LV CHO THÉP MỚI ===
+
+Chiều sâu khoan cấy Lv lớn nhất: 719.68 mm (thanh #3)
+Thanh có Chiều sâu khoan cấy Lv lớn nhất là thanh #3, lực tác dụng vào thanh là KÉO = 71.806 kN
+Các giá trị tương ứng:
+1/ Lv = 719.68
+2/ L0 = 619.85
+3/ e = 99.83
+4/ Le = 49.83
+5/ FC = 50.00
+6/ Lb,rqd = 423.27
+7/ σ_sd = 228.56
+8/ fyd = 434.78
+9/ f_bdPIR = 2.70
+10/ L0,min = 300.00
+11/ α2 = 1.00
+12/ α3 = 0.98
+13/ α6 = 1.50
+14/ C_d = 10.00
+15/ K = 0.05
+16/ λ = 0.47
+17/ ∑ Ast = 314.16
+18/ ∑ Ast,min = 165.15
+19/ A_s = 314.16
+20/ number of transverse rebars = 4.00
+✅ Thép hiện hữu số thứ tự 12 vẫn trong giới hạn an toàn: |F| = 71.806 kN ≤ N_rd = 165.275 kN.
+
+Nhấn phím bất kỳ để thoát...

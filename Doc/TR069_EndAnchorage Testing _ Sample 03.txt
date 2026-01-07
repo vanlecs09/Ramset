@@ -1,0 +1,64 @@
+ This program is used to verify the tensile capacity of a connection with a single rebar on site, calculated according to the TR069 design method
+Vui lòng nhập tên sản phẩm (Reo 502 Xtrem / Epcon G5 Xtrem): Epcon G5 Xtrem
+Sản phẩm 'Epcon G5 Xtrem' đã được xác nhận. Tiếp tục tính toán...
+Đang gửi dữ liệu lên server để tính toán, vui lòng chờ...
+Loại bê tông HIỆN HỮU (ví dụ C30/37): c30/37
+[BT HIỆN HỮU] C30/37: fck=30.00 MPa
+Vui lòng nhập loại tải (static / seismic): static
+Bê tông (cracked / uncracked): uncracked
+Lỗ khoan (dry / water): dry
+Phương pháp khoan (hammer / diamond): diamond
+Working life (50 / 100 năm): 50
+Phạm vi nhiệt độ (I / II / III): II
+Điều kiện liên kết (good / other): other
+α_sus (sustained load ratio): 0.5
+hef (mm, >0): 200
+ed1 (mm, từ tâm đến cạnh phải x+, >0): 1000
+ed2 (mm, từ tâm đến cạnh trên y+, >0): 1000
+ed3 (mm, từ tâm đến cạnh trái x-, >0): 1500
+ed4 (mm, từ tâm đến cạnh dưới y-, >0): 1500
+φ (mm, >0 cho thanh duy nhất): 20
+Gamma_Mc = 2.10
+fyk (N/mm², >0): 500
+N (kN, lực kéo >0): 140
+Khối bê tông: rộng = 2500.00 mm, cao = 2500.00 mm, Ac = 6250000.00 mm²
+Tiến trình: 50% hoàn tất.
+Tiến trình: 75% hoàn tất.
+Kết quả đã sẵn sàng từ server. Đang hiển thị...
+=== Công thức N_Rdc (Concrete Cone) ===
+No_Rkc = 170411.27 N
+A0_cN = 360000.00 mm²
+A_cN = 360000.00 mm²
+ψ_sN = 1.00 | ψ_ecN = 1.00 | ψ_reN = 1.00 | ψ_MN = 1.00
+α_eq = 1.00 | γ_Mc = 2.10
+N_Rkc = 170411.27 N → N_Rdc = 81.15 kN
+=== Công thức N_Rdsp (Splitting) ===
+-- Hệ số nền:
+ η1 = 0.700 | Ak = 4.400 | sp1 = 0.26 | sp2 = 0.25 | sp3 = 0.52 | sp4 = 0.26 | lb1 = 0.65
+-- Khoảng cách/biên:
+ Cs/2 = Infinity mm | Cd = 1000.00 mm | Cmax = 1500.00 mm | ratio = 1.500
+-- Các thừa số theo công thức:
+ (f_ck/25)^sp1 = 1.04855 | (25/max(φ,12))^sp2 = 1.05737
+ (Cd/φ)^sp3 = 7.64653 | ratio^sp4 = 1.11118
+ (7φ/Lb)^lb1 = 0.79307 | hệ số tải (Ω_ptr/α_eq,sp) = 1.000
+-- T_Rksp ban đầu (chưa cắt):
+ τ_Rksp_initial = 23.011 MPa
+-- Giới hạn/cắt theo T_Rkuncr:
+ T_Rkuncr = 8.852 MPa | Ω_creq = 1.000 | α_eqp = 0.830 | ψ_sus = 1.000 | ψ_0sus = 0.700
+ case = [7φ..20φ] | scale (nếu >20φ) = 1.00000 | cap_limit = 8.852 MPa
+-- T_Rksp sau cùng & lực:
+τ_Rksp_final = 8.852 MPa
+γ_inst = 1.40 | γ_Mc = 2.10 (γ_Mc = γ_inst × 1.5)
+ N_Rksp = 111234.09 N | N_Rdsp = 52.97 kN | So với Ti_max = 140.00 kN
+
+Kết quả chính:
+N_Rdc (Cone) = 81.15 kN
+N_Rdsp (Splitting) = 52.97 kN
+N_Rks (Steel) = 157.08 kN
+N (yêu cầu) = 140.00 kN
+Giá trị chịu kéo lớn nhất của liên kết = 52.97 kN
+Thời gian xử lý: 367.29 giây.
+
+Quá trình tính toán đã hoàn tất.
+
+Nhấn phím bất kỳ để thoát...

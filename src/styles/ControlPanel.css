@@ -1,0 +1,129 @@
+.control-panel {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 280px;
+  height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 20px;
+  overflow-y: auto;
+  border-right: 2px solid #0f3460;
+  color: #eaeaea;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  z-index: 100;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.control-panel h2 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  color: #00d4ff;
+  border-bottom: 2px solid #0f3460;
+  padding-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.control-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.control-group label {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #b0b0b0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.control-group input {
+  padding: 8px 12px;
+  border: 1px solid #0f3460;
+  background: #0f1419;
+  color: #00d4ff;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.control-group input:focus {
+  outline: none;
+  border-color: #00d4ff;
+  background: #1a2a3e;
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+}
+
+.control-group input::placeholder {
+  color: #555;
+}
+
+.control-group select {
+  padding: 8px 12px;
+  border: 1px solid #0f3460;
+  background: #0f1419;
+  color: #00d4ff;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.control-group select:focus {
+  outline: none;
+  border-color: #00d4ff;
+  background: #1a2a3e;
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+}
+
+.control-group select option {
+  background: #0f1419;
+  color: #00d4ff;
+}
+
+.info-box {
+  background: #0f1419;
+  border: 1px solid #0f3460;
+  border-radius: 4px;
+  padding: 12px;
+  margin-top: 20px;
+  color: #b0b0b0;
+}
+
+.info-box p {
+  margin: 0 0 8px 0;
+  font-weight: 600;
+  color: #00d4ff;
+  font-size: 13px;
+}
+
+.info-box ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 12px;
+}
+
+.info-box li {
+  margin: 4px 0;
+  color: #b0b0b0;
+}
+
+/* Scrollbar styling */
+.control-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.control-panel::-webkit-scrollbar-track {
+  background: #0f1419;
+}
+
+.control-panel::-webkit-scrollbar-thumb {
+  background: #0f3460;
+  border-radius: 3px;
+}
+
+.control-panel::-webkit-scrollbar-thumb:hover {
+  background: #00d4ff;
+}

@@ -1,0 +1,155 @@
+ This program performs rebar end anchorage calculations in accordance with the TR 069 design method
+Vui lòng nhập tên sản phẩm (Reo 502 Xtrem / Epcon G5 Xtrem): Epcon G5 Xtrem
+Sản phẩm 'Epcon G5 Xtrem' đã được xác nhận. Tiếp tục tính toán...
+Vui lòng chọn thời gian chịu lửa (R30 / R60 / R90 / R120 / R180 / R240): R30
+Đã chọn R30 (thời gian cháy = 30 phút).
+
+Bạn muốn tính toán chiều sâu khoan cấy thép khi chịu lửa không? (Yes/No): No
+Tính toán ở nhiệt độ thường (không chịu lửa).
+Bạn muốn tính cho dầm, cột tròn, cột chữ nhật, hay cột phức tạp? (dam / cottron / cotchunhat / cotphuctap): dam
+Sử dụng infinite edge distance? (Yes/No): yes
+Vui lòng nhập loại tải (static / seismic): static
+Bê tông (cracked / uncracked): uncracked
+T (mm) – concrete thickness: 1000
+A (mm) – chiều cao tiết diện: 500
+B (mm) – chiều rộng tiết diện: 400
+SC (mm) – khoảng cách từ mép đến tâm thép: 40
+TC (mm) – khoảng cách từ mép trên đến lớp thép trên cùng: 40
+BC (mm) – khoảng cách từ mép dưới đến lớp thép dưới cùng: 40
+TD (mm) – đường kính thép lớp trên: 20
+BD (mm) – đường kính thép lớp dưới: 20
+T12 (mm) – khoảng cách giữa lớp thép trên 1 và 2: 100
+T23 (mm) – khoảng cách giữa lớp thép trên 2 và 3: 0
+T34 (mm) – khoảng cách giữa lớp thép trên 3 và 4: 0
+B12 (mm) – khoảng cách giữa lớp thép dưới 1 và 2: 0
+B23 (mm) – khoảng cách giữa lớp thép dưới 2 và 3: 0
+nt1 – số thanh thép lớp trên 1: 3
+nt2 – số thanh thép lớp trên 2: 3
+nt3 – số thanh thép lớp trên 3: 0
+nt4 – số thanh thép lớp trên 4: 0
+nb1 – số thanh thép lớp dưới 1: 3
+nb2 – số thanh thép lớp dưới 2: 0
+nb3 – số thanh thép lớp dưới 3: 0
+
+Bạn có muốn THÊM thanh thép? (Yes/No): no
+
+Bạn có muốn XÓA thanh theo SỐ THỨ TỰ? (Yes/No): no
+
+Tọa độ của các thanh thép (theo lớp):
+Thanh 1: (-160.00, 210.00) [nt1], φ=20
+Thanh 2: (0.00, 210.00) [nt1], φ=20
+Thanh 3: (160.00, 210.00) [nt1], φ=20
+Thanh 4: (-160.00, 110.00) [nt2], φ=20
+Thanh 5: (0.00, 110.00) [nt2], φ=20
+Thanh 6: (160.00, 110.00) [nt2], φ=20
+Thanh 7: (-160.00, -210.00) [nb1], φ=20
+Thanh 8: (0.00, -210.00) [nb1], φ=20
+Thanh 9: (160.00, -210.00) [nb1], φ=20
+Loại bê tông MỚI (ví dụ C30/37): c20/25
+[BT MỚI] C20/25: fck=20.00 MPa; fcd=13.33 MPa
+Loại bê tông HIỆN HỮU (ví dụ C30/37): c20/25
+[BT HIỆN HỮU] C20/25: fck=20.00 MPa
+Lỗ khoan (dry / water): dry
+Phương pháp khoan (hammer / diamond): hammer
+Điều kiện liên kết (good / other): good
+fuk (MPa): 650
+fy (MPa): 500
+Es (MPa): 200000
+[THÉP] fy=500.00 MPa; fyd=434.78 MPa; Es=200000 MPa
+Working life (50 / 100 năm): 50
+Phạm vi nhiệt độ (I / II / III): I
+α_sus (sustained load ratio): 0.5
+Mx (kN·m): -148.1
+My (kN·m): 0
+N (kN; dương = kéo, âm = nén): 0
+Thiết lập mesh tự động: h_min = 0.8, h_max = 5, RrefMul = 2
+Chọn cách tạo lưới: 1 (chia lưới tam giác) hoặc 2 (gmsh.exe để chia lưới): 1
+Đang tạo lưới tam giác nội bộ...
+Số cell bê tông (mixed tri/quad): 11096
+Đang gửi dữ liệu lên server để tính toán, vui lòng chờ... (Nhấn ESC để hủy)
+Thời gian xử lý: 65.63 giây.
+Kết quả đã sẵn sàng từ server. Đang hiển thị...
+✅ Hội tụ (tổng 0 vòng Newton): ε0=3.571882E-004, κx=-4.467613E-006 1/mm, κy=-9.315525E-010 1/mm
+N_calc=0.000 kN | Mx_calc=-148.100 kN.m | My_calc=0.000 kN.m
+Max σc (dấu kỹ sư, nén âm) = -8.13 MPa | Max εc=1.465412E-003 | Max |σs|=259.11 (≤ fyd=434.78?)
+
+[THÔNG BÁO]: Max εc = 1.465412E-003 ≤ ε_cu2 (0.0035) → Bê tông an toàn, không có vùng nghiền nát.
+
+Lực trong từng nhóm thép (dấu kỹ sư: dương = KÉO, âm = NÉN):
+ Nhóm nt1 (3 thanh): F = 81.392 kN (KÉO)
+ Nhóm nt2 (3 thanh): F = 53.321 kN (KÉO)
+ Nhóm nb1 (3 thanh): F = -36.506 kN (NÉN)
+
+Chi tiết lực từng thanh thép:
+ Thanh 1: (-160.00, 210.00) [nt1] → F = 81.392 kN (KÉO)
+ Thanh 2: (0.00, 210.00) [nt1] → F = 81.392 kN (KÉO)
+ Thanh 3: (160.00, 210.00) [nt1] → F = 81.392 kN (KÉO)
+ Thanh 4: (-160.00, 110.00) [nt2] → F = 53.321 kN (KÉO)
+ Thanh 5: (0.00, 110.00) [nt2] → F = 53.321 kN (KÉO)
+ Thanh 6: (160.00, 110.00) [nt2] → F = 53.321 kN (KÉO)
+ Thanh 7: (-160.00, -210.00) [nb1] → F = -36.506 kN (NÉN)
+ Thanh 8: (0.00, -210.00) [nb1] → F = -36.506 kN (NÉN)
+ Thanh 9: (160.00, -210.00) [nb1] → F = -36.506 kN (NÉN)
+
+Tổng lực: Tk (kéo) = 404.137 kN
+ Tn_thép = -109.518 kN | Tn_bê tông = -294.619 kN
+ Tn (tổng)=-404.137 kN
+Centroid Tk = (-0.01, 170.42) mm
+Centroid Tn = (-0.01, -196.04) mm
+Khoảng lệch tâm Tk–Tn: (lever arm Z=366.46 mm)
+Trọng tâm hình học nhóm thép chịu kéo: (x_hh, y_hh) = (0.00, 160.00) mm
+
+A_s_tension = 1885.0 mm² | A_s_compression = 942.5 mm² | A_s_total = 2827.4 mm²
+μ = 0.0115
+A_smin = 213.2 mm² | A_smax = 8000.0 mm²
+
+=== Giao điểm giữa trục trung hòa và chu vi tiết diện bê tông mới ===
+Giao điểm 1: (-200.00, -79.99) mm
+Giao điểm 2: (200.00, -79.91) mm
+Lb1 (Concrete cone breakout) = 356.4 mm
+[Debug] Cmin(thanh kéo chi phối) = ∞ mm
+[Debug] Cmin(thanh nén chi phối) = ∞ mm
+Min Spacing từ thanh kéo CHI PHỐI đến các thanh kéo khác: 100.00 mm
+[Debug] dmin(thanh kéo chi phối) = 40.0 mm
+[Debug] dmin(thanh nén chi phối) = 40.0 mm
+Thanh nén chi phối #9 → φ=20 mm | fbdPIR=2.30 | α_lb=1.00 | L_brqdn=252.61 mm | Lbn=252.61 mm
+ → Giá trị lực nén lớn nhất có thể chịu của thanh #9 = A_s·fyd/1000 = 136.59 kN (A_s=314.2 mm², fyd=434.78 MPa)
+
+=== Chiều sâu khoan cấy (theo loại cấu kiện) ===
+Chiều sâu khoan cấy cho thép chịu kéo (sàn/dầm) – THÀNH PHẦN CHI PHỐI: Thanh #1 → Lbk = 356.40 mm
+Chiều sâu khoan cấy cho thép chịu nén (sàn/dầm) – THÀNH PHẦN CHI PHỐI: Thanh #9 → Lbn = 252.61 mm
+
+=== Tính L_brqdk, L_brqdn, L_bmink (theo thanh chi phối, KHÔNG LỬA) ===
+Thanh kéo chi phối #1 → φ=20 mm | fbdPIR=2.30 | α_lb=1.00 | L_brqdk=563.21 mm | L_bmink=200.00 mm | Lb1=356.40 mm | Lb2=257.30 mm | Lbk=356.40 mm
+ → Giá trị lực kéo lớn nhất có thể chịu của thanh #1 = A_s·fyd/1000 = 136.59 kN (A_s=314.2 mm², fyd=434.78 MPa)
+Thanh nén chi phối #9 → φ=20 mm | fbdPIR=2.30 | α_lb=1.00 | L_brqdn=252.61 mm | Lbn=252.61 mm
+ → Giá trị lực nén lớn nhất có thể chịu của thanh #9 = A_s·fyd/1000 = 136.59 kN (A_s=314.2 mm², fyd=434.78 MPa)
+=== Công thức N_Rdc (Concrete Cone) – bản cập nhật ψ_ecN & ψ_MN mới ===
+N°_Rkc = k1 * √f_ck(exist) * (h_ef)^1.5 = 330989.51 N
+A°_cN = 9 * (h_ef)^2 = 1143188.64 mm²
+A_cN (thực) = 1624252.64 mm²
+(x_hh, y_hh) = (0.00, 160.00) | Tk@(-0.01, 170.42)
+ecx = 0.01 mm | ecy = 10.42 mm
+ψ_sN = 1.00 | ψ_ecx = 1.00 | ψ_ecy = 0.98 | ψ_ecN = 0.98 | ψ_reN = 1.00 | ψ_MN = 1.31
+α_eq = 1.00 | γ_inst = 1.00 | γ_Mc = 1.50
+N_Rkc = 606346.69 N → N_Rdc = 404.23 kN
+=== Công thức N_Rdsp (Splitting) — theo THANH KÉO CHI PHỐI ===
+-- Hệ số nền:
+ η1 = 1.000 | Ak = 4.400 | sp1 = 0.29 | sp2 = 0.27 | sp3 = 0.68 | sp4 = 0.35 | lb1 = 0.60
+-- Khoảng cách/biên:
+ Cs/2 = 40.00 mm | Cd = 40.00 mm | Cmax = 140.00 mm | ratio = 3.500
+-- Các thừa số theo công thức:
+ (f_ck/25)^sp1 = 0.93734 | (25/max(φ,12))^sp2 = 1.06210
+ (Cd/φ)^sp3 = 1.60214 | ratio^sp4 = 1.55033
+ (7φ/Lb)^lb1 = 0.69408 | hệ số tải (Ω_ptr/α_eq,sp) = 1.000
+-- T_Rksp ban đầu (chưa cắt):
+ τ_Rksp_initial = 7.552 MPa
+-- Giới hạn/cắt theo T_Rkuncr:
+ T_Rkuncr = 14.000 MPa | Ω_creq = 1.000 | α_eqp = 0.830 | ψ_sus = 1.000 | α_eq,sp = 1.000 | ψ_0sus = 0.880
+ case = [7φ..20φ] | scale (nếu >20φ) = 1.00000 | cap_limit = 14.000 MPa
+-- T_Rksp sau cùng & lực:
+ τ_Rksp_final = 7.552 MPa
+ γ_inst = 1.00 | γ_Mc = 1.50 (γ_Mc = γ_inst × 1.5)
+ N_Rksp = 122087.60 N | N_Rdsp = 81.39 kN | So sánh với F_rdk(thanh chi phối) = 81.39 kN
+
+Nhấn phím bất kỳ để thoát...

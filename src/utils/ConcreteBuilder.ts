@@ -1,0 +1,389 @@
+import * as BABYLON from '@babylonjs/core';
+
+export interface ConcreteGroup {
+    mesh?: BABYLON.Mesh;
+    material?: BABYLON.StandardMaterial;
+    infiniteBlocks?: BABYLON.Mesh[];
+}
+
+// Global concrete material - shared across all concrete instances
+let concreteMaterial: BABYLON.StandardMaterial | null = null;
+let sinBlockMaterial: BABYLON.StandardMaterial | null = null;
+
+const initializeConcreteMaterial = (scene: BABYLON.Scene) => {
+    if (!concreteMaterial) {
+        concreteMaterial = new BABYLON.StandardMaterial('concreteMaterial', scene);
+        concreteMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8);   // light gray tint
+        concreteMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+        concreteMaterial.alpha = 0.4;                                    // transparency (0 = invisible, 1 = opaque)
+        concreteMaterial.backFaceCulling = false;
+    }
+    return concreteMaterial;
+};
+
+const initializeSinBlockMaterial = (scene: BABYLON.Scene) => {
+    if (!sinBlockMaterial) {
+        sinBlockMaterial = new BABYLON.StandardMaterial('sinBlockMaterial', scene);
+        sinBlockMaterial.diffuseColor = new BABYLON.Color3(214 / 255, 217 / 255, 200 / 255);   // tan/beige color
+        sinBlockMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
+        sinBlockMaterial.alpha = 0.2;  // semi-transparent
+        sinBlockMaterial.backFaceCulling = false;
+        sinBlockMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
+    }
+    return sinBlockMaterial;
+};
+
+
+export const createConcrete = (
+    scene: BABYLON.Scene,
+    concreteThickness: number = 1,
+    offsetXPos: number = 1.5,  // distance from center to right edge (+X)
+    offsetXNeg: number = 1.5,  // distance from center to left edge (-X)
+    offsetZPos: number = 1,    // distance from center to back edge (+Z)
+    offsetZNeg: number = 1,    // distance from center to front edge (-Z)
+    parent?: BABYLON.TransformNode,
+    isFiniteConcrete: boolean = true
+): ConcreteGroup => {
+    // Calculate width and depth from offsets
+    const columnWidth = offsetXPos + offsetXNeg;
+    const columnDepth = offsetZPos + offsetZNeg;
+
+    // Calculate center position based on asymmetric offsets
+    const centerXPos = (offsetXPos - offsetXNeg) / 2;
+    const centerZPos = (offsetZPos - offsetZNeg) / 2;
+
+    const material = initializeConcreteMaterial(scene);
+
+    const concrete = BABYLON.MeshBuilder.CreateBox(
+        'concrete',
+        { width: columnWidth, height: concreteThickness, depth: columnDepth },
+        scene
+    );
+    concrete.position.x = centerXPos;
+    concrete.position.y = concreteThickness / 2;
+    concrete.position.z = centerZPos;
+    concrete.material = material;
+    concrete.receiveShadows = true;
+
+    if (parent) {
+        concrete.parent = parent as BABYLON.Node;
+    }
+
+
+    const sinBlocks = !isFiniteConcrete
+        ? createInfiniteBlocks(
+            scene,
+            centerXPos,
+            centerZPos,
+            offsetXPos,
+            offsetXNeg,
+            offsetZPos,
+            offsetZNeg,
+            columnWidth,
+            columnDepth,
+            concreteThickness,
+            parent
+        )
+        : [];
+
+    return {
+        mesh: concrete,
+        material: material,
+        infiniteBlocks: sinBlocks,
+    };
+};
+
+export const updateConcrete = (
+    concreteGroup: ConcreteGroup,
+    scene: BABYLON.Scene,
+    concreteThickness: number = 1,
+    offsetXPos: number = 1.5,  // distance from center to right edge (+X)
+    offsetXNeg: number = 1.5,  // distance from center to left edge (-X)
+    offsetZPos: number = 1,    // distance from center to back edge (+Z)
+    offsetZNeg: number = 1,    // distance from center to front edge (-Z)
+    parent?: BABYLON.TransformNode,
+    isFiniteConcrete: boolean = true
+) => {
+    // Calculate width and depth from offsets
+    const columnWidth = offsetXPos + offsetXNeg;
+    const columnDepth = offsetZPos + offsetZNeg;
+
+    // Calculate center position based on asymmetric offsets
+    const centerXPos = (offsetXPos - offsetXNeg) / 2;
+    const centerZPos = (offsetZPos - offsetZNeg) / 2;
+
+    if (concreteGroup.mesh) {
+        concreteGroup.mesh.dispose();
+    }
+
+    // Dispose old sin blocks
+    if (concreteGroup.infiniteBlocks) {
+        for (let i = concreteGroup.infiniteBlocks.length - 1; i >= 0; i--) {
+            concreteGroup.infiniteBlocks[i].dispose();
+        }
+        concreteGroup.infiniteBlocks = [];
+    }
+
+    const material = initializeConcreteMaterial(scene);
+
+    const concrete = BABYLON.MeshBuilder.CreateBox(
+        'concrete',
+        { width: columnWidth, height: concreteThickness, depth: columnDepth },
+        scene
+    );
+    concrete.position.x = centerXPos;
+    concrete.position.y = concreteThickness / 2;
+    concrete.position.z = centerZPos;
+    concrete.material = material;
+    concrete.receiveShadows = true;
+
+    if (parent) {
+        concrete.parent = parent as BABYLON.Node;
+    }
+
+    const sinBlocks = !isFiniteConcrete
+        ? createInfiniteBlocks(
+            scene,
+            centerXPos,
+            centerZPos,
+            offsetXPos,
+            offsetXNeg,
+            offsetZPos,
+            offsetZNeg,
+            columnWidth,
+            columnDepth,
+            concreteThickness,
+            parent
+        )
+        : [];
+
+    concreteGroup.mesh = concrete;
+    concreteGroup.material = material;
+    concreteGroup.infiniteBlocks = sinBlocks;
+};
+
+const createInfiniteBlocks = (
+    scene: BABYLON.Scene,
+    centerXPos: number,
+    centerZPos: number,
+    offsetXPos: number,
+    offsetXNeg: number,
+    offsetZPos: number,
+    offsetZNeg: number,
+    columnWidth: number,
+    columnDepth: number,
+    concreteThickness: number,
+    parent?: BABYLON.TransformNode
+): BABYLON.Mesh[] => {
+    const sinBlockMat = initializeSinBlockMaterial(scene);
+    const blockThickness = 0.5;
+
+    const sinBlocks = [
+        createWaveBlock(
+            scene,
+            'sinBlock_back',
+            new BABYLON.Vector3(centerXPos, 0, offsetZPos + blockThickness / 2),
+            columnWidth,
+            concreteThickness,
+            blockThickness,
+            'z',
+            sinBlockMat
+        ),
+        createWaveBlock(
+            scene,
+            'sinBlock_front',
+            new BABYLON.Vector3(centerXPos, 0, -offsetZNeg - blockThickness / 2),
+            columnWidth,
+            concreteThickness,
+            blockThickness,
+            '-z',
+            sinBlockMat
+        ),
+        createWaveBlock(
+            scene,
+            'sinBlock_left',
+            new BABYLON.Vector3(-offsetXNeg - blockThickness / 2, 0, centerZPos),
+            columnDepth,
+            concreteThickness,
+            blockThickness,
+            '-x',
+            sinBlockMat
+        ),
+        createWaveBlock(
+            scene,
+            'sinBlock_right',
+            new BABYLON.Vector3(offsetXPos + blockThickness / 2, 0, centerZPos),
+            columnDepth,
+            concreteThickness,
+            blockThickness,
+            'x',
+            sinBlockMat
+        ),
+    ];
+
+    if (parent) {
+        sinBlocks.forEach(block => block.parent = parent as BABYLON.Node);
+    }
+
+    return sinBlocks;
+};
+
+const createWaveBlock = (
+    scene: BABYLON.Scene,
+    name: string,
+    position: BABYLON.Vector3,
+    blockWidth: number,
+    blockHeight: number,
+    blockDepth: number,
+    waveAxis: 'x' | 'y' | 'z' | '-x' | '-y' | '-z',
+    material: BABYLON.StandardMaterial
+): BABYLON.Mesh => {
+    //  blockHeight = 2;
+
+    const amp = 0.2;      // sine amplitude
+    const freq = 5;        // wave frequency
+    const divU = 50;       // subdivisions along wave direction
+    const divV = 10;//Math.max(5, Math.floor(blockHeight * 10)); // subdivisions along height
+
+
+    // blockWidth = 2
+
+    const positions: number[] = [];
+    const indices: number[] = [];
+    const uvs: number[] = [];
+
+    // Outer face vertices (wavy surface)
+    for (let iv = 0; iv <= divV; iv++) {
+        const v = (iv / divV) * blockHeight;
+        for (let iu = 0; iu <= divU; iu++) {
+            const u = (iu / divU - 0.5) * blockWidth;
+            const waveDisplacement = Math.sin((iu / divU) * Math.PI * freq) * amp;
+
+            if (waveAxis === 'x') {
+                positions.push(blockDepth / 2 + waveDisplacement, v, u);
+            } else if (waveAxis === '-x') {
+                positions.push(-blockDepth / 2 - waveDisplacement, v, u);
+            } else if (waveAxis === 'y') {
+                positions.push(u, -blockDepth / 2 - waveDisplacement, v);
+            } else if (waveAxis === '-y') {
+                positions.push(u, -blockDepth / 2 + waveDisplacement, v);
+            } else if (waveAxis === 'z') {
+                positions.push(u, v, blockDepth / 2 + waveDisplacement);
+            } else { // '-z'
+                positions.push(u, v, -blockDepth / 2 - waveDisplacement);
+            }
+            uvs.push(iu / divU, iv / divV);
+        }
+    }
+
+    // Inner face vertices (flat surface)
+    const offset = positions.length / 3;
+    for (let iv = 0; iv <= divV; iv++) {
+        const v = (iv / divV) * blockHeight;
+        for (let iu = 0; iu <= divU; iu++) {
+            const u = (iu / divU - 0.5) * blockWidth;
+
+            if (waveAxis === 'x' || waveAxis === '-x') {
+                let bdepth = waveAxis == 'x' ? -blockDepth / 2 : blockDepth / 2;
+                positions.push(bdepth, v, u);
+            } else if (waveAxis === 'y' || waveAxis === '-y') {
+                let bdepth = waveAxis == 'y' ? -blockDepth / 2 : blockDepth / 2;
+                positions.push(u, bdepth, v);
+            } else { // 'z' or '-z'
+                let bdepth = waveAxis == 'z' ? -blockDepth / 2 : blockDepth / 2;
+                positions.push(u, v, bdepth);
+            }
+            uvs.push(iu / divU, iv / divV);
+        }
+    }
+
+    const ring = divU + 1;
+
+    // Outer faces
+    for (let iv = 0; iv < divV; iv++) {
+        for (let iu = 0; iu < divU; iu++) {
+            const a = iv * ring + iu;
+            const b = a + 1;
+            const c = a + ring;
+            const d = c + 1;
+
+            indices.push(a, b, c);
+            indices.push(b, d, c);
+        }
+    }
+
+    // Inner faces
+    for (let iv = 0; iv < divV; iv++) {
+        for (let iu = 0; iu < divU; iu++) {
+            const a = offset + iv * ring + iu;
+            const b = a + 1;
+            const c = a + ring;
+            const d = c + 1;
+
+            indices.push(a, c, b);
+            indices.push(b, c, d);
+        }
+    }
+
+    // Side walls
+    const backCol = divU;
+    for (let iv = 0; iv < divV; iv++) {
+        const outerA = iv * ring;
+        const outerB = (iv + 1) * ring;
+        const innerA = outerA + offset;
+        const innerB = outerB + offset;
+
+        indices.push(outerA, outerB, innerA);
+        indices.push(innerA, outerB, innerB);
+    }
+
+    for (let iv = 0; iv < divV; iv++) {
+        const outerA = iv * ring + backCol;
+        const outerB = (iv + 1) * ring + backCol;
+        const innerA = outerA + offset;
+        const innerB = outerB + offset;
+
+        indices.push(outerA, innerA, outerB);
+        indices.push(innerA, innerB, outerB);
+    }
+
+    for (let iu = 0; iu < divU; iu++) {
+        const outerA = iu;
+        const outerB = iu + 1;
+        const innerA = outerA + offset;
+        const innerB = outerB + offset;
+
+        indices.push(outerA, innerA, outerB);
+        indices.push(innerA, innerB, outerB);
+    }
+
+    const topRow = divV * ring;
+    for (let iu = 0; iu < divU; iu++) {
+        const outerA = topRow + iu;
+        const outerB = topRow + iu + 1;
+        const innerA = outerA + offset;
+        const innerB = outerB + offset;
+
+        indices.push(outerA, outerB, innerA);
+        indices.push(innerA, outerB, innerB);
+    }
+
+    const mesh = new BABYLON.Mesh(name, scene);
+    mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
+    mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs);
+
+    const normalsArray: number[] = [];
+    BABYLON.VertexData.ComputeNormals(positions, indices, normalsArray);
+    mesh.setVerticesData(BABYLON.VertexBuffer.NormalKind, normalsArray);
+    mesh.setIndices(indices);
+
+    mesh.material = material;
+    mesh.position = position;
+
+    return mesh;
+};
+
+
+export const getConcreteMaterial = (): BABYLON.StandardMaterial | null => {
+    return concreteMaterial;
+};
