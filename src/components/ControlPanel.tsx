@@ -1,13 +1,25 @@
 import React, { useState } from 'react';
 import '../styles/ControlPanel.css';
 import type { RectangleColumnParams } from '../App';
+import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS } from '../constants/defaultParams';
 
 interface ComplexColumnParams {
   isFiniteConcrete: boolean;
+  concreteThickness: number;
+  offsetXPos: number;
+  offsetXNeg: number;
+  offsetZPos: number;
+  offsetZNeg: number;
   cuboid1SizeX: number;
   cuboid1SizeZ: number;
+  cuboid1PostCountLeftEdge: number;
+  cuboid1PostCountTopEdge: number;
   cuboid2SizeX: number;
   cuboid2SizeZ: number;
+  cuboid2TranslateX: number;
+  cuboid2TranslateZ: number;
+  cuboid2PostCountLeftEdge: number;
+  cuboid2PostCountTopEdge: number;
   postRadius: number;
   postOffset: number;
 }
@@ -37,46 +49,78 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onComplexColumnParamsChange,
   onRectangleColumnParamsChange,
 }) => {
-  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn'>('circularColumns');
+  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn'>('rectangleColumn');
 
   // Tower parameters
-  const [towerIsFiniteConcrete, setTowerIsFiniteConcrete] = useState(true);
-  
-  const [towerConcreteThickness, setTowerConcreteThickness] = useState(1.5);
-  const [towerCylinderHeight, setTowerCylinderHeight] = useState(1);
-  const [towerCylinderRadius, setTowerCylinderRadius] = useState(1.5);
-  const [towerPostRadius, setTowerPostRadius] = useState(0.05);
-  const [towerPostCount, setTowerPostCount] = useState(10);
-  const [towerCircumferenceOffset, setTowerCircumferenceOffset] = useState(0.06);
-  const [towerOffsetXPos, setTowerOffsetXPos] = useState(1.5);
-  const [towerOffsetXNeg, setTowerOffsetXNeg] = useState(1.5);
-  const [towerOffsetZPos, setTowerOffsetZPos] = useState(1.5);
-  const [towerOffsetZNeg, setTowerOffsetZNeg] = useState(1.5);
+  const [towerIsFiniteConcrete, setTowerIsFiniteConcrete] = useState(DEFAULT_TOWER_PARAMS.isFiniteConcrete);
+  const [towerConcreteThickness, setTowerConcreteThickness] = useState(DEFAULT_TOWER_PARAMS.concreteThickness);
+  const [towerCylinderHeight, setTowerCylinderHeight] = useState(DEFAULT_TOWER_PARAMS.cylinderHeight);
+  const [towerCylinderRadius, setTowerCylinderRadius] = useState(DEFAULT_TOWER_PARAMS.cylinderRadius);
+  const [towerPostRadius, setTowerPostRadius] = useState(DEFAULT_TOWER_PARAMS.postRadius);
+  const [towerPostCount, setTowerPostCount] = useState(DEFAULT_TOWER_PARAMS.postCount);
+  const [towerCircumferenceOffset, setTowerCircumferenceOffset] = useState(DEFAULT_TOWER_PARAMS.circumferenceToPostOffset);
+  const [towerOffsetXPos, setTowerOffsetXPos] = useState(DEFAULT_TOWER_PARAMS.offsetXPos);
+  const [towerOffsetXNeg, setTowerOffsetXNeg] = useState(DEFAULT_TOWER_PARAMS.offsetXNeg);
+  const [towerOffsetZPos, setTowerOffsetZPos] = useState(DEFAULT_TOWER_PARAMS.offsetZPos);
+  const [towerOffsetZNeg, setTowerOffsetZNeg] = useState(DEFAULT_TOWER_PARAMS.offsetZNeg);
 
   // Complex Column parameters
-  const [complexIsFiniteConcrete, setComplexIsFiniteConcrete] = useState(true);
-  const [cuboid1SizeX, setCuboid1SizeX] = useState(2);
-  const [cuboid1SizeZ, setCuboid1SizeZ] = useState(2);
-  const [cuboid2SizeX, setCuboid2SizeX] = useState(2);
-  const [cuboid2SizeZ, setCuboid2SizeZ] = useState(2);
-  const [complexColumnPostRadius, setComplexColumnPostRadius] = useState(0.05);
-  const [complexColumnPostOffset, setComplexColumnPostOffset] = useState(0.1);
+  const [complexIsFiniteConcrete, setComplexIsFiniteConcrete] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.isFiniteConcrete);
+  const [complexConcreteThickness, setComplexConcreteThickness] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.concreteThickness);
+  const [complexOffsetXPos, setComplexOffsetXPos] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.offsetXPos);
+  const [complexOffsetXNeg, setComplexOffsetXNeg] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.offsetXNeg);
+  const [complexOffsetZPos, setComplexOffsetZPos] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.offsetZPos);
+  const [complexOffsetZNeg, setComplexOffsetZNeg] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.offsetZNeg);
+  const [cuboid1SizeX, setCuboid1SizeX] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.cuboid1SizeX);
+  const [cuboid1SizeZ, setCuboid1SizeZ] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.cuboid1SizeZ);
+  const [cuboid1PostCountLeftEdge, setCuboid1PostCountLeftEdge] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.cuboid1PostCountLeftEdge);
+  const [cuboid1PostCountTopEdge, setCuboid1PostCountTopEdge] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.cuboid1PostCountTopEdge);
+  const [cuboid2SizeX, setCuboid2SizeX] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.cuboid2SizeX);
+  const [cuboid2SizeZ, setCuboid2SizeZ] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.cuboid2SizeZ);
+  const [cuboid2TranslateX, setCuboid2TranslateX] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.cuboid2TranslateX);
+  const [cuboid2TranslateZ, setCuboid2TranslateZ] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.cuboid2TranslateZ);
+  const [cuboid2PostCountLeftEdge, setCuboid2PostCountLeftEdge] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.cuboid2PostCountLeftEdge);
+  const [cuboid2PostCountTopEdge, setCuboid2PostCountTopEdge] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.cuboid2PostCountTopEdge);
+  const [complexColumnPostRadius, setComplexColumnPostRadius] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.postRadius);
+  const [complexColumnPostOffset, setComplexColumnPostOffset] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.postOffset);
 
   // Rectangle Column parameters
-  const [rectangleIsFiniteConcrete, setRectangleIsFiniteConcrete] = useState(true);
+  const [rectangleIsFiniteConcrete, setRectangleIsFiniteConcrete] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.isFiniteConcrete);
 
   // Rectangle Column parameters
-  const [concreteThickness, setConcreteThickness] = useState(3);
-  const [columnWidth, setColumnWidth] = useState(1);
-  const [columnDepth, setColumnDepth] = useState(1.5);
-  const [postCountX, setPostCountX] = useState(3);
-  const [postCountZ, setPostCountZ] = useState(2);
-  const [postDiameter, setPostDiameter] = useState(0.1);
-  const [postOffset, setPostOffset] = useState(0.1);
-  const [offsetXPos, setOffsetXPos] = useState(1.5);
-  const [offsetXNeg, setOffsetXNeg] = useState(1.5);
-  const [offsetZPos, setOffsetZPos] = useState(1.5);
-  const [offsetZNeg, setOffsetZNeg] = useState(1.5);
+  const [concreteThickness, setConcreteThickness] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.concreteThickness);
+  const [columnWidth, setColumnWidth] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.columnWidth);
+  const [columnDepth, setColumnDepth] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.columnDepth);
+  const [postCountX, setPostCountX] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.postCountX);
+  const [postCountZ, setPostCountZ] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.postCountZ);
+  const [postDiameter, setPostDiameter] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.postDiameter);
+  const [postOffset, setPostOffset] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.postOffset);
+  const [offsetXPos, setOffsetXPos] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.offsetXPos);
+  const [offsetXNeg, setOffsetXNeg] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.offsetXNeg);
+  const [offsetZPos, setOffsetZPos] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.offsetZPos);
+  const [offsetZNeg, setOffsetZNeg] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.offsetZNeg);
+
+  // Helper function to build complete complex column params
+  const getComplexColumnParams = (overrides?: Partial<ComplexColumnParams>): ComplexColumnParams => ({
+    isFiniteConcrete: overrides?.isFiniteConcrete ?? complexIsFiniteConcrete,
+    concreteThickness: overrides?.concreteThickness ?? complexConcreteThickness,
+    offsetXPos: overrides?.offsetXPos ?? complexOffsetXPos,
+    offsetXNeg: overrides?.offsetXNeg ?? complexOffsetXNeg,
+    offsetZPos: overrides?.offsetZPos ?? complexOffsetZPos,
+    offsetZNeg: overrides?.offsetZNeg ?? complexOffsetZNeg,
+    cuboid1SizeX: overrides?.cuboid1SizeX ?? cuboid1SizeX,
+    cuboid1SizeZ: overrides?.cuboid1SizeZ ?? cuboid1SizeZ,
+    cuboid1PostCountLeftEdge: overrides?.cuboid1PostCountLeftEdge ?? cuboid1PostCountLeftEdge,
+    cuboid1PostCountTopEdge: overrides?.cuboid1PostCountTopEdge ?? cuboid1PostCountTopEdge,
+    cuboid2SizeX: overrides?.cuboid2SizeX ?? cuboid2SizeX,
+    cuboid2SizeZ: overrides?.cuboid2SizeZ ?? cuboid2SizeZ,
+    cuboid2TranslateX: overrides?.cuboid2TranslateX ?? cuboid2TranslateX,
+    cuboid2TranslateZ: overrides?.cuboid2TranslateZ ?? cuboid2TranslateZ,
+    cuboid2PostCountLeftEdge: overrides?.cuboid2PostCountLeftEdge ?? cuboid2PostCountLeftEdge,
+    cuboid2PostCountTopEdge: overrides?.cuboid2PostCountTopEdge ?? cuboid2PostCountTopEdge,
+    postRadius: overrides?.postRadius ?? complexColumnPostRadius,
+    postOffset: overrides?.postOffset ?? complexColumnPostOffset,
+  });
 
   const handleTowerIsFiniteConcreteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.checked;
@@ -276,88 +320,106 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     });
   };
 
+  const handleComplexConcreteThicknessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setComplexConcreteThickness(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ concreteThickness: value }));
+  };
+
+  const handleComplexOffsetXPosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setComplexOffsetXPos(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ offsetXPos: value }));
+  };
+
+  const handleComplexOffsetXNegChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setComplexOffsetXNeg(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ offsetXNeg: value }));
+  };
+
+  const handleComplexOffsetZPosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setComplexOffsetZPos(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ offsetZPos: value }));
+  };
+
+  const handleComplexOffsetZNegChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setComplexOffsetZNeg(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ offsetZNeg: value }));
+  };
+
   const handleCuboid1SizeXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setCuboid1SizeX(value);
-    onComplexColumnParamsChange({
-      isFiniteConcrete: complexIsFiniteConcrete,
-      cuboid1SizeX: value,
-      cuboid1SizeZ: cuboid1SizeZ,
-      cuboid2SizeX: cuboid2SizeX,
-      cuboid2SizeZ: cuboid2SizeZ,
-      postRadius: complexColumnPostRadius,
-      postOffset: complexColumnPostOffset,
-    });
+    onComplexColumnParamsChange(getComplexColumnParams({ cuboid1SizeX: value }));
   };
 
   const handleCuboid1SizeZChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setCuboid1SizeZ(value);
-    onComplexColumnParamsChange({
-      isFiniteConcrete: complexIsFiniteConcrete,
-      cuboid1SizeX: cuboid1SizeX,
-      cuboid1SizeZ: value,
-      cuboid2SizeX: cuboid2SizeX,
-      cuboid2SizeZ: cuboid2SizeZ,
-      postRadius: complexColumnPostRadius,
-      postOffset: complexColumnPostOffset,
-    });
+    onComplexColumnParamsChange(getComplexColumnParams({ cuboid1SizeZ: value }));
   };
 
   const handleCuboid2SizeXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setCuboid2SizeX(value);
-    onComplexColumnParamsChange({
-      isFiniteConcrete: complexIsFiniteConcrete,
-      cuboid1SizeX: cuboid1SizeX,
-      cuboid1SizeZ: cuboid1SizeZ,
-      cuboid2SizeX: value,
-      cuboid2SizeZ: cuboid2SizeZ,
-      postRadius: complexColumnPostRadius,
-      postOffset: complexColumnPostOffset,
-    });
+    onComplexColumnParamsChange(getComplexColumnParams({ cuboid2SizeX: value }));
   };
 
   const handleCuboid2SizeZChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setCuboid2SizeZ(value);
-    onComplexColumnParamsChange({
-      isFiniteConcrete: complexIsFiniteConcrete,
-      cuboid1SizeX: cuboid1SizeX,
-      cuboid1SizeZ: cuboid1SizeZ,
-      cuboid2SizeX: cuboid2SizeX,
-      cuboid2SizeZ: value,
-      postRadius: complexColumnPostRadius,
-      postOffset: complexColumnPostOffset,
-    });
+    onComplexColumnParamsChange(getComplexColumnParams({ cuboid2SizeZ: value }));
+  };
+
+  const handleCuboid2TranslateXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setCuboid2TranslateX(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ cuboid2TranslateX: value }));
+  };
+
+  const handleCuboid2TranslateZChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setCuboid2TranslateZ(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ cuboid2TranslateZ: value }));
+  };
+
+  const handleCuboid1PostCountLeftEdgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 2;
+    setCuboid1PostCountLeftEdge(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ cuboid1PostCountLeftEdge: value }));
+  };
+
+  const handleCuboid1PostCountTopEdgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 2;
+    setCuboid1PostCountTopEdge(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ cuboid1PostCountTopEdge: value }));
+  };
+
+  const handleCuboid2PostCountLeftEdgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 2;
+    setCuboid2PostCountLeftEdge(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ cuboid2PostCountLeftEdge: value }));
+  };
+
+  const handleCuboid2PostCountTopEdgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 2;
+    setCuboid2PostCountTopEdge(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ cuboid2PostCountTopEdge: value }));
   };
 
   const handleComplexColumnPostRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setComplexColumnPostRadius(value);
-    onComplexColumnParamsChange({
-      isFiniteConcrete: complexIsFiniteConcrete,
-      cuboid1SizeX: cuboid1SizeX,
-      cuboid1SizeZ: cuboid1SizeZ,
-      cuboid2SizeX: cuboid2SizeX,
-      cuboid2SizeZ: cuboid2SizeZ,
-      postRadius: value,
-      postOffset: complexColumnPostOffset,
-    });
+    onComplexColumnParamsChange(getComplexColumnParams({ postRadius: value }));
   };
 
   const handleComplexColumnPostOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setComplexColumnPostOffset(value);
-    onComplexColumnParamsChange({
-      isFiniteConcrete: complexIsFiniteConcrete,
-      cuboid1SizeX: cuboid1SizeX,
-      cuboid1SizeZ: cuboid1SizeZ,
-      cuboid2SizeX: cuboid2SizeX,
-      cuboid2SizeZ: cuboid2SizeZ,
-      postRadius: complexColumnPostRadius,
-      postOffset: value,
-    });
+    onComplexColumnParamsChange(getComplexColumnParams({ postOffset: value }));
   };
 
   const handleConcreteThicknessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -734,19 +796,71 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 onChange={(e) => {
                   const value = e.target.checked;
                   setComplexIsFiniteConcrete(value);
-                  onComplexColumnParamsChange({
-                    isFiniteConcrete: value,
-                    cuboid1SizeX: cuboid1SizeX,
-                    cuboid1SizeZ: cuboid1SizeZ,
-                    cuboid2SizeX: cuboid2SizeX,
-                    cuboid2SizeZ: cuboid2SizeZ,
-                    postRadius: complexColumnPostRadius,
-                    postOffset: complexColumnPostOffset,
-                  });
+                  onComplexColumnParamsChange(getComplexColumnParams({ isFiniteConcrete: value }));
                 }}
               />
               Finite Concrete
             </label>
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Thickness</label>
+            <input
+              type="number"
+              value={complexConcreteThickness}
+              onChange={handleComplexConcreteThicknessChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter thickness"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset X+ (Right)</label>
+            <input
+              type="number"
+              value={complexOffsetXPos}
+              onChange={handleComplexOffsetXPosChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter offset"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset X- (Left)</label>
+            <input
+              type="number"
+              value={complexOffsetXNeg}
+              onChange={handleComplexOffsetXNegChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter offset"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset Z+ (Back)</label>
+            <input
+              type="number"
+              value={complexOffsetZPos}
+              onChange={handleComplexOffsetZPosChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter offset"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset Z- (Front)</label>
+            <input
+              type="number"
+              value={complexOffsetZNeg}
+              onChange={handleComplexOffsetZNegChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter offset"
+            />
           </div>
 
           <div className="control-group">
@@ -794,6 +908,76 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               step="0.1"
               min="0.1"
               placeholder="Enter length"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Cuboid 2 Translate X</label>
+            <input
+              type="number"
+              value={cuboid2TranslateX}
+              onChange={handleCuboid2TranslateXChange}
+              step="0.1"
+              placeholder="Enter X translation"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Cuboid 2 Translate Z</label>
+            <input
+              type="number"
+              value={cuboid2TranslateZ}
+              onChange={handleCuboid2TranslateZChange}
+              step="0.1"
+              placeholder="Enter Z translation"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Cuboid 1 Post Count - Left Edge</label>
+            <input
+              type="number"
+              value={cuboid1PostCountLeftEdge}
+              onChange={handleCuboid1PostCountLeftEdgeChange}
+              step="1"
+              min="2"
+              placeholder="Enter post count"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Cuboid 1 Post Count - Top Edge</label>
+            <input
+              type="number"
+              value={cuboid1PostCountTopEdge}
+              onChange={handleCuboid1PostCountTopEdgeChange}
+              step="1"
+              min="2"
+              placeholder="Enter post count"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Cuboid 2 Post Count - Left Edge</label>
+            <input
+              type="number"
+              value={cuboid2PostCountLeftEdge}
+              onChange={handleCuboid2PostCountLeftEdgeChange}
+              step="1"
+              min="2"
+              placeholder="Enter post count"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Cuboid 2 Post Count - Top Edge</label>
+            <input
+              type="number"
+              value={cuboid2PostCountTopEdge}
+              onChange={handleCuboid2PostCountTopEdgeChange}
+              step="1"
+              min="2"
+              placeholder="Enter post count"
             />
           </div>
 

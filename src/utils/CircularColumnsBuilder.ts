@@ -134,9 +134,10 @@ export const updateCircularColumns = (
   }
 
   // Create new posts with pre-calculated positions
-  const connectingPostHeight = concreteThickness + gapDistance + 1.5;
+  const connectingPostHeight = concreteThickness / 2 + gapDistance + columnHeight / 2;
 
   postPositions.forEach((postPos) => {
+    postPos.position.y = concreteThickness/2 + connectingPostHeight / 2 + gapDistance;
     const postGroup = createPost(
       scene,
       connectingPostHeight,

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import './App.css';
 import ConstructionViewer from './components/ConstructionViewer';
-import ControlPanel from './components/ControlPanel';
+import { ControlPanel } from './components/ControlPanel';
+import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS } from './constants/defaultParams';
 
 export interface CircularColumnParams {
   isFiniteConcrete: boolean;
@@ -19,10 +20,21 @@ export interface CircularColumnParams {
 
 export interface ComplexColumnParams {
   isFiniteConcrete: boolean;
+  concreteThickness: number;
+  offsetXPos: number;
+  offsetXNeg: number;
+  offsetZPos: number;
+  offsetZNeg: number;
   cuboid1SizeX: number;
   cuboid1SizeZ: number;
+  cuboid1PostCountLeftEdge: number;
+  cuboid1PostCountTopEdge: number;
   cuboid2SizeX: number;
   cuboid2SizeZ: number;
+  cuboid2TranslateX: number;
+  cuboid2TranslateZ: number;
+  cuboid2PostCountLeftEdge: number;
+  cuboid2PostCountTopEdge: number;
   postRadius: number;
   postOffset: number;
 }
@@ -43,43 +55,10 @@ export interface RectangleColumnParams {
 }
 
 function App() {
-  const [currentModel, setCurrentModel] = useState< 'circularColumns' | 'complexColumn' | 'rectangleColumn'>('circularColumns');
-  const [towerParams, setTowerParams] = useState<CircularColumnParams>({
-    isFiniteConcrete: true,
-    concreteThickness: 3,
-    cylinderHeight: 1,
-    cylinderRadius: 1.5,
-    postRadius: 0.05,
-    postCount: 10,
-    circumferenceToPostOffset: 0.06,
-    offsetXPos: 1.5,
-    offsetXNeg: 1.5,
-    offsetZPos: 1.5,
-    offsetZNeg: 1.5,
-  });
-  const [complexColumnParams, setComplexColumnParams] = useState<ComplexColumnParams>({
-    isFiniteConcrete: true,
-    cuboid1SizeX: 2,
-    cuboid1SizeZ: 2,
-    cuboid2SizeX: 2,
-    cuboid2SizeZ: 2,
-    postRadius: 0.05,
-    postOffset: 0.1,
-  });
-  const [rectangleColumnParams, setRectangleColumnParams] = useState<RectangleColumnParams>({
-    isFiniteConcrete: true,
-    concreteThickness: 3,
-    columnWidth: 1,
-    columnDepth: 1.5,
-    postCountX: 3,
-    postCountZ: 2,
-    postDiameter: 0.1,
-    postOffset: 0.1,
-    offsetXPos: 1.5,
-    offsetXNeg: 1.5,
-    offsetZPos: 1.5,
-    offsetZNeg: 1.5,
-  });
+  const [currentModel, setCurrentModel] = useState< 'circularColumns' | 'complexColumn' | 'rectangleColumn'>('rectangleColumn');
+  const [towerParams, setTowerParams] = useState<CircularColumnParams>(DEFAULT_TOWER_PARAMS);
+  const [complexColumnParams, setComplexColumnParams] = useState<ComplexColumnParams>(DEFAULT_COMPLEX_COLUMN_PARAMS);
+  const [rectangleColumnParams, setRectangleColumnParams] = useState<RectangleColumnParams>(DEFAULT_RECTANGLE_COLUMN_PARAMS);
 
   return (
     <div className="app-container">

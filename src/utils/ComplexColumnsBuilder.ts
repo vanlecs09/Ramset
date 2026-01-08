@@ -1,21 +1,9 @@
 import * as BABYLON from '@babylonjs/core';
 import type { BaseStructureGroup } from './CircularColumnsBuilder';
+import { createConcrete, updateConcrete } from './ConcreteBuilder';
+import type { ConcreteGroup } from './ConcreteBuilder';
+import { calculateCuboidPostPositions } from './CuboidPostPositionCalculator';
 
-export const createPost = (position: BABYLON.Vector3, scene: BABYLON.Scene, radius: number = 0.05) => {
-  const post = BABYLON.MeshBuilder.CreateCylinder(
-    'post',
-    { height: 2, diameter: radius * 2 },
-    scene
-  );
-  post.position = position;
-
-  const postMaterial = new BABYLON.StandardMaterial('postMaterial', scene);
-  postMaterial.emissiveColor = new BABYLON.Color3(0.627, 0.322, 0.176); // #A0522D
-  post.material = postMaterial;
-
-  post.receiveShadows = true;
-  return post;
-};
 
 export const createCross = (
   position: BABYLON.Vector3,
@@ -46,7 +34,7 @@ export const createCross = (
 };
 
 export interface ComplexColumnGroup extends BaseStructureGroup {
-  box?: BABYLON.Mesh;
+  concrete?: ConcreteGroup;
   cuboid1?: BABYLON.Mesh;
   cuboid2?: BABYLON.Mesh;
   posts?: BABYLON.Mesh[];
@@ -54,20 +42,33 @@ export interface ComplexColumnGroup extends BaseStructureGroup {
 
 export const createComplexColumn = (
   scene: BABYLON.Scene,
-  boxSize: number = 3,
+  concreteThickness: number = 1,
+  offsetXPos: number = 1.5,
+  offsetXNeg: number = 1.5,
+  offsetZPos: number = 1.5,
+  offsetZNeg: number = 1.5,
   cuboid1SizeX: number = 2,
   cuboid1SizeZ: number = 2,
+  cuboid1PostCountLeftEdge: number = 2,
+  cuboid1PostCountTopEdge: number = 2,
   cuboid2SizeX: number = 2,
   cuboid2SizeZ: number = 2,
+  cuboid2TranslateX: number = 0,
+  cuboid2TranslateZ: number = 0,
+  cuboid2PostCountLeftEdge: number = 2,
+  cuboid2PostCountTopEdge: number = 2,
   postRadius: number = 0.05,
-  postOffset: number = 0.1
+  postOffset: number = 0.1,
+  isFiniteConcrete: boolean = true
 ): ComplexColumnGroup => {
   const columnGroup = new BABYLON.TransformNode('complexColumn', scene);
   const complexColumn: ComplexColumnGroup = {
     group: columnGroup,
     posts: [],
     dispose() {
-      this.box?.dispose();
+      this.concrete?.mesh?.dispose();
+      this.concrete?.material?.dispose();
+      this.concrete?.infiniteBlocks?.forEach(block => block.dispose());
       this.cuboid1?.dispose();
       this.cuboid2?.dispose();
       this.posts?.forEach(post => post.dispose());
@@ -75,23 +76,23 @@ export const createComplexColumn = (
     }
   };
 
-  // 1. Create bottom box (basic floor)
-  const box = BABYLON.MeshBuilder.CreateBox('complexColumnBox', { size: boxSize }, scene);
-  box.position.y = 1.5;
-
-  const boxMaterial = new BABYLON.StandardMaterial('complexBoxMaterial', scene);
-  boxMaterial.emissiveColor = new BABYLON.Color3(0.42, 1, 0.42); // #6BFF6B
-  boxMaterial.alpha = 0.3;
-  box.material = boxMaterial;
-
-  box.receiveShadows = true;
-  box.parent = columnGroup;
-  complexColumn.box = box;
+  // 1. Create concrete base using ConcreteBuilder
+  const concreteGroup = createConcrete(
+    scene,
+    concreteThickness,
+    offsetXPos,
+    offsetXNeg,
+    offsetZPos,
+    offsetZNeg,
+    columnGroup,
+    isFiniteConcrete
+  );
+  complexColumn.concrete = concreteGroup;
 
   // 2. Create 2 cuboids that cross each other on top
   const cuboidMaterial = new BABYLON.StandardMaterial('cuboidMaterial', scene);
-  cuboidMaterial.emissiveColor = new BABYLON.Color3(1, 0.42, 0.42); // #FF6B6B
-  cuboidMaterial.alpha = 0.4;
+  cuboidMaterial.diffuseColor = new BABYLON.Color3(1, 0.42, 0.42); // #FF6B6B
+  cuboidMaterial.alpha = 0.7;
 
   // First cuboid (along X axis)
   const cuboid1 = BABYLON.MeshBuilder.CreateBox('cuboid1', { width: cuboid1SizeX, height: 0.6, depth: cuboid1SizeZ }, scene);
@@ -103,38 +104,46 @@ export const createComplexColumn = (
 
   // Second cuboid (along Z axis)
   const cuboid2 = BABYLON.MeshBuilder.CreateBox('cuboid2', { width: cuboid2SizeX, height: 0.6, depth: cuboid2SizeZ }, scene);
-  cuboid2.position = new BABYLON.Vector3(0, 3.5, 0);
+  cuboid2.position = new BABYLON.Vector3(cuboid2TranslateX, 3.5, cuboid2TranslateZ);
   cuboid2.material = cuboidMaterial;
   cuboid2.receiveShadows = true;
   cuboid2.parent = columnGroup;
   complexColumn.cuboid2 = cuboid2;
 
   // 3. Create posts around the perimeter of cuboids
-  const cuboid1Posts = [
-    new BABYLON.Vector3(-cuboid1SizeX / 2 + postOffset, 2.5, -cuboid1SizeZ / 2 + postOffset),
-    new BABYLON.Vector3(-cuboid1SizeX / 2 + postOffset, 2.5, cuboid1SizeZ / 2 - postOffset),
-    new BABYLON.Vector3(cuboid1SizeX / 2 - postOffset, 2.5, -cuboid1SizeZ / 2 + postOffset),
-    new BABYLON.Vector3(cuboid1SizeX / 2 - postOffset, 2.5, cuboid1SizeZ / 2 - postOffset),
-  ];
+  const cuboid1Positions = calculateCuboidPostPositions(
+    0, // centerX (cuboid1 is centered)
+    0, // centerZ (cuboid1 is centered)
+    cuboid1SizeX,
+    cuboid1SizeZ,
+    cuboid1PostCountLeftEdge,
+    cuboid1PostCountTopEdge,
+    postOffset,
+    2.5 // baseY
+  );
 
-  const cuboid2Posts = [
-    new BABYLON.Vector3(-cuboid2SizeX / 2 + postOffset, 2.5, -cuboid2SizeZ / 2 + postOffset),
-    new BABYLON.Vector3(-cuboid2SizeX / 2 + postOffset, 2.5, cuboid2SizeZ / 2 - postOffset),
-    new BABYLON.Vector3(cuboid2SizeX / 2 - postOffset, 2.5, -cuboid2SizeZ / 2 + postOffset),
-    new BABYLON.Vector3(cuboid2SizeX / 2 - postOffset, 2.5, cuboid2SizeZ / 2 - postOffset),
-  ];
+  const cuboid2Positions = calculateCuboidPostPositions(
+    cuboid2TranslateX,
+    cuboid2TranslateZ,
+    cuboid2SizeX,
+    cuboid2SizeZ,
+    cuboid2PostCountLeftEdge,
+    cuboid2PostCountTopEdge,
+    postOffset,
+    2.5 // baseY
+  );
 
-  const allPostPositions = [...cuboid1Posts, ...cuboid2Posts];
+  const allPostPositions = [...cuboid1Positions, ...cuboid2Positions];
 
-  allPostPositions.forEach((pos, index) => {
+  allPostPositions.forEach((postPos) => {
     const post = BABYLON.MeshBuilder.CreateCylinder(
-      `complexColumnPost_${index}`,
+      `complexColumnPost_${postPos.index}`,
       { height: 2, diameter: postRadius * 2 },
       scene
     );
-    post.position = pos;
+    post.position = postPos.position;
 
-    const postMaterial = new BABYLON.StandardMaterial(`complexPostMaterial_${index}`, scene);
+    const postMaterial = new BABYLON.StandardMaterial(`complexPostMaterial_${postPos.index}`, scene);
     postMaterial.emissiveColor = new BABYLON.Color3(0.627, 0.322, 0.176); // #A0522D
     post.material = postMaterial;
 
@@ -148,17 +157,46 @@ export const createComplexColumn = (
 
 export const updateComplexColumn = (
   complexColumn: ComplexColumnGroup,
+  concreteThickness: number = 1,
+  offsetXPos: number = 1.5,
+  offsetXNeg: number = 1.5,
+  offsetZPos: number = 1.5,
+  offsetZNeg: number = 1.5,
   cuboid1SizeX: number = 2,
   cuboid1SizeZ: number = 2,
+  cuboid1PostCountLeftEdge: number = 2,
+  cuboid1PostCountTopEdge: number = 2,
   cuboid2SizeX: number = 2,
   cuboid2SizeZ: number = 2,
+  cuboid2TranslateX: number = 0,
+  cuboid2TranslateZ: number = 0,
+  cuboid2PostCountLeftEdge: number = 2,
+  cuboid2PostCountTopEdge: number = 2,
   postRadius: number = 0.05,
-  postOffset: number = 0.1
+  postOffset: number = 0.1,
+  isFiniteConcrete: boolean = true
 ) => {
   const scene = complexColumn.group.getScene();
+
+  // 1. Update concrete using ConcreteBuilder
+  if (complexColumn.concrete) {
+    updateConcrete(
+      complexColumn.concrete,
+      scene,
+      concreteThickness,
+      offsetXPos,
+      offsetXNeg,
+      offsetZPos,
+      offsetZNeg,
+      complexColumn.group,
+      isFiniteConcrete
+    );
+  }
+
+  // 2. Create cuboid material
   const cuboidMaterial = new BABYLON.StandardMaterial('cuboidMaterial', scene);
-  cuboidMaterial.emissiveColor = new BABYLON.Color3(1, 0.42, 0.42); // #FF6B6B
-  cuboidMaterial.alpha = 0.4;
+  cuboidMaterial.diffuseColor = new BABYLON.Color3(1, 0.42, 0.42); // #FF6B6B
+  cuboidMaterial.alpha = 0.7;
 
   // Update cuboid 1
   if (complexColumn.cuboid1) {
@@ -177,7 +215,7 @@ export const updateComplexColumn = (
     complexColumn.cuboid2.dispose();
 
     const cuboid2 = BABYLON.MeshBuilder.CreateBox('cuboid2', { width: cuboid2SizeX, height: 0.6, depth: cuboid2SizeZ }, scene);
-    cuboid2.position = new BABYLON.Vector3(0, 3.5, 0);
+    cuboid2.position = new BABYLON.Vector3(cuboid2TranslateX, 3.5, cuboid2TranslateZ);
     cuboid2.material = cuboidMaterial;
     cuboid2.receiveShadows = true;
     cuboid2.parent = complexColumn.group;
@@ -193,31 +231,39 @@ export const updateComplexColumn = (
   }
 
   // Create new posts with updated parameters
-  const cuboid1Posts = [
-    new BABYLON.Vector3(-cuboid1SizeX / 2 + postOffset, 2.5, -cuboid1SizeZ / 2 + postOffset),
-    new BABYLON.Vector3(-cuboid1SizeX / 2 + postOffset, 2.5, cuboid1SizeZ / 2 - postOffset),
-    new BABYLON.Vector3(cuboid1SizeX / 2 - postOffset, 2.5, -cuboid1SizeZ / 2 + postOffset),
-    new BABYLON.Vector3(cuboid1SizeX / 2 - postOffset, 2.5, cuboid1SizeZ / 2 - postOffset),
-  ];
+  const cuboid1Positions = calculateCuboidPostPositions(
+    0,
+    0,
+    cuboid1SizeX,
+    cuboid1SizeZ,
+    cuboid1PostCountLeftEdge,
+    cuboid1PostCountTopEdge,
+    postOffset,
+    2.5
+  );
 
-  const cuboid2Posts = [
-    new BABYLON.Vector3(-cuboid2SizeX / 2 + postOffset, 2.5, -cuboid2SizeZ / 2 + postOffset),
-    new BABYLON.Vector3(-cuboid2SizeX / 2 + postOffset, 2.5, cuboid2SizeZ / 2 - postOffset),
-    new BABYLON.Vector3(cuboid2SizeX / 2 - postOffset, 2.5, -cuboid2SizeZ / 2 + postOffset),
-    new BABYLON.Vector3(cuboid2SizeX / 2 - postOffset, 2.5, cuboid2SizeZ / 2 - postOffset),
-  ];
+  const cuboid2Positions = calculateCuboidPostPositions(
+    cuboid2TranslateX,
+    cuboid2TranslateZ,
+    cuboid2SizeX,
+    cuboid2SizeZ,
+    cuboid2PostCountLeftEdge,
+    cuboid2PostCountTopEdge,
+    postOffset,
+    2.5
+  );
 
-  const allPostPositions = [...cuboid1Posts, ...cuboid2Posts];
+  const allPostPositions = [...cuboid1Positions, ...cuboid2Positions];
 
-  allPostPositions.forEach((pos, index) => {
+  allPostPositions.forEach((postPos) => {
     const post = BABYLON.MeshBuilder.CreateCylinder(
-      `complexColumnPost_${index}`,
+      `complexColumnPost_${postPos.index}`,
       { height: 2, diameter: postRadius * 2 },
       scene
     );
-    post.position = pos;
+    post.position = postPos.position;
 
-    const postMaterial = new BABYLON.StandardMaterial(`complexPostMaterial_${index}`, scene);
+    const postMaterial = new BABYLON.StandardMaterial(`complexPostMaterial_${postPos.index}`, scene);
     postMaterial.emissiveColor = new BABYLON.Color3(0.627, 0.322, 0.176); // #A0522D
     post.material = postMaterial;
 
