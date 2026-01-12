@@ -18,19 +18,19 @@ interface TowerParams {
   postRadius: number;
   postCount: number;
   circumferenceToPostOffset: number;
-  offsetXPos: number;
-  offsetXNeg: number;
-  offsetZPos: number;
-  offsetZNeg: number;
+  concreteOffsetXRight: number;
+  concreteOffsetXLeft: number;
+  concreteOffsetZBack: number;
+  concreteOffsetZFront: number;
 }
 
 interface ComplexColumnParams {
   isFiniteConcrete: boolean;
   concreteThickness: number;
-  offsetXPos: number;
-  offsetXNeg: number;
-  offsetZPos: number;
-  offsetZNeg: number;
+  concreteOffsetXRight: number;
+  concreteOffsetXLeft: number;
+  concreteOffsetZBack: number;
+  concreteOffsetZFront: number;
   cuboid1SizeX: number;
   cuboid1SizeZ: number;
   cuboid1PostCountLeftEdge: number;
@@ -64,18 +64,18 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     postRadius: 0.05,
     postCount: 10,
     circumferenceToPostOffset: 0.06,
-    offsetXPos: 1.5,
-    offsetXNeg: 1.5,
-    offsetZPos: 1.5,
-    offsetZNeg: 1.5,
+    concreteOffsetXRight: 1.5,
+    concreteOffsetXLeft: 1.5,
+    concreteOffsetZBack: 1.5,
+    concreteOffsetZFront: 1.5,
   },
   complexColumnParams = {
     isFiniteConcrete: false,
     concreteThickness: 1,
-    offsetXPos: 1.5,
-    offsetXNeg: 1.5,
-    offsetZPos: 1.5,
-    offsetZNeg: 1.5,
+    concreteOffsetXRight: 1.5,
+    concreteOffsetXLeft: 1.5,
+    concreteOffsetZBack: 1.5,
+    concreteOffsetZFront: 1.5,
     cuboid1SizeX: 2,
     cuboid1SizeZ: 2,
     cuboid1PostCountLeftEdge: 2,
@@ -256,49 +256,50 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         baseY
       );
 
+
       if (!circularColumnsRef.current) {
         disposePreviousStructure();
         circularColumnsRef.current = createCircularColumns(
           scene,
           postPositions,
-          towerParams.concreteThickness,
           towerParams.cylinderHeight,
           towerParams.cylinderRadius,
           towerParams.postRadius,
-          towerParams.offsetXPos,
-          towerParams.offsetXNeg,
-          towerParams.offsetZPos,
-          towerParams.offsetZNeg,
+          complexColumnParams.concreteThickness,
+          complexColumnParams.concreteOffsetXRight,
+          complexColumnParams.concreteOffsetXLeft,
+          complexColumnParams.concreteOffsetZBack,
+          complexColumnParams.concreteOffsetZFront,
           towerParams.isFiniteConcrete
         );
       } else {
         updateCircularColumns(
           circularColumnsRef.current,
           postPositions,
-          towerParams.concreteThickness,
           towerParams.cylinderHeight,
           towerParams.cylinderRadius,
           towerParams.postRadius,
-          towerParams.offsetXPos,
-          towerParams.offsetXNeg,
-          towerParams.offsetZPos,
-          towerParams.offsetZNeg,
+          complexColumnParams.concreteThickness,
+          complexColumnParams.concreteOffsetXRight,
+          complexColumnParams.concreteOffsetXLeft,
+          complexColumnParams.concreteOffsetZBack,
+          complexColumnParams.concreteOffsetZFront,
           towerParams.isFiniteConcrete
         );
       }
 
     } else if (model === 'complexColumn') {
 
-      
+
       if (!complexColumnRef.current) {
         disposePreviousStructure();
         complexColumnRef.current = createComplexColumn(
           scene,
           complexColumnParams.concreteThickness,
-          complexColumnParams.offsetXPos,
-          complexColumnParams.offsetXNeg,
-          complexColumnParams.offsetZPos,
-          complexColumnParams.offsetZNeg,
+          complexColumnParams.concreteOffsetXRight,
+          complexColumnParams.concreteOffsetXLeft,
+          complexColumnParams.concreteOffsetZBack,
+          complexColumnParams.concreteOffsetZFront,
           complexColumnParams.cuboid1SizeX,
           complexColumnParams.cuboid1SizeZ,
           complexColumnParams.cuboid1PostCountLeftEdge,
@@ -317,10 +318,10 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         updateComplexColumn(
           complexColumnRef.current,
           complexColumnParams.concreteThickness,
-          complexColumnParams.offsetXPos,
-          complexColumnParams.offsetXNeg,
-          complexColumnParams.offsetZPos,
-          complexColumnParams.offsetZNeg,
+          complexColumnParams.concreteOffsetXRight,
+          complexColumnParams.concreteOffsetXLeft,
+          complexColumnParams.concreteOffsetZBack,
+          complexColumnParams.concreteOffsetZFront,
           complexColumnParams.cuboid1SizeX,
           complexColumnParams.cuboid1SizeZ,
           complexColumnParams.cuboid1PostCountLeftEdge,
@@ -359,10 +360,10 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           rectangleColumnParams.columnWidth,
           rectangleColumnParams.columnDepth,
           rectangleColumnParams.postDiameter,
-          rectangleColumnParams.offsetXPos,
-          rectangleColumnParams.offsetXNeg,
-          rectangleColumnParams.offsetZPos,
-          rectangleColumnParams.offsetZNeg,
+          rectangleColumnParams.concreteOffsetXRight,
+          rectangleColumnParams.concreteOffsetXLeft,
+          rectangleColumnParams.concreteOffsetZBack,
+          rectangleColumnParams.concreteOffsetZFront,
           rectangleColumnParams.isFiniteConcrete
         );
       } else {
@@ -384,10 +385,10 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           rectangleColumnParams.columnWidth,
           rectangleColumnParams.columnDepth,
           rectangleColumnParams.postDiameter,
-          rectangleColumnParams.offsetXPos,
-          rectangleColumnParams.offsetXNeg,
-          rectangleColumnParams.offsetZPos,
-          rectangleColumnParams.offsetZNeg,
+          rectangleColumnParams.concreteOffsetXRight,
+          rectangleColumnParams.concreteOffsetXLeft,
+          rectangleColumnParams.concreteOffsetZBack,
+          rectangleColumnParams.concreteOffsetZFront,
           rectangleColumnParams.isFiniteConcrete
         );
       }
@@ -401,17 +402,13 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     towerParams.postRadius,
     towerParams.postCount,
     towerParams.circumferenceToPostOffset,
-    towerParams.offsetXPos,
-    towerParams.offsetXNeg,
-    towerParams.offsetZPos,
-    towerParams.offsetZNeg,
 
     complexColumnParams.isFiniteConcrete,
     complexColumnParams.concreteThickness,
-    complexColumnParams.offsetXPos,
-    complexColumnParams.offsetXNeg,
-    complexColumnParams.offsetZPos,
-    complexColumnParams.offsetZNeg,
+    complexColumnParams.concreteOffsetXRight,
+    complexColumnParams.concreteOffsetXLeft,
+    complexColumnParams.concreteOffsetZBack,
+    complexColumnParams.concreteOffsetZFront,
     complexColumnParams.cuboid1SizeX,
     complexColumnParams.cuboid1SizeZ,
     complexColumnParams.cuboid2SizeX,
@@ -420,7 +417,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     complexColumnParams.cuboid2TranslateZ,
     complexColumnParams.postRadius,
     complexColumnParams.postOffset,
-    
+
     rectangleColumnParams.isFiniteConcrete,
     rectangleColumnParams.concreteThickness,
     rectangleColumnParams.columnWidth,
@@ -429,10 +426,10 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     rectangleColumnParams.postCountZ,
     rectangleColumnParams.postDiameter,
     rectangleColumnParams.postOffset,
-    rectangleColumnParams.offsetXPos,
-    rectangleColumnParams.offsetXNeg,
-    rectangleColumnParams.offsetZPos,
-    rectangleColumnParams.offsetZNeg,
+    rectangleColumnParams.concreteOffsetXRight,
+    rectangleColumnParams.concreteOffsetXLeft,
+    rectangleColumnParams.concreteOffsetZBack,
+    rectangleColumnParams.concreteOffsetZFront,
 
   ]);
 

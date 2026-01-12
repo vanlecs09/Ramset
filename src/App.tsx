@@ -12,19 +12,19 @@ export interface CircularColumnParams {
   postRadius: number;
   postCount: number;
   circumferenceToPostOffset: number;
-  offsetXPos: number;
-  offsetXNeg: number;
-  offsetZPos: number;
-  offsetZNeg: number;
+  concreteOffsetXRight: number;
+  concreteOffsetXLeft: number;
+  concreteOffsetZBack: number;
+  concreteOffsetZFront: number;
 }
 
 export interface ComplexColumnParams {
   isFiniteConcrete: boolean;
   concreteThickness: number;
-  offsetXPos: number;
-  offsetXNeg: number;
-  offsetZPos: number;
-  offsetZNeg: number;
+  concreteOffsetXRight: number;
+  concreteOffsetXLeft: number;
+  concreteOffsetZBack: number;
+  concreteOffsetZFront: number;
   cuboid1SizeX: number;
   cuboid1SizeZ: number;
   cuboid1PostCountLeftEdge: number;
@@ -48,10 +48,10 @@ export interface RectangleColumnParams {
   postCountZ: number;
   postDiameter: number;
   postOffset: number;
-  offsetXPos: number;
-  offsetXNeg: number;
-  offsetZPos: number;
-  offsetZNeg: number;
+  concreteOffsetXRight: number;
+  concreteOffsetXLeft: number;
+  concreteOffsetZBack: number;
+  concreteOffsetZFront: number;
 }
 
 function App() {

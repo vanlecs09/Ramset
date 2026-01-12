@@ -8,10 +8,10 @@ export interface TowerParams {
   postRadius: number;
   postCount: number;
   circumferenceToPostOffset: number;
-  offsetXPos: number;
-  offsetXNeg: number;
-  offsetZPos: number;
-  offsetZNeg: number;
+  concreteOffsetXRight: number;
+  concreteOffsetXLeft: number;
+  concreteOffsetZBack: number;
+  concreteOffsetZFront: number;
 }
 
 export const DEFAULT_TOWER_PARAMS: TowerParams = {
@@ -22,19 +22,19 @@ export const DEFAULT_TOWER_PARAMS: TowerParams = {
   postRadius: 0.05,
   postCount: 10,
   circumferenceToPostOffset: 0.06,
-  offsetXPos: 1.5,
-  offsetXNeg: 1.5,
-  offsetZPos: 1.5,
-  offsetZNeg: 1.5,
+  concreteOffsetXRight: 1.5,
+  concreteOffsetXLeft: 1.5,
+  concreteOffsetZBack: 1.5,
+  concreteOffsetZFront: 1.5,
 };
 
 export const DEFAULT_COMPLEX_COLUMN_PARAMS: ComplexColumnParams = {
   isFiniteConcrete: true,
   concreteThickness: 3,
-  offsetXPos: 1.5,
-  offsetXNeg: 1.5,
-  offsetZPos: 1.5,
-  offsetZNeg: 1.5,
+  concreteOffsetXRight: 1.5,
+  concreteOffsetXLeft: 1.5,
+  concreteOffsetZBack: 1.5,
+  concreteOffsetZFront: 1.5,
   cuboid1SizeX: 1,
   cuboid1SizeZ: 0.5,
   cuboid1PostCountLeftEdge: 2,
@@ -58,8 +58,8 @@ export const DEFAULT_RECTANGLE_COLUMN_PARAMS: RectangleColumnParams = {
   postCountZ: 2,
   postDiameter: 0.1,
   postOffset: 0.1,
-  offsetXPos: 1.5,
-  offsetXNeg: 1.5,
-  offsetZPos: 1.5,
-  offsetZNeg: 1.5,
+  concreteOffsetXRight: 1.5,
+  concreteOffsetXLeft: 1.5,
+  concreteOffsetZBack: 1.5,
+  concreteOffsetZFront: 1.5,
 };

@@ -23,10 +23,10 @@ export const createCircularColumns = (
   columnHeight: number = 1,
   columnRadius: number = 1.5,
   postRadius: number = 0.05,
-  offsetXPos: number = 1.5,
-  offsetXNeg: number = 1.5,
-  offsetZPos: number = 1.5,
-  offsetZNeg: number = 1.5,
+  concreteOffsetXRight: number = 1.5,
+  concreteOffsetXLeft: number = 1.5,
+  concreteOffsetZBack: number = 1.5,
+  concreteOffsetZFront: number = 1.5,
   isFiniteConcrete: boolean = true
 ): CircularColumnsGroup => {
   const towerGroup = new BABYLON.TransformNode('CircularColumns', scene);
@@ -44,7 +44,7 @@ export const createCircularColumns = (
   };
 
   // Create bottom concrete using ConcreteBuilder with offset parameters
-  const concreteGroup = createConcrete(scene, concreteThickness, offsetXPos, offsetXNeg, offsetZPos, offsetZNeg, towerGroup, isFiniteConcrete);
+  const concreteGroup = createConcrete(scene, concreteThickness, concreteOffsetXRight, concreteOffsetXLeft, concreteOffsetZBack, concreteOffsetZFront, towerGroup, isFiniteConcrete);
   circularColumns.concrete = concreteGroup.mesh;
   circularColumns.infiniteBlocks = concreteGroup.infiniteBlocks || [];
 
@@ -91,10 +91,10 @@ export const updateCircularColumns = (
   columnHeight: number = 1,
   columnRadius: number = 1.5,
   postRadius: number = 0.05,
-  offsetXPos: number = 1.5,
-  offsetXNeg: number = 1.5,
-  offsetZPos: number = 1.5,
-  offsetZNeg: number = 1.5,
+  concreteOffsetXRight: number = 1.5,
+  concreteOffsetXLeft: number = 1.5,
+  concreteOffsetZBack: number = 1.5,
+  concreteOffsetZFront: number = 1.5,
   isFiniteConcrete: boolean = true
 ) => {
   const gapDistance = 0.5;
@@ -102,7 +102,7 @@ export const updateCircularColumns = (
 
   // Update concrete using ConcreteBuilder with offset parameters
   const concreteGroup = { mesh: circularColumns.concrete, infiniteBlocks: circularColumns.infiniteBlocks || [] };
-  updateConcrete(concreteGroup, scene, concreteThickness, offsetXPos, offsetXNeg, offsetZPos, offsetZNeg, circularColumns.group, isFiniteConcrete);
+  updateConcrete(concreteGroup, scene, concreteThickness, concreteOffsetXRight, concreteOffsetXLeft, concreteOffsetZBack, concreteOffsetZFront, circularColumns.group, isFiniteConcrete);
   circularColumns.concrete = concreteGroup.mesh;
   circularColumns.infiniteBlocks = concreteGroup.infiniteBlocks;
   if (circularColumns.circularColumn) {

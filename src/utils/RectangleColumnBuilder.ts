@@ -34,10 +34,10 @@ export const createRectangleColumn = (
     columnWidth: number = 3,
     columnDepth: number = 2,
     postDiameter: number = 0.2,
-    offsetXPos: number = 1.5,
-    offsetXNeg: number = 1.5,
-    offsetZPos: number = 1.5,
-    offsetZNeg: number = 1.5,
+    concreteOffsetXRight: number = 1.5,
+    concreteOffsetXLeft: number = 1.5,
+    concreteOffsetZBack: number = 1.5,
+    concreteOffsetZFront: number = 1.5,
     isFiniteConcrete: boolean = true
 ): RectangleColumnGroup => {
     const columnGroup = new BABYLON.TransformNode('rectangleColumn', scene);
@@ -59,7 +59,7 @@ export const createRectangleColumn = (
 
     // 1. Create concrete using ConcreteBuilder
     // Pass offset parameters directly to concrete builder
-    const concreteGroup = createConcrete(scene, concreteThickness, offsetXPos, offsetXNeg, offsetZPos, offsetZNeg, columnGroup, isFiniteConcrete);
+    const concreteGroup = createConcrete(scene, concreteThickness, concreteOffsetXRight, concreteOffsetXLeft, concreteOffsetZBack, concreteOffsetZFront, columnGroup, isFiniteConcrete);
     rectangleColumn.concrete = concreteGroup.mesh;
     rectangleColumn.infiniteBlocks = concreteGroup.infiniteBlocks || [];
 
@@ -100,10 +100,10 @@ export const updateRectangleColumn = (
     columnWidth: number = 3,
     columnDepth: number = 2,
     postDiameter: number = 0.2,
-    offsetXPos: number = 1.5,
-    offsetXNeg: number = 1.5,
-    offsetZPos: number = 1.5,
-    offsetZNeg: number = 1.5,
+    concreteOffsetXRight: number = 1.5,
+    concreteOffsetXLeft: number = 1.5,
+    concreteOffsetZBack: number = 1.5,
+    concreteOffsetZFront: number = 1.5,
     isFiniteConcrete: boolean = true
 ) => {
     const scene = rectangleColumn.group.getScene();
@@ -114,7 +114,7 @@ export const updateRectangleColumn = (
     // Update concrete using ConcreteBuilder
     // Pass offset parameters directly to concrete builder
     const concreteGroup = { mesh: rectangleColumn.concrete, infiniteBlocks: rectangleColumn.infiniteBlocks || [] };
-    updateConcrete(concreteGroup, scene, concreteThickness, offsetXPos, offsetXNeg, offsetZPos, offsetZNeg, rectangleColumn.group, isFiniteConcrete);
+    updateConcrete(concreteGroup, scene, concreteThickness, concreteOffsetXRight, concreteOffsetXLeft, concreteOffsetZBack, concreteOffsetZFront, rectangleColumn.group, isFiniteConcrete);
     rectangleColumn.concrete = concreteGroup.mesh;
     rectangleColumn.infiniteBlocks = concreteGroup.infiniteBlocks;
 

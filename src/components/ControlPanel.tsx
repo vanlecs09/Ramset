@@ -6,10 +6,10 @@ import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_
 interface ComplexColumnParams {
   isFiniteConcrete: boolean;
   concreteThickness: number;
-  offsetXPos: number;
-  offsetXNeg: number;
-  offsetZPos: number;
-  offsetZNeg: number;
+  concreteOffsetXRight: number;
+  concreteOffsetXLeft: number;
+  concreteOffsetZBack: number;
+  concreteOffsetZFront: number;
   cuboid1SizeX: number;
   cuboid1SizeZ: number;
   cuboid1PostCountLeftEdge: number;
@@ -34,10 +34,10 @@ interface ControlPanelProps {
     postRadius: number;
     postCount: number;
     circumferenceToPostOffset: number;
-    offsetXPos: number;
-    offsetXNeg: number;
-    offsetZPos: number;
-    offsetZNeg: number;
+    concreteOffsetXRight: number;
+    concreteOffsetXLeft: number;
+    concreteOffsetZBack: number;
+    concreteOffsetZFront: number;
   }) => void;
   onComplexColumnParamsChange: (params: ComplexColumnParams) => void;
   onRectangleColumnParamsChange: (params: RectangleColumnParams) => void;
@@ -59,18 +59,18 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [towerPostRadius, setTowerPostRadius] = useState(DEFAULT_TOWER_PARAMS.postRadius);
   const [towerPostCount, setTowerPostCount] = useState(DEFAULT_TOWER_PARAMS.postCount);
   const [towerCircumferenceOffset, setTowerCircumferenceOffset] = useState(DEFAULT_TOWER_PARAMS.circumferenceToPostOffset);
-  const [towerOffsetXPos, setTowerOffsetXPos] = useState(DEFAULT_TOWER_PARAMS.offsetXPos);
-  const [towerOffsetXNeg, setTowerOffsetXNeg] = useState(DEFAULT_TOWER_PARAMS.offsetXNeg);
-  const [towerOffsetZPos, setTowerOffsetZPos] = useState(DEFAULT_TOWER_PARAMS.offsetZPos);
-  const [towerOffsetZNeg, setTowerOffsetZNeg] = useState(DEFAULT_TOWER_PARAMS.offsetZNeg);
+  const [towerConcreteOffsetXRight, setTowerConcreteOffsetXRight] = useState(DEFAULT_TOWER_PARAMS.concreteOffsetXRight);
+  const [towerConcreteOffsetXLeft, setTowerConcreteOffsetXLeft] = useState(DEFAULT_TOWER_PARAMS.concreteOffsetXLeft);
+  const [towerConcreteOffsetZBack, setTowerConcreteOffsetZBack] = useState(DEFAULT_TOWER_PARAMS.concreteOffsetZBack);
+  const [towerConcreteOffsetZFront, setTowerConcreteOffsetZFront] = useState(DEFAULT_TOWER_PARAMS.concreteOffsetZFront);
 
   // Complex Column parameters
   const [complexIsFiniteConcrete, setComplexIsFiniteConcrete] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.isFiniteConcrete);
   const [complexConcreteThickness, setComplexConcreteThickness] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.concreteThickness);
-  const [complexOffsetXPos, setComplexOffsetXPos] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.offsetXPos);
-  const [complexOffsetXNeg, setComplexOffsetXNeg] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.offsetXNeg);
-  const [complexOffsetZPos, setComplexOffsetZPos] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.offsetZPos);
-  const [complexOffsetZNeg, setComplexOffsetZNeg] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.offsetZNeg);
+  const [complexConcreteOffsetXRight, setComplexConcreteOffsetXRight] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.concreteOffsetXRight);
+  const [complexConcreteOffsetXLeft, setComplexConcreteOffsetXLeft] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.concreteOffsetXLeft);
+  const [complexConcreteOffsetZBack, setComplexConcreteOffsetZBack] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.concreteOffsetZBack);
+  const [complexConcreteOffsetZFront, setComplexConcreteOffsetZFront] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.concreteOffsetZFront);
   const [cuboid1SizeX, setCuboid1SizeX] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.cuboid1SizeX);
   const [cuboid1SizeZ, setCuboid1SizeZ] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.cuboid1SizeZ);
   const [cuboid1PostCountLeftEdge, setCuboid1PostCountLeftEdge] = useState(DEFAULT_COMPLEX_COLUMN_PARAMS.cuboid1PostCountLeftEdge);
@@ -95,19 +95,19 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [postCountZ, setPostCountZ] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.postCountZ);
   const [postDiameter, setPostDiameter] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.postDiameter);
   const [postOffset, setPostOffset] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.postOffset);
-  const [offsetXPos, setOffsetXPos] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.offsetXPos);
-  const [offsetXNeg, setOffsetXNeg] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.offsetXNeg);
-  const [offsetZPos, setOffsetZPos] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.offsetZPos);
-  const [offsetZNeg, setOffsetZNeg] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.offsetZNeg);
+  const [concreteOffsetXRight, setConcreteOffsetXRight] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.concreteOffsetXRight);
+  const [concreteOffsetXLeft, setConcreteOffsetXLeft] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.concreteOffsetXLeft);
+  const [concreteOffsetZBack, setConcreteOffsetZBack] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.concreteOffsetZBack);
+  const [concreteOffsetZFront, setConcreteOffsetZFront] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.concreteOffsetZFront);
 
   // Helper function to build complete complex column params
   const getComplexColumnParams = (overrides?: Partial<ComplexColumnParams>): ComplexColumnParams => ({
     isFiniteConcrete: overrides?.isFiniteConcrete ?? complexIsFiniteConcrete,
     concreteThickness: overrides?.concreteThickness ?? complexConcreteThickness,
-    offsetXPos: overrides?.offsetXPos ?? complexOffsetXPos,
-    offsetXNeg: overrides?.offsetXNeg ?? complexOffsetXNeg,
-    offsetZPos: overrides?.offsetZPos ?? complexOffsetZPos,
-    offsetZNeg: overrides?.offsetZNeg ?? complexOffsetZNeg,
+    concreteOffsetXRight: overrides?.concreteOffsetXRight ?? complexConcreteOffsetXRight,
+    concreteOffsetXLeft: overrides?.concreteOffsetXLeft ?? complexConcreteOffsetXLeft,
+    concreteOffsetZBack: overrides?.concreteOffsetZBack ?? complexConcreteOffsetZBack,
+    concreteOffsetZFront: overrides?.concreteOffsetZFront ?? complexConcreteOffsetZFront,
     cuboid1SizeX: overrides?.cuboid1SizeX ?? cuboid1SizeX,
     cuboid1SizeZ: overrides?.cuboid1SizeZ ?? cuboid1SizeZ,
     cuboid1PostCountLeftEdge: overrides?.cuboid1PostCountLeftEdge ?? cuboid1PostCountLeftEdge,
@@ -133,10 +133,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postRadius: towerPostRadius,
       postCount: towerPostCount,
       circumferenceToPostOffset: towerCircumferenceOffset,
-      offsetXPos: towerOffsetXPos,
-      offsetXNeg: towerOffsetXNeg,
-      offsetZPos: towerOffsetZPos,
-      offsetZNeg: towerOffsetZNeg,
+      concreteOffsetXRight: towerConcreteOffsetXRight,
+      concreteOffsetXLeft: towerConcreteOffsetXLeft,
+      concreteOffsetZBack: towerConcreteOffsetZBack,
+      concreteOffsetZFront: towerConcreteOffsetZFront,
     });
   };
 
@@ -151,10 +151,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postRadius: towerPostRadius,
       postCount: towerPostCount,
       circumferenceToPostOffset: towerCircumferenceOffset,
-      offsetXPos: towerOffsetXPos,
-      offsetXNeg: towerOffsetXNeg,
-      offsetZPos: towerOffsetZPos,
-      offsetZNeg: towerOffsetZNeg,
+      concreteOffsetXRight: towerConcreteOffsetXRight,
+      concreteOffsetXLeft: towerConcreteOffsetXLeft,
+      concreteOffsetZBack: towerConcreteOffsetZBack,
+      concreteOffsetZFront: towerConcreteOffsetZFront,
     });
   };
 
@@ -169,10 +169,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postRadius: towerPostRadius,
       postCount: towerPostCount,
       circumferenceToPostOffset: towerCircumferenceOffset,
-      offsetXPos: towerOffsetXPos,
-      offsetXNeg: towerOffsetXNeg,
-      offsetZPos: towerOffsetZPos,
-      offsetZNeg: towerOffsetZNeg,
+      concreteOffsetXRight: towerConcreteOffsetXRight,
+      concreteOffsetXLeft: towerConcreteOffsetXLeft,
+      concreteOffsetZBack: towerConcreteOffsetZBack,
+      concreteOffsetZFront: towerConcreteOffsetZFront,
     });
   };
 
@@ -187,10 +187,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postRadius: towerPostRadius,
       postCount: towerPostCount,
       circumferenceToPostOffset: towerCircumferenceOffset,
-      offsetXPos: towerOffsetXPos,
-      offsetXNeg: towerOffsetXNeg,
-      offsetZPos: towerOffsetZPos,
-      offsetZNeg: towerOffsetZNeg,
+      concreteOffsetXRight: towerConcreteOffsetXRight,
+      concreteOffsetXLeft: towerConcreteOffsetXLeft,
+      concreteOffsetZBack: towerConcreteOffsetZBack,
+      concreteOffsetZFront: towerConcreteOffsetZFront,
     });
   };
 
@@ -205,10 +205,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postRadius: value,
       postCount: towerPostCount,
       circumferenceToPostOffset: towerCircumferenceOffset,
-      offsetXPos: towerOffsetXPos,
-      offsetXNeg: towerOffsetXNeg,
-      offsetZPos: towerOffsetZPos,
-      offsetZNeg: towerOffsetZNeg,
+      concreteOffsetXRight: towerConcreteOffsetXRight,
+      concreteOffsetXLeft: towerConcreteOffsetXLeft,
+      concreteOffsetZBack: towerConcreteOffsetZBack,
+      concreteOffsetZFront: towerConcreteOffsetZFront,
     });
   };
 
@@ -223,10 +223,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postRadius: towerPostRadius,
       postCount: value,
       circumferenceToPostOffset: towerCircumferenceOffset,
-      offsetXPos: towerOffsetXPos,
-      offsetXNeg: towerOffsetXNeg,
-      offsetZPos: towerOffsetZPos,
-      offsetZNeg: towerOffsetZNeg,
+      concreteOffsetXRight: towerConcreteOffsetXRight,
+      concreteOffsetXLeft: towerConcreteOffsetXLeft,
+      concreteOffsetZBack: towerConcreteOffsetZBack,
+      concreteOffsetZFront: towerConcreteOffsetZFront,
     });
   };
 
@@ -241,16 +241,16 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postRadius: towerPostRadius,
       postCount: towerPostCount,
       circumferenceToPostOffset: value,
-      offsetXPos: towerOffsetXPos,
-      offsetXNeg: towerOffsetXNeg,
-      offsetZPos: towerOffsetZPos,
-      offsetZNeg: towerOffsetZNeg,
+      concreteOffsetXRight: towerConcreteOffsetXRight,
+      concreteOffsetXLeft: towerConcreteOffsetXLeft,
+      concreteOffsetZBack: towerConcreteOffsetZBack,
+      concreteOffsetZFront: towerConcreteOffsetZFront,
     });
   };
 
-  const handleTowerOffsetXPosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTowerConcreteOffsetXRightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setTowerOffsetXPos(value);
+    setTowerConcreteOffsetXRight(value);
     onTowerParamsChange({
       isFiniteConcrete: towerIsFiniteConcrete,
       concreteThickness: towerConcreteThickness,
@@ -259,16 +259,16 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postRadius: towerPostRadius,
       postCount: towerPostCount,
       circumferenceToPostOffset: towerCircumferenceOffset,
-      offsetXPos: value,
-      offsetXNeg: towerOffsetXNeg,
-      offsetZPos: towerOffsetZPos,
-      offsetZNeg: towerOffsetZNeg,
+      concreteOffsetXRight: value,
+      concreteOffsetXLeft: towerConcreteOffsetXLeft,
+      concreteOffsetZBack: towerConcreteOffsetZBack,
+      concreteOffsetZFront: towerConcreteOffsetZFront,
     });
   };
 
-  const handleTowerOffsetXNegChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTowerConcreteOffsetXLeftChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setTowerOffsetXNeg(value);
+    setTowerConcreteOffsetXLeft(value);
     onTowerParamsChange({
       isFiniteConcrete: towerIsFiniteConcrete,
       concreteThickness: towerConcreteThickness,
@@ -277,16 +277,16 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postRadius: towerPostRadius,
       postCount: towerPostCount,
       circumferenceToPostOffset: towerCircumferenceOffset,
-      offsetXPos: towerOffsetXPos,
-      offsetXNeg: value,
-      offsetZPos: towerOffsetZPos,
-      offsetZNeg: towerOffsetZNeg,
+      concreteOffsetXRight: towerConcreteOffsetXRight,
+      concreteOffsetXLeft: value,
+      concreteOffsetZBack: towerConcreteOffsetZBack,
+      concreteOffsetZFront: towerConcreteOffsetZFront,
     });
   };
 
-  const handleTowerOffsetZPosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTowerConcreteOffsetZBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setTowerOffsetZPos(value);
+    setTowerConcreteOffsetZBack(value);
     onTowerParamsChange({
       isFiniteConcrete: towerIsFiniteConcrete,
       concreteThickness: towerConcreteThickness,
@@ -295,16 +295,16 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postRadius: towerPostRadius,
       postCount: towerPostCount,
       circumferenceToPostOffset: towerCircumferenceOffset,
-      offsetXPos: towerOffsetXPos,
-      offsetXNeg: towerOffsetXNeg,
-      offsetZPos: value,
-      offsetZNeg: towerOffsetZNeg,
+      concreteOffsetXRight: towerConcreteOffsetXRight,
+      concreteOffsetXLeft: towerConcreteOffsetXLeft,
+      concreteOffsetZBack: value,
+      concreteOffsetZFront: towerConcreteOffsetZFront,
     });
   };
 
-  const handleTowerOffsetZNegChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTowerConcreteOffsetZFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setTowerOffsetZNeg(value);
+    setTowerConcreteOffsetZFront(value);
     onTowerParamsChange({
       isFiniteConcrete: towerIsFiniteConcrete,
       concreteThickness: towerConcreteThickness,
@@ -313,10 +313,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postRadius: towerPostRadius,
       postCount: towerPostCount,
       circumferenceToPostOffset: towerCircumferenceOffset,
-      offsetXPos: towerOffsetXPos,
-      offsetXNeg: towerOffsetXNeg,
-      offsetZPos: towerOffsetZPos,
-      offsetZNeg: value,
+      concreteOffsetXRight: towerConcreteOffsetXRight,
+      concreteOffsetXLeft: towerConcreteOffsetXLeft,
+      concreteOffsetZBack: towerConcreteOffsetZBack,
+      concreteOffsetZFront: value,
     });
   };
 
@@ -326,28 +326,28 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     onComplexColumnParamsChange(getComplexColumnParams({ concreteThickness: value }));
   };
 
-  const handleComplexOffsetXPosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleComplexConcreteOffsetXRightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setComplexOffsetXPos(value);
-    onComplexColumnParamsChange(getComplexColumnParams({ offsetXPos: value }));
+    setComplexConcreteOffsetXRight(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ concreteOffsetXRight: value }));
   };
 
-  const handleComplexOffsetXNegChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleComplexConcreteOffsetXLeftChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setComplexOffsetXNeg(value);
-    onComplexColumnParamsChange(getComplexColumnParams({ offsetXNeg: value }));
+    setComplexConcreteOffsetXLeft(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ concreteOffsetXLeft: value }));
   };
 
-  const handleComplexOffsetZPosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleComplexConcreteOffsetZBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setComplexOffsetZPos(value);
-    onComplexColumnParamsChange(getComplexColumnParams({ offsetZPos: value }));
+    setComplexConcreteOffsetZBack(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ concreteOffsetZBack: value }));
   };
 
-  const handleComplexOffsetZNegChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleComplexConcreteOffsetZFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setComplexOffsetZNeg(value);
-    onComplexColumnParamsChange(getComplexColumnParams({ offsetZNeg: value }));
+    setComplexConcreteOffsetZFront(value);
+    onComplexColumnParamsChange(getComplexColumnParams({ concreteOffsetZFront: value }));
   };
 
   const handleCuboid1SizeXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -434,10 +434,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postCountZ: postCountZ,
       postDiameter: postDiameter,
       postOffset: postOffset,
-      offsetXPos: offsetXPos,
-      offsetXNeg: offsetXNeg,
-      offsetZPos: offsetZPos,
-      offsetZNeg: offsetZNeg,
+      concreteOffsetXRight: concreteOffsetXRight,
+      concreteOffsetXLeft: concreteOffsetXLeft,
+      concreteOffsetZBack: concreteOffsetZBack,
+      concreteOffsetZFront: concreteOffsetZFront,
     });
   };
 
@@ -453,10 +453,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postCountZ: postCountZ,
       postDiameter: postDiameter,
       postOffset: postOffset,
-      offsetXPos: offsetXPos,
-      offsetXNeg: offsetXNeg,
-      offsetZPos: offsetZPos,
-      offsetZNeg: offsetZNeg,
+      concreteOffsetXRight: concreteOffsetXRight,
+      concreteOffsetXLeft: concreteOffsetXLeft,
+      concreteOffsetZBack: concreteOffsetZBack,
+      concreteOffsetZFront: concreteOffsetZFront,
     });
   };
 
@@ -472,10 +472,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postCountZ: postCountZ,
       postDiameter: postDiameter,
       postOffset: postOffset,
-      offsetXPos: offsetXPos,
-      offsetXNeg: offsetXNeg,
-      offsetZPos: offsetZPos,
-      offsetZNeg: offsetZNeg,
+      concreteOffsetXRight: concreteOffsetXRight,
+      concreteOffsetXLeft: concreteOffsetXLeft,
+      concreteOffsetZBack: concreteOffsetZBack,
+      concreteOffsetZFront: concreteOffsetZFront,
     });
   };
 
@@ -491,10 +491,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postCountZ: postCountZ,
       postDiameter: postDiameter,
       postOffset: postOffset,
-      offsetXPos: offsetXPos,
-      offsetXNeg: offsetXNeg,
-      offsetZPos: offsetZPos,
-      offsetZNeg: offsetZNeg,
+      concreteOffsetXRight: concreteOffsetXRight,
+      concreteOffsetXLeft: concreteOffsetXLeft,
+      concreteOffsetZBack: concreteOffsetZBack,
+      concreteOffsetZFront: concreteOffsetZFront,
     });
   };
 
@@ -510,10 +510,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postCountZ: value,
       postDiameter: postDiameter,
       postOffset: postOffset,
-      offsetXPos: offsetXPos,
-      offsetXNeg: offsetXNeg,
-      offsetZPos: offsetZPos,
-      offsetZNeg: offsetZNeg,
+      concreteOffsetXRight: concreteOffsetXRight,
+      concreteOffsetXLeft: concreteOffsetXLeft,
+      concreteOffsetZBack: concreteOffsetZBack,
+      concreteOffsetZFront: concreteOffsetZFront,
     });
   };
 
@@ -529,10 +529,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postCountZ: postCountZ,
       postDiameter: value,
       postOffset: postOffset,
-      offsetXPos: offsetXPos,
-      offsetXNeg: offsetXNeg,
-      offsetZPos: offsetZPos,
-      offsetZNeg: offsetZNeg,
+      concreteOffsetXRight: concreteOffsetXRight,
+      concreteOffsetXLeft: concreteOffsetXLeft,
+      concreteOffsetZBack: concreteOffsetZBack,
+      concreteOffsetZFront: concreteOffsetZFront,
     });
   };
 
@@ -548,16 +548,16 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postCountZ: postCountZ,
       postDiameter: postDiameter,
       postOffset: value,
-      offsetXPos: offsetXPos,
-      offsetXNeg: offsetXNeg,
-      offsetZPos: offsetZPos,
-      offsetZNeg: offsetZNeg,
+      concreteOffsetXRight: concreteOffsetXRight,
+      concreteOffsetXLeft: concreteOffsetXLeft,
+      concreteOffsetZBack: concreteOffsetZBack,
+      concreteOffsetZFront: concreteOffsetZFront,
     });
   };
 
-  const handleOffsetXPosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleConcreteOffsetXRightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setOffsetXPos(value);
+    setConcreteOffsetXRight(value);
     onRectangleColumnParamsChange({
       isFiniteConcrete: rectangleIsFiniteConcrete,
       concreteThickness: concreteThickness,
@@ -567,16 +567,16 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postCountZ: postCountZ,
       postDiameter: postDiameter,
       postOffset: postOffset,
-      offsetXPos: value,
-      offsetXNeg: offsetXNeg,
-      offsetZPos: offsetZPos,
-      offsetZNeg: offsetZNeg,
+      concreteOffsetXRight: value,
+      concreteOffsetXLeft: concreteOffsetXLeft,
+      concreteOffsetZBack: concreteOffsetZBack,
+      concreteOffsetZFront: concreteOffsetZFront,
     });
   };
 
-  const handleOffsetXNegChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleConcreteOffsetXLeftChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setOffsetXNeg(value);
+    setConcreteOffsetXLeft(value);
     onRectangleColumnParamsChange({
       isFiniteConcrete: rectangleIsFiniteConcrete,
       concreteThickness: concreteThickness,
@@ -586,16 +586,16 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postCountZ: postCountZ,
       postDiameter: postDiameter,
       postOffset: postOffset,
-      offsetXPos: offsetXPos,
-      offsetXNeg: value,
-      offsetZPos: offsetZPos,
-      offsetZNeg: offsetZNeg,
+      concreteOffsetXRight: concreteOffsetXRight,
+      concreteOffsetXLeft: value,
+      concreteOffsetZBack: concreteOffsetZBack,
+      concreteOffsetZFront: concreteOffsetZFront,
     });
   };
 
-  const handleOffsetZPosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleConcreteOffsetZBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setOffsetZPos(value);
+    setConcreteOffsetZBack(value);
     onRectangleColumnParamsChange({
       isFiniteConcrete: rectangleIsFiniteConcrete,
       concreteThickness: concreteThickness,
@@ -605,16 +605,16 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postCountZ: postCountZ,
       postDiameter: postDiameter,
       postOffset: postOffset,
-      offsetXPos: offsetXPos,
-      offsetXNeg: offsetXNeg,
-      offsetZPos: value,
-      offsetZNeg: offsetZNeg,
+      concreteOffsetXRight: concreteOffsetXRight,
+      concreteOffsetXLeft: concreteOffsetXLeft,
+      concreteOffsetZBack: value,
+      concreteOffsetZFront: concreteOffsetZFront,
     });
   };
 
-  const handleOffsetZNegChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleConcreteOffsetZFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setOffsetZNeg(value);
+    setConcreteOffsetZFront(value);
     onRectangleColumnParamsChange({
       isFiniteConcrete: rectangleIsFiniteConcrete,
       concreteThickness: concreteThickness,
@@ -624,10 +624,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       postCountZ: postCountZ,
       postDiameter: postDiameter,
       postOffset: postOffset,
-      offsetXPos: offsetXPos,
-      offsetXNeg: offsetXNeg,
-      offsetZPos: offsetZPos,
-      offsetZNeg: value,
+      concreteOffsetXRight: concreteOffsetXRight,
+      concreteOffsetXLeft: concreteOffsetXLeft,
+      concreteOffsetZBack: concreteOffsetZBack,
+      concreteOffsetZFront: value,
     });
   };
 
@@ -740,11 +740,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset X+ (Right)</label>
             <input
               type="number"
-              value={towerOffsetXPos}
-              onChange={handleTowerOffsetXPosChange}
+              value={towerConcreteOffsetXRight}
+              onChange={handleTowerConcreteOffsetXRightChange}
               step="0.1"
               min="0.1"
-              placeholder="Enter offset"
+              placeholder="Enter Concrete Offset X+"
             />
           </div>
 
@@ -752,11 +752,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset X- (Left)</label>
             <input
               type="number"
-              value={towerOffsetXNeg}
-              onChange={handleTowerOffsetXNegChange}
+              value={towerConcreteOffsetXLeft}
+              onChange={handleTowerConcreteOffsetXLeftChange}
               step="0.1"
               min="0.1"
-              placeholder="Enter offset"
+              placeholder="Enter Concrete Offset X-"
             />
           </div>
 
@@ -764,11 +764,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset Z+ (Back)</label>
             <input
               type="number"
-              value={towerOffsetZPos}
-              onChange={handleTowerOffsetZPosChange}
+              value={towerConcreteOffsetZBack}
+              onChange={handleTowerConcreteOffsetZBackChange}
               step="0.1"
               min="0.1"
-              placeholder="Enter offset"
+              placeholder="Enter Concrete Offset Z+"
             />
           </div>
 
@@ -776,11 +776,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset Z- (Front)</label>
             <input
               type="number"
-              value={towerOffsetZNeg}
-              onChange={handleTowerOffsetZNegChange}
+              value={towerConcreteOffsetZFront}
+              onChange={handleTowerConcreteOffsetZFrontChange}
               step="0.1"
               min="0.1"
-              placeholder="Enter offset"
+              placeholder="Enter Concrete Offset Z-"
             />
           </div>
         </>
@@ -819,11 +819,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset X+ (Right)</label>
             <input
               type="number"
-              value={complexOffsetXPos}
-              onChange={handleComplexOffsetXPosChange}
+              value={complexConcreteOffsetXRight}
+              onChange={handleComplexConcreteOffsetXRightChange}
               step="0.1"
               min="0.1"
-              placeholder="Enter offset"
+              placeholder="Enter Concrete Offset X+"
             />
           </div>
 
@@ -831,11 +831,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset X- (Left)</label>
             <input
               type="number"
-              value={complexOffsetXNeg}
-              onChange={handleComplexOffsetXNegChange}
+              value={complexConcreteOffsetXLeft}
+              onChange={handleComplexConcreteOffsetXLeftChange}
               step="0.1"
               min="0.1"
-              placeholder="Enter offset"
+              placeholder="Enter Concrete Offset X-"
             />
           </div>
 
@@ -843,11 +843,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset Z+ (Back)</label>
             <input
               type="number"
-              value={complexOffsetZPos}
-              onChange={handleComplexOffsetZPosChange}
+              value={complexConcreteOffsetZBack}
+              onChange={handleComplexConcreteOffsetZBackChange}
               step="0.1"
               min="0.1"
-              placeholder="Enter offset"
+              placeholder="Enter Concrete Offset Z+"
             />
           </div>
 
@@ -855,11 +855,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset Z- (Front)</label>
             <input
               type="number"
-              value={complexOffsetZNeg}
-              onChange={handleComplexOffsetZNegChange}
+              value={complexConcreteOffsetZFront}
+              onChange={handleComplexConcreteOffsetZFrontChange}
               step="0.1"
               min="0.1"
-              placeholder="Enter offset"
+              placeholder="Enter Concrete Offset Z-"
             />
           </div>
 
@@ -1027,10 +1027,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     postCountZ: postCountZ,
                     postDiameter: postDiameter,
                     postOffset: postOffset,
-                    offsetXPos: offsetXPos,
-                    offsetXNeg: offsetXNeg,
-                    offsetZPos: offsetZPos,
-                    offsetZNeg: offsetZNeg,
+                    concreteOffsetXRight: concreteOffsetXRight,
+                    concreteOffsetXLeft: concreteOffsetXLeft,
+                    concreteOffsetZBack: concreteOffsetZBack,
+                    concreteOffsetZFront: concreteOffsetZFront,
                   });
                 }}
               />
@@ -1127,11 +1127,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset X+ (Right)</label>
             <input
               type="number"
-              value={offsetXPos}
-              onChange={handleOffsetXPosChange}
+              value={concreteOffsetXRight}
+              onChange={handleConcreteOffsetXRightChange}
               step="0.1"
               min="0.1"
-              placeholder="Enter offset X+"
+              placeholder="Enter Concrete Offset X+"
             />
           </div>
 
@@ -1139,11 +1139,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset X- (Left)</label>
             <input
               type="number"
-              value={offsetXNeg}
-              onChange={handleOffsetXNegChange}
+              value={concreteOffsetXLeft}
+              onChange={handleConcreteOffsetXLeftChange}
               step="0.1"
               min="0.1"
-              placeholder="Enter offset X-"
+              placeholder="Enter Concrete Offset X-"
             />
           </div>
 
@@ -1151,11 +1151,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset Z+ (Back)</label>
             <input
               type="number"
-              value={offsetZPos}
-              onChange={handleOffsetZPosChange}
+              value={concreteOffsetZBack}
+              onChange={handleConcreteOffsetZBackChange}
               step="0.1"
               min="0.1"
-              placeholder="Enter offset Z+"
+              placeholder="Enter Concrete Offset Z+"
             />
           </div>
 
@@ -1163,11 +1163,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset Z- (Front)</label>
             <input
               type="number"
-              value={offsetZNeg}
-              onChange={handleOffsetZNegChange}
+              value={concreteOffsetZFront}
+              onChange={handleConcreteOffsetZFrontChange}
               step="0.1"
               min="0.1"
-              placeholder="Enter offset Z-"
+              placeholder="Enter Concrete Offset Z-"
             />
           </div>
         </>
