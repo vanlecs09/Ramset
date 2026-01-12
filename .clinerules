@@ -1,0 +1,296 @@
+# Cline Memory Bank - RampSet Project
+
+## Project Overview
+**Project Name:** RampSet (Ramset)  
+**Repository:** https://github.com/vanlecs09/Ramset  
+**Tech Stack:** React + TypeScript, Babylon.js 7.12.0, Vite 7.3.0  
+**Purpose:** 3D visualization tool for creating and managing circular columns, rectangle columns, and complex columns with configurable concrete and post systems
+
+## Architecture
+
+### Core Structure
+```
+src/
+├── components/
+│   ├── ControlPanel.tsx        # UI controls for all 3D model parameters
+│   ├── ConstructionViewer.tsx  # Babylon.js scene setup and orchestration
+│   └── App.tsx                 # Central state management
+├── utils/
+│   ├── ConcreteBuilder.ts      # Concrete mesh creation (offset-based)
+│   ├── CircularColumnsBuilder.ts
+│   ├── RectangleColumnBuilder.ts
+│   └── ComplexColumnsBuilder.ts
+└── styles/
+    └── ControlPanel.css
+```
+
+### Key Technologies
+- **Babylon.js 7.12.0**: 3D rendering engine for mesh creation and scene management
+- **React + TypeScript**: UI framework with strict type checking
+- **Vite 7.3.0**: Build tool (production bundle: ~5.3MB)
+- **Git**: Version control on GitHub (main branch)
+
+## Core Features & Implementations
+
+### 1. Offset-Based Geometry System
+**Purpose:** Enable asymmetric concrete dimensions from a center point
+
+**Parameters:**
+- `offsetXPos`: Distance from center to right edge (+X direction)
+- `offsetXNeg`: Distance from center to left edge (-X direction)
+- `offsetZPos`: Distance from center to back edge (+Z direction)
+- `offsetZNeg`: Distance from center to front edge (-Z direction)
+
+**Calculations:**
+```typescript
+// Dimension from sum of offsets
+const columnWidth = offsetXPos + offsetXNeg;
+const columnDepth = offsetZPos + offsetZNeg;
+
+// Position from difference (asymmetric center)
+const centerXPos = (offsetXPos - offsetXNeg) / 2;
+const centerZPos = (offsetZPos - offsetZNeg) / 2;
+```
+
+**Applied To:** CircularColumns, RectangleColumns, ComplexColumns
+
+### 2. ConcreteBuilder Module
+**Function:** `createConcrete()` and `updateConcrete()`
+
+**Signature:**
+```typescript
+export const createConcrete = (
+  scene: BABYLON.Scene,
+  concreteThickness: number = 1,
+  offsetXPos: number = 1.5,
+  offsetXNeg: number = 1.5,
+  offsetZPos: number = 1,
+  offsetZNeg: number = 1,
+  parent?: BABYLON.TransformNode,
+  isFiniteConcrete: boolean = true
+): ConcreteGroup
+```
+
+**Features:**
+- Creates concrete mesh with offset-based dimensions
+- Calculates center position from asymmetric offsets
+- Creates sin block patterns for infinite (wavy) concrete blocks on 4 faces
+- Helper function `createSinBlocks()` eliminates code duplication
+- Returns `ConcreteGroup` with mesh, material, and infiniteBlocks array
+
+**Sin Block Positioning:** All 4 faces (back, front, left, right) positioned relative to calculated center
+
+### 3. Model-Specific Implementations
+
+#### CircularColumns (Circular Tower)
+- **Components:** Concrete base + cylinder + posts around circumference
+- **Parameters:** concreteThickness, cylinderHeight, cylinderRadius, postRadius, postCount, circumferenceToPostOffset, and 4 offsets
+- **ControlPanel:** Full suite of input controls with real-time updates
+
+#### RectangleColumns (Rectangular Structure)
+- **Components:** Concrete slab + corner/edge posts
+- **Parameters:** concreteThickness, columnWidth, columnDepth, postCountX, postCountZ, postDiameter, postOffset, and 4 offsets
+- **ControlPanel:** Complete parameter controls
+
+#### ComplexColumns (Recently Updated)
+- **Components:** Concrete base (using ConcreteBuilder) + 2 crossing cuboids + posts
+- **Parameters:** concreteThickness, 4 offsets, 2 cuboid dimensions, postRadius, postOffset
+- **ControlPanel:** Finite concrete checkbox, concrete controls (thickness + 4 offsets), cuboid sizes, post parameters
+- **Recent Changes:** Now uses ConcreteBuilder instead of basic box; added 5 new handler functions for concrete params; added 5 new UI controls
+
+### 4. State Management Flow
+**Layers (5-Layer Threading):**
+
+1. **UI State** (ControlPanel): Individual useState hooks for each parameter
+2. **App State** (App.tsx): CircularColumnParams, RectangleColumnParams, ComplexColumnParams interfaces
+3. **Orchestration** (ConstructionViewer): Receives full params object, manages scene
+4. **Builders** (CircularColumnsBuilder, RectangleColumnBuilder, ComplexColumnsBuilder): Accepts params, creates/updates meshes
+5. **Utilities** (ConcreteBuilder, PostBuilder): Low-level mesh creation
+
+**Update Flow:** UI change → setState → onParamsChange callback → App state update → ConstructionViewer re-render → Builder function called
+
+### 5. Type Definitions
+
+**CircularColumnParams:**
+```typescript
+{
+  isFiniteConcrete: boolean;
+  concreteThickness: number;
+  cylinderHeight: number;
+  cylinderRadius: number;
+  postRadius: number;
+  postCount: number;
+  circumferenceToPostOffset: number;
+  offsetXPos: number;
+  offsetXNeg: number;
+  offsetZPos: number;
+  offsetZNeg: number;
+}
+```
+
+**RectangleColumnParams:**
+```typescript
+{
+  isFiniteConcrete: boolean;
+  concreteThickness: number;
+  columnWidth: number;
+  columnDepth: number;
+  postCountX: number;
+  postCountZ: number;
+  postDiameter: number;
+  postOffset: number;
+  offsetXPos: number;
+  offsetXNeg: number;
+  offsetZPos: number;
+  offsetZNeg: number;
+}
+```
+
+**ComplexColumnParams:** (NEW)
+```typescript
+{
+  isFiniteConcrete: boolean;
+  concreteThickness: number;
+  offsetXPos: number;
+  offsetXNeg: number;
+  offsetZPos: number;
+  offsetZNeg: number;
+  cuboid1SizeX: number;
+  cuboid1SizeZ: number;
+  cuboid2SizeX: number;
+  cuboid2SizeZ: number;
+  postRadius: number;
+  postOffset: number;
+}
+```
+
+## Recent Development History
+
+### Phase 7 (Latest - ComplexColumn Integration)
+**Date:** January 8, 2026
+
+**Completed:**
+- ✅ Updated ComplexColumnsBuilder to use ConcreteBuilder
+- ✅ Added concrete thickness and 4 offset parameters
+- ✅ Modified ComplexColumnGroup interface (concrete instead of box)
+- ✅ Updated createComplexColumn/updateComplexColumn signatures
+- ✅ Updated ConstructionViewer ComplexColumnParams interface
+- ✅ Updated default complexColumnParams state
+- ✅ Enhanced ControlPanel with 5 new state variables
+- ✅ Added 5 new handler functions (concrete + offsets)
+- ✅ Added 5 new UI input controls
+- ✅ Updated all 6 existing handlers to include concrete params
+- ✅ Updated App.tsx interface and state
+- ✅ Build: Zero TypeScript errors, production bundle 5,287.11 kB
+
+### Previous Phases (1-6)
+- Offset parameter implementation for RectangleColumn
+- Concrete positioning math refinement
+- Code refactoring (extract sin block creation)
+- Feature extension to CircularColumns
+- Error investigation and TypeScript fixes
+- GitHub initialization and push (commit 7e0676c)
+
+## Important Code Patterns
+
+### Handler Function Pattern (ControlPanel)
+```typescript
+const handleParamChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = parseFloat(e.target.value) || 0;
+  setStateVar(value);
+  onParamsChange({
+    // ALL parameters (not just changed one)
+    existingParam1: stateVar1,
+    changedParam: value,
+    existingParam2: stateVar2,
+    // ... all other params
+  });
+};
+```
+
+**Key:** All parameters must be included in callback, not just the changed one
+
+### Concrete Builder Pattern
+```typescript
+// Create with offsets
+const concreteGroup = createConcrete(
+  scene,
+  thickness,
+  offsetXPos, offsetXNeg, offsetZPos, offsetZNeg,
+  parent,
+  isFinite
+);
+
+// Update with same signature
+updateConcrete(
+  concreteGroup,
+  scene,
+  thickness,
+  offsetXPos, offsetXNeg, offsetZPos, offsetZNeg,
+  parent,
+  isFinite
+);
+```
+
+### Disposal Pattern
+```typescript
+dispose() {
+  this.mesh?.dispose();
+  this.material?.dispose();
+  this.infiniteBlocks?.forEach(block => block.dispose());
+  // Don't dispose parent group
+}
+```
+
+## Known Issues & Constraints
+
+1. **Bundle Size:** ~5.3MB (warning about chunks > 500kB)
+   - Could optimize with dynamic imports
+   - Consider code-splitting for Babylon.js modules
+
+2. **CSS Warnings:** Minor esbuild CSS syntax warnings (non-critical)
+
+3. **Post Creation:** Currently duplicated in builders; could extract to shared utility
+
+## Git & Deployment
+
+**Repository:** https://github.com/vanlecs09/Ramset  
+**Current Branch:** main  
+**Latest Commit:** Integrate concrete and post models into ComplexColumn (Jan 8, 2026)
+
+**Build Command:** `npm run build` (runs `tsc -b && vite build`)  
+**Dev Command:** `npm run dev` (starts Vite dev server on localhost:5173)
+
+## Continuation Guidelines
+
+### When Adding New Features
+1. Update relevant builder (CircularColumnsBuilder, RectangleColumnBuilder, etc.)
+2. Update corresponding interface in App.tsx
+3. Add state variables to ControlPanel
+4. Create handler functions (must include ALL params)
+5. Add UI controls in ControlPanel
+6. Update ConstructionViewer if needed
+7. Run full build test: `npm run build`
+8. Commit with descriptive message
+
+### Common Patterns to Maintain
+- All offset parameters named: offsetXPos, offsetXNeg, offsetZPos, offsetZNeg
+- Default offset value: 1.5
+- Concrete thickness default: 1-3 (varies by model)
+- All handler callbacks must include ALL parameters
+- Use multi_replace_string_in_file for multiple edits
+- ConcreteBuilder always called for concrete creation (never hardcode boxes)
+
+### Testing Checklist
+- [ ] TypeScript compilation passes (zero errors)
+- [ ] Production build successful
+- [ ] ControlPanel shows all new input controls
+- [ ] Real-time updates work on all parameters
+- [ ] Models render correctly in 3D view
+- [ ] Git status clean before commit
+
+## Contact & Repository
+**Owner:** vanlecs09  
+**Repository:** https://github.com/vanlecs09/Ramset  
+**Latest Updates:** January 8, 2026
+

@@ -37,31 +37,21 @@ const initializeSinBlockMaterial = (scene: BABYLON.Scene) => {
 export const createConcrete = (
     scene: BABYLON.Scene,
     concreteThickness: number = 1,
-    concreteOffsetXRight: number = 1.5,  // distance from center to right edge (+X)
-    concreteOffsetXLeft: number = 1.5,  // distance from center to left edge (-X)
-    concreteOffsetZBack: number = 1,    // distance from center to back edge (+Z)
-    concreteOffsetZFront: number = 1,    // distance from center to front edge (-Z)
+    concreteWidth: number = 3,
+    concreteDepth: number = 3,
+    concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
+    finiteBlockPositions: BABYLON.Vector3[] = [],
     parent?: BABYLON.TransformNode,
     isFiniteConcrete: boolean = true
 ): ConcreteGroup => {
-    // Calculate width and depth from offsets
-    const columnWidth = concreteOffsetXRight + concreteOffsetXLeft;
-    const columnDepth = concreteOffsetZBack + concreteOffsetZFront;
-
-    // Calculate center position based on asymmetric offsets
-    const centerXPos = (concreteOffsetXRight - concreteOffsetXLeft) / 2;
-    const centerZPos = (concreteOffsetZBack - concreteOffsetZFront) / 2;
-
     const material = initializeConcreteMaterial(scene);
 
     const concrete = BABYLON.MeshBuilder.CreateBox(
         'concrete',
-        { width: columnWidth, height: concreteThickness, depth: columnDepth },
+        { width: concreteWidth, height: concreteThickness, depth: concreteDepth },
         scene
     );
-    concrete.position.x = centerXPos;
-    concrete.position.y = concreteThickness / 2;
-    concrete.position.z = centerZPos;
+    concrete.position = concretePosition;
     concrete.material = material;
     concrete.receiveShadows = true;
 
@@ -73,14 +63,9 @@ export const createConcrete = (
     const sinBlocks = !isFiniteConcrete
         ? createInfiniteBlocks(
             scene,
-            centerXPos,
-            centerZPos,
-            concreteOffsetXRight,
-            concreteOffsetXLeft,
-            concreteOffsetZBack,
-            concreteOffsetZFront,
-            columnWidth,
-            columnDepth,
+            finiteBlockPositions,
+            concreteWidth,
+            concreteDepth,
             concreteThickness,
             parent
         )
@@ -97,21 +82,14 @@ export const updateConcrete = (
     concreteGroup: ConcreteGroup,
     scene: BABYLON.Scene,
     concreteThickness: number = 1,
-    concreteOffsetXRight: number = 1.5,  // distance from center to right edge (+X)
-    concreteOffsetXLeft: number = 1.5,  // distance from center to left edge (-X)
-    concreteOffsetZBack: number = 1,    // distance from center to back edge (+Z)
-    concreteOffsetZFront: number = 1,    // distance from center to front edge (-Z)
+    concreteWidth: number = 3,
+    concreteDepth: number = 3,
+    concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
+    finiteBlockPositions: BABYLON.Vector3[] = [],
     parent?: BABYLON.TransformNode,
     isFiniteConcrete: boolean = true
 ) => {
-    // Calculate width and depth from offsets
-    const columnWidth = concreteOffsetXRight + concreteOffsetXLeft;
-    const columnDepth = concreteOffsetZBack + concreteOffsetZFront;
-
-    // Calculate center position based on asymmetric offsets
-    const centerXPos = (concreteOffsetXRight - concreteOffsetXLeft) / 2;
-    const centerZPos = (concreteOffsetZBack - concreteOffsetZFront) / 2;
-
+    // Dispose old concrete mesh
     if (concreteGroup.mesh) {
         concreteGroup.mesh.dispose();
     }
@@ -128,12 +106,10 @@ export const updateConcrete = (
 
     const concrete = BABYLON.MeshBuilder.CreateBox(
         'concrete',
-        { width: columnWidth, height: concreteThickness, depth: columnDepth },
+        { width: concreteWidth, height: concreteThickness, depth: concreteDepth },
         scene
     );
-    concrete.position.x = centerXPos;
-    concrete.position.y = concreteThickness / 2;
-    concrete.position.z = centerZPos;
+    concrete.position = concretePosition;
     concrete.material = material;
     concrete.receiveShadows = true;
 
@@ -144,14 +120,9 @@ export const updateConcrete = (
     const sinBlocks = !isFiniteConcrete
         ? createInfiniteBlocks(
             scene,
-            centerXPos,
-            centerZPos,
-            concreteOffsetXRight,
-            concreteOffsetXLeft,
-            concreteOffsetZBack,
-            concreteOffsetZFront,
-            columnWidth,
-            columnDepth,
+            finiteBlockPositions,
+            concreteWidth,
+            concreteDepth,
             concreteThickness,
             parent
         )
@@ -164,14 +135,9 @@ export const updateConcrete = (
 
 const createInfiniteBlocks = (
     scene: BABYLON.Scene,
-    centerXPos: number,
-    centerZPos: number,
-    concreteOffsetXRight: number,
-    concreteOffsetXLeft: number,
-    concreteOffsetZBack: number,
-    concreteOffsetZFront: number,
-    columnWidth: number,
-    columnDepth: number,
+    finiteBlockPositions: BABYLON.Vector3[] = [],
+    concreteWidth: number,
+    concreteDepth: number,
     concreteThickness: number,
     parent?: BABYLON.TransformNode
 ): BABYLON.Mesh[] => {
@@ -182,8 +148,8 @@ const createInfiniteBlocks = (
         createWaveBlock(
             scene,
             'sinBlock_back',
-            new BABYLON.Vector3(centerXPos, 0, concreteOffsetZBack + blockThickness / 2),
-            columnWidth,
+            finiteBlockPositions[0],
+            concreteWidth,
             concreteThickness,
             blockThickness,
             'z',
@@ -192,8 +158,8 @@ const createInfiniteBlocks = (
         createWaveBlock(
             scene,
             'sinBlock_front',
-            new BABYLON.Vector3(centerXPos, 0, -concreteOffsetZFront - blockThickness / 2),
-            columnWidth,
+            finiteBlockPositions[1],
+            concreteWidth,
             concreteThickness,
             blockThickness,
             '-z',
@@ -202,8 +168,8 @@ const createInfiniteBlocks = (
         createWaveBlock(
             scene,
             'sinBlock_left',
-            new BABYLON.Vector3(-concreteOffsetXLeft - blockThickness / 2, 0, centerZPos),
-            columnDepth,
+            finiteBlockPositions[2],
+            concreteDepth,
             concreteThickness,
             blockThickness,
             '-x',
@@ -212,8 +178,8 @@ const createInfiniteBlocks = (
         createWaveBlock(
             scene,
             'sinBlock_right',
-            new BABYLON.Vector3(concreteOffsetXRight + blockThickness / 2, 0, centerZPos),
-            columnDepth,
+            finiteBlockPositions[3],
+            concreteDepth,
             concreteThickness,
             blockThickness,
             'x',

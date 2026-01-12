@@ -18,16 +18,16 @@ export interface CircularColumnsGroup extends BaseStructureGroup {
 
 export const createCircularColumns = (
   scene: BABYLON.Scene,
-  postPositions: PostPosition[],
   concreteThickness: number = 1.5,
+  concreteWidth: number = 3,
+  concreteDepth: number = 3,
+  concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
+  infiniteBlockPositions: BABYLON.Vector3[] = [],
+  isFiniteConcrete: boolean = true,
   columnHeight: number = 1,
   columnRadius: number = 1.5,
   postRadius: number = 0.05,
-  concreteOffsetXRight: number = 1.5,
-  concreteOffsetXLeft: number = 1.5,
-  concreteOffsetZBack: number = 1.5,
-  concreteOffsetZFront: number = 1.5,
-  isFiniteConcrete: boolean = true
+  postPositions: PostPosition[],
 ): CircularColumnsGroup => {
   const towerGroup = new BABYLON.TransformNode('CircularColumns', scene);
   const circularColumns: CircularColumnsGroup = {
@@ -44,7 +44,16 @@ export const createCircularColumns = (
   };
 
   // Create bottom concrete using ConcreteBuilder with offset parameters
-  const concreteGroup = createConcrete(scene, concreteThickness, concreteOffsetXRight, concreteOffsetXLeft, concreteOffsetZBack, concreteOffsetZFront, towerGroup, isFiniteConcrete);
+  const concreteGroup = createConcrete(
+    scene,
+    concreteThickness,
+    concreteWidth,
+    concreteDepth,
+    concretePosition,
+    infiniteBlockPositions,
+    towerGroup,
+    isFiniteConcrete);
+
   circularColumns.concrete = concreteGroup.mesh;
   circularColumns.infiniteBlocks = concreteGroup.infiniteBlocks || [];
 
@@ -59,14 +68,14 @@ export const createCircularColumns = (
 
   const cylinderMaterial = new BABYLON.StandardMaterial('cylinderMaterial', scene);
   cylinderMaterial.diffuseColor = new BABYLON.Color3(0.91, 0.30, 0.24); // #E74C3C
-  cylinderMaterial.alpha = 0.6;
+  cylinderMaterial.alpha = 0.1;
   cylinder.material = cylinderMaterial;
 
   cylinder.receiveShadows = true;
   cylinder.parent = towerGroup;
   circularColumns.circularColumn = cylinder;
 
-  // Create connecting posts using pre-calculated positions
+  // // Create connecting posts using pre-calculated positions
   const connectingPostHeight = concreteThickness + gapDistance + 1.5;
 
   postPositions.forEach((postPos) => {
@@ -86,23 +95,31 @@ export const createCircularColumns = (
 
 export const updateCircularColumns = (
   circularColumns: CircularColumnsGroup,
-  postPositions: PostPosition[],
   concreteThickness: number = 1.5,
+  concreteWidth: number = 3,
+  concreteDepth: number = 3,
+  concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
+  infiniteBlockPositions: BABYLON.Vector3[] = [],
+  isFiniteConcrete: boolean = true,
   columnHeight: number = 1,
   columnRadius: number = 1.5,
   postRadius: number = 0.05,
-  concreteOffsetXRight: number = 1.5,
-  concreteOffsetXLeft: number = 1.5,
-  concreteOffsetZBack: number = 1.5,
-  concreteOffsetZFront: number = 1.5,
-  isFiniteConcrete: boolean = true
+  postPositions: PostPosition[],
 ) => {
   const gapDistance = 0.5;
   const scene = circularColumns.group.getScene();
 
   // Update concrete using ConcreteBuilder with offset parameters
   const concreteGroup = { mesh: circularColumns.concrete, infiniteBlocks: circularColumns.infiniteBlocks || [] };
-  updateConcrete(concreteGroup, scene, concreteThickness, concreteOffsetXRight, concreteOffsetXLeft, concreteOffsetZBack, concreteOffsetZFront, circularColumns.group, isFiniteConcrete);
+  updateConcrete(concreteGroup,
+    scene,
+    concreteThickness,
+    concreteWidth,
+    concreteDepth,
+    concretePosition,
+    infiniteBlockPositions,
+    circularColumns.group,
+    isFiniteConcrete);
   circularColumns.concrete = concreteGroup.mesh;
   circularColumns.infiniteBlocks = concreteGroup.infiniteBlocks;
   if (circularColumns.circularColumn) {
@@ -137,7 +154,7 @@ export const updateCircularColumns = (
   const connectingPostHeight = concreteThickness / 2 + gapDistance + columnHeight / 2;
 
   postPositions.forEach((postPos) => {
-    postPos.position.y = concreteThickness/2 + connectingPostHeight / 2 + gapDistance;
+    postPos.position.y = concreteThickness / 2 + connectingPostHeight / 2 + gapDistance;
     const postGroup = createPost(
       scene,
       connectingPostHeight,

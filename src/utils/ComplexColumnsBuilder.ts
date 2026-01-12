@@ -43,10 +43,11 @@ export interface ComplexColumnGroup extends BaseStructureGroup {
 export const createComplexColumn = (
   scene: BABYLON.Scene,
   concreteThickness: number = 1,
-  concreteOffsetXRight: number = 1.5,
-  concreteOffsetXLeft: number = 1.5,
-  concreteOffsetZBack: number = 1.5,
-  concreteOffsetZFront: number = 1.5,
+  concreteWidth: number = 3,
+  concreteDepth: number = 3,
+  concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
+  infiniteBlockPositions: BABYLON.Vector3[] = [],
+  isFiniteConcrete: boolean = true,
   cuboid1SizeX: number = 2,
   cuboid1SizeZ: number = 2,
   cuboid1PostCountLeftEdge: number = 2,
@@ -58,8 +59,7 @@ export const createComplexColumn = (
   cuboid2PostCountLeftEdge: number = 2,
   cuboid2PostCountTopEdge: number = 2,
   postRadius: number = 0.05,
-  postOffset: number = 0.1,
-  isFiniteConcrete: boolean = true
+  postOffset: number = 0.1
 ): ComplexColumnGroup => {
   const columnGroup = new BABYLON.TransformNode('complexColumn', scene);
   const complexColumn: ComplexColumnGroup = {
@@ -80,10 +80,10 @@ export const createComplexColumn = (
   const concreteGroup = createConcrete(
     scene,
     concreteThickness,
-    concreteOffsetXRight,
-    concreteOffsetXLeft,
-    concreteOffsetZBack,
-    concreteOffsetZFront,
+    concreteWidth,
+    concreteDepth,
+    concretePosition,
+    infiniteBlockPositions,
     columnGroup,
     isFiniteConcrete
   );
@@ -158,10 +158,11 @@ export const createComplexColumn = (
 export const updateComplexColumn = (
   complexColumn: ComplexColumnGroup,
   concreteThickness: number = 1,
-  concreteOffsetXRight: number = 1.5,
-  concreteOffsetXLeft: number = 1.5,
-  concreteOffsetZBack: number = 1.5,
-  concreteOffsetZFront: number = 1.5,
+  concreteWidth: number = 3,
+  concreteDepth: number = 3,
+  concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
+  infiniteBlockPositions: BABYLON.Vector3[] = [],
+  isFiniteConcrete: boolean = true,
   cuboid1SizeX: number = 2,
   cuboid1SizeZ: number = 2,
   cuboid1PostCountLeftEdge: number = 2,
@@ -173,8 +174,7 @@ export const updateComplexColumn = (
   cuboid2PostCountLeftEdge: number = 2,
   cuboid2PostCountTopEdge: number = 2,
   postRadius: number = 0.05,
-  postOffset: number = 0.1,
-  isFiniteConcrete: boolean = true
+  postOffset: number = 0.1
 ) => {
   const scene = complexColumn.group.getScene();
 
@@ -184,10 +184,10 @@ export const updateComplexColumn = (
       complexColumn.concrete,
       scene,
       concreteThickness,
-      concreteOffsetXRight,
-      concreteOffsetXLeft,
-      concreteOffsetZBack,
-      concreteOffsetZFront,
+      concreteWidth,
+      concreteDepth,
+      concretePosition,
+      infiniteBlockPositions,
       complexColumn.group,
       isFiniteConcrete
     );

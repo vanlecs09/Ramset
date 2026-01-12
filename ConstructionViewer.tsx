@@ -4,7 +4,7 @@ import { createComplexColumn, updateComplexColumn } from '../utils/ComplexColumn
 import { createCircularColumns, updateCircularColumns } from '../utils/CircularColumnsBuilder';
 import { createRectangleColumn, updateRectangleColumn } from '../utils/RectangleColumnBuilder';
 import { calculateCircularPostPositions } from '../utils/CircularPostPositionCalculator';
-import { calculateRectanglePostPositions } from '../utils/RectanglePostPositionCalculator';
+import { calculateRectanglePostPositions } from '../utils/RectanglePostPositionCalculator'; \nimport { createConcrete, updateConcrete } from '../utils/ConcreteBuilder';
 import type { CircularColumnsGroup } from '../utils/CircularColumnsBuilder';
 import type { ComplexColumnGroup } from '../utils/ComplexColumnsBuilder';
 import type { RectangleColumnGroup } from '../utils/RectangleColumnBuilder';
@@ -56,7 +56,7 @@ interface ConstructionViewerProps {
 export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   onSceneReady,
   model = 'circularColumns',
-  towerParams: circleColumns = {
+  towerParams = {
     isFiniteConcrete: false,
     concreteThickness: 3,
     cylinderHeight: 1,
@@ -98,10 +98,6 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     postCountZ: 2,
     postDiameter: 0.2,
     postOffset: 0.1,
-    concreteOffsetXRight: 1.5,
-    concreteOffsetXLeft: 1.5,
-    concreteOffsetZBack: 1.5,
-    concreteOffsetZFront: 1.5,
   },
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -254,85 +250,56 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       const gapDistance = 0.5;
       const baseY = 1.5 + gapDistance / 2;
       const postPositions = calculateCircularPostPositions(
-        circleColumns.cylinderRadius,
-        circleColumns.circumferenceToPostOffset,
-        circleColumns.postCount,
+        towerParams.cylinderRadius,
+        towerParams.circumferenceToPostOffset,
+        towerParams.postCount,
         baseY
       );
 
-
-      const concreteWidth = circleColumns.concreteOffsetXRight + circleColumns.concreteOffsetXLeft;
-      const concreteDepth = circleColumns.concreteOffsetZBack + circleColumns.concreteOffsetZFront;
-      const centerXPos = (circleColumns.concreteOffsetXRight - circleColumns.concreteOffsetXLeft) / 2;
-      const centerZPos = (circleColumns.concreteOffsetZBack - circleColumns.concreteOffsetZFront) / 2;
-      let concretePosition = new BABYLON.Vector3(centerXPos, circleColumns.concreteThickness / 2, centerZPos);
-
-      const blockThickness = 0.5;
-      let frontWavePos = new BABYLON.Vector3(centerXPos, 0, circleColumns.concreteOffsetZBack + blockThickness / 2);
-      let backWavePos = new BABYLON.Vector3(centerXPos, 0, -circleColumns.concreteOffsetZFront - blockThickness / 2);
-      let leftWavePos = new BABYLON.Vector3(-circleColumns.concreteOffsetXLeft - blockThickness / 2, 0, centerZPos);
-      let rightWavePos = new BABYLON.Vector3(circleColumns.concreteOffsetXRight + blockThickness / 2, 0, centerZPos);
-      let finiteBlockPositions = [frontWavePos, backWavePos, leftWavePos, rightWavePos];
-
-
       if (!circularColumnsRef.current) {
         disposePreviousStructure();
-        circularColumnsRef.current = createCircularColumns(
+        // circularColumnsRef.current = concreteGroup = createConcrete(scene, towerParams.concreteThickness, towerParams.concreteOffsetXRight, towerParams.concreteOffsetXLeft, towerParams.concreteOffsetZBack, towerParams.concreteOffsetZFront, undefined, towerParams.isFiniteConcrete);
+        createCircularColumns(
           scene,
-          circleColumns.concreteThickness,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          finiteBlockPositions,
-          circleColumns.isFiniteConcrete,
-          circleColumns.cylinderHeight,
-          circleColumns.cylinderRadius,
-          circleColumns.postRadius,
           postPositions,
-
+          towerParams.concreteThickness,
+          towerParams.cylinderHeight,
+          towerParams.cylinderRadius,
+          towerParams.postRadius,
+          towerParams.concreteOffsetXRight,
+          towerParams.concreteOffsetXLeft,
+          towerParams.concreteOffsetZBack,
+          towerParams.concreteOffsetZFront,
+          towerParams.isFiniteConcrete
         );
       } else {
         updateCircularColumns(
           circularColumnsRef.current,
-          circleColumns.concreteThickness,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          finiteBlockPositions,
-          circleColumns.isFiniteConcrete,
-          circleColumns.cylinderHeight,
-          circleColumns.cylinderRadius,
-          circleColumns.postRadius,
           postPositions,
+          towerParams.concreteThickness,
+          towerParams.cylinderHeight,
+          towerParams.cylinderRadius,
+          towerParams.postRadius,
+          towerParams.concreteOffsetXRight,
+          towerParams.concreteOffsetXLeft,
+          towerParams.concreteOffsetZBack,
+          towerParams.concreteOffsetZFront,
+          towerParams.isFiniteConcrete
         );
       }
 
     } else if (model === 'complexColumn') {
 
-      // Calculate concrete dimensions and positions (same as circular column pattern)
-      const concreteWidth = complexColumnParams.concreteOffsetXRight + complexColumnParams.concreteOffsetXLeft;
-      const concreteDepth = complexColumnParams.concreteOffsetZBack + complexColumnParams.concreteOffsetZFront;
-      const centerXPos = (complexColumnParams.concreteOffsetXRight - complexColumnParams.concreteOffsetXLeft) / 2;
-      const centerZPos = (complexColumnParams.concreteOffsetZBack - complexColumnParams.concreteOffsetZFront) / 2;
-      let concretePosition = new BABYLON.Vector3(centerXPos, complexColumnParams.concreteThickness / 2, centerZPos);
-
-      const blockThickness = 0.5;
-      let frontWavePos = new BABYLON.Vector3(centerXPos, 0, complexColumnParams.concreteOffsetZBack + blockThickness / 2);
-      let backWavePos = new BABYLON.Vector3(centerXPos, 0, -complexColumnParams.concreteOffsetZFront - blockThickness / 2);
-      let leftWavePos = new BABYLON.Vector3(-complexColumnParams.concreteOffsetXLeft - blockThickness / 2, 0, centerZPos);
-      let rightWavePos = new BABYLON.Vector3(complexColumnParams.concreteOffsetXRight + blockThickness / 2, 0, centerZPos);
-      let finiteBlockPositions = [frontWavePos, backWavePos, leftWavePos, rightWavePos];
 
       if (!complexColumnRef.current) {
         disposePreviousStructure();
         complexColumnRef.current = createComplexColumn(
           scene,
           complexColumnParams.concreteThickness,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          finiteBlockPositions,
-          complexColumnParams.isFiniteConcrete,
+          complexColumnParams.concreteOffsetXRight,
+          complexColumnParams.concreteOffsetXLeft,
+          complexColumnParams.concreteOffsetZBack,
+          complexColumnParams.concreteOffsetZFront,
           complexColumnParams.cuboid1SizeX,
           complexColumnParams.cuboid1SizeZ,
           complexColumnParams.cuboid1PostCountLeftEdge,
@@ -344,17 +311,17 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           complexColumnParams.cuboid2PostCountLeftEdge,
           complexColumnParams.cuboid2PostCountTopEdge,
           complexColumnParams.postRadius,
-          complexColumnParams.postOffset
+          complexColumnParams.postOffset,
+          complexColumnParams.isFiniteConcrete
         );
       } else {
         updateComplexColumn(
           complexColumnRef.current,
           complexColumnParams.concreteThickness,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          finiteBlockPositions,
-          complexColumnParams.isFiniteConcrete,
+          complexColumnParams.concreteOffsetXRight,
+          complexColumnParams.concreteOffsetXLeft,
+          complexColumnParams.concreteOffsetZBack,
+          complexColumnParams.concreteOffsetZFront,
           complexColumnParams.cuboid1SizeX,
           complexColumnParams.cuboid1SizeZ,
           complexColumnParams.cuboid1PostCountLeftEdge,
@@ -366,38 +333,25 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           complexColumnParams.cuboid2PostCountLeftEdge,
           complexColumnParams.cuboid2PostCountTopEdge,
           complexColumnParams.postRadius,
-          complexColumnParams.postOffset
+          complexColumnParams.postOffset,
+          complexColumnParams.isFiniteConcrete
         );
       }
     } else if (model === 'rectangleColumn') {
 
-      // Calculate concrete dimensions and positions (same as circular column pattern)
-      const concreteWidth = rectangleColumnParams.concreteOffsetXRight + rectangleColumnParams.concreteOffsetXLeft;
-      const concreteDepth = rectangleColumnParams.concreteOffsetZBack + rectangleColumnParams.concreteOffsetZFront;
-      const centerXPos = (rectangleColumnParams.concreteOffsetXRight - rectangleColumnParams.concreteOffsetXLeft) / 2;
-      const centerZPos = (rectangleColumnParams.concreteOffsetZBack - rectangleColumnParams.concreteOffsetZFront) / 2;
-      let concretePosition = new BABYLON.Vector3(centerXPos, rectangleColumnParams.concreteThickness / 2, centerZPos);
-
-      const blockThickness = 0.5;
-      let frontWavePos = new BABYLON.Vector3(centerXPos, 0, rectangleColumnParams.concreteOffsetZBack + blockThickness / 2);
-      let backWavePos = new BABYLON.Vector3(centerXPos, 0, -rectangleColumnParams.concreteOffsetZFront - blockThickness / 2);
-      let leftWavePos = new BABYLON.Vector3(-rectangleColumnParams.concreteOffsetXLeft - blockThickness / 2, 0, centerZPos);
-      let rightWavePos = new BABYLON.Vector3(rectangleColumnParams.concreteOffsetXRight + blockThickness / 2, 0, centerZPos);
-      let finiteBlockPositions = [frontWavePos, backWavePos, leftWavePos, rightWavePos];
-
-      // Calculate post positions first
-      const columnCenterY = rectangleColumnParams.concreteThickness + 0.75;
-      const postPositions = calculateRectanglePostPositions(
-        rectangleColumnParams.columnWidth,
-        rectangleColumnParams.columnDepth,
-        rectangleColumnParams.postCountX,
-        rectangleColumnParams.postCountZ,
-        rectangleColumnParams.postOffset,
-        columnCenterY
-      );
-
       if (!rectangleColumnRef.current) {
         disposePreviousStructure();
+
+        // Calculate post positions first
+        const columnCenterY = rectangleColumnParams.concreteThickness + 0.75;
+        const postPositions = calculateRectanglePostPositions(
+          rectangleColumnParams.columnWidth,
+          rectangleColumnParams.columnDepth,
+          rectangleColumnParams.postCountX,
+          rectangleColumnParams.postCountZ,
+          rectangleColumnParams.postOffset,
+          columnCenterY
+        );
 
         rectangleColumnRef.current = createRectangleColumn(
           scene,
@@ -406,13 +360,24 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           rectangleColumnParams.columnWidth,
           rectangleColumnParams.columnDepth,
           rectangleColumnParams.postDiameter,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          finiteBlockPositions,
+          rectangleColumnParams.concreteOffsetXRight,
+          rectangleColumnParams.concreteOffsetXLeft,
+          rectangleColumnParams.concreteOffsetZBack,
+          rectangleColumnParams.concreteOffsetZFront,
           rectangleColumnParams.isFiniteConcrete
         );
       } else {
+        // Calculate post positions first
+        const columnCenterY = rectangleColumnParams.concreteThickness + 0.75;
+        const postPositions = calculateRectanglePostPositions(
+          rectangleColumnParams.columnWidth,
+          rectangleColumnParams.columnDepth,
+          rectangleColumnParams.postCountX,
+          rectangleColumnParams.postCountZ,
+          rectangleColumnParams.postOffset,
+          columnCenterY
+        );
+
         updateRectangleColumn(
           rectangleColumnRef.current,
           postPositions,
@@ -420,27 +385,27 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           rectangleColumnParams.columnWidth,
           rectangleColumnParams.columnDepth,
           rectangleColumnParams.postDiameter,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          finiteBlockPositions,
+          rectangleColumnParams.concreteOffsetXRight,
+          rectangleColumnParams.concreteOffsetXLeft,
+          rectangleColumnParams.concreteOffsetZBack,
+          rectangleColumnParams.concreteOffsetZFront,
           rectangleColumnParams.isFiniteConcrete
         );
       }
     }
   }, [
     model,
-    circleColumns.isFiniteConcrete,
-    circleColumns.concreteThickness,
-    circleColumns.cylinderHeight,
-    circleColumns.cylinderRadius,
-    circleColumns.postRadius,
-    circleColumns.postCount,
-    circleColumns.concreteOffsetXRight,
-    circleColumns.concreteOffsetXLeft,
-    circleColumns.concreteOffsetZBack,
-    circleColumns.concreteOffsetZFront,
-    circleColumns.circumferenceToPostOffset,
+    towerParams.isFiniteConcrete,
+    towerParams.concreteThickness,
+    towerParams.cylinderHeight,
+    towerParams.cylinderRadius,
+    towerParams.postRadius,
+    towerParams.postCount,
+    towerParams.circumferenceToPostOffset,
+    towerParams.concreteOffsetXRight,
+    towerParams.concreteOffsetXLeft,
+    towerParams.concreteOffsetZBack,
+    towerParams.concreteOffsetZFront,
 
     complexColumnParams.isFiniteConcrete,
     complexColumnParams.concreteThickness,
