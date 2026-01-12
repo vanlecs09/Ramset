@@ -53,6 +53,51 @@ interface ConstructionViewerProps {
   rectangleColumnParams?: RectangleColumnParams;
 }
 
+interface ConcreteLayout {
+  concreteWidth: number;
+  concreteDepth: number;
+  centerXPos: number;
+  centerZPos: number;
+  concretePosition: BABYLON.Vector3;
+  finiteBlockPositions: BABYLON.Vector3[];
+}
+
+interface ConcreteOffsets {
+  concreteOffsetXRight: number;
+  concreteOffsetXLeft: number;
+  concreteOffsetZBack: number;
+  concreteOffsetZFront: number;
+  concreteThickness: number;
+}
+
+const calculateConcreteLayout = (offsets: ConcreteOffsets): ConcreteLayout => {
+  const concreteWidth = offsets.concreteOffsetXRight + offsets.concreteOffsetXLeft;
+  const concreteDepth = offsets.concreteOffsetZBack + offsets.concreteOffsetZFront;
+  const centerXPos = (offsets.concreteOffsetXRight - offsets.concreteOffsetXLeft) / 2;
+  const centerZPos = (offsets.concreteOffsetZBack - offsets.concreteOffsetZFront) / 2;
+  // Top face of concrete is at Y = 2, so center position is 2 - (thickness/2)
+  const concreteTopY = 1.5;
+  const concreteCenterY = concreteTopY - (offsets.concreteThickness / 2);
+  const concretePosition = new BABYLON.Vector3(centerXPos, concreteCenterY, centerZPos);
+
+  const blockThickness = 0.5;
+  const blockBottomY = concreteTopY - blockThickness;
+  const frontWavePos = new BABYLON.Vector3(centerXPos, blockBottomY, offsets.concreteOffsetZBack + blockThickness / 2);
+  const backWavePos = new BABYLON.Vector3(centerXPos, blockBottomY, -offsets.concreteOffsetZFront - blockThickness / 2);
+  const leftWavePos = new BABYLON.Vector3(-offsets.concreteOffsetXLeft - blockThickness / 2, blockBottomY, centerZPos);
+  const rightWavePos = new BABYLON.Vector3(offsets.concreteOffsetXRight + blockThickness / 2, blockBottomY, centerZPos);
+  const finiteBlockPositions = [frontWavePos, backWavePos, leftWavePos, rightWavePos];
+
+  return {
+    concreteWidth,
+    concreteDepth,
+    centerXPos,
+    centerZPos,
+    concretePosition,
+    finiteBlockPositions,
+  };
+};
+
 export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   onSceneReady,
   model = 'circularColumns',
@@ -260,19 +305,13 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         baseY
       );
 
-
-      const concreteWidth = circleColumns.concreteOffsetXRight + circleColumns.concreteOffsetXLeft;
-      const concreteDepth = circleColumns.concreteOffsetZBack + circleColumns.concreteOffsetZFront;
-      const centerXPos = (circleColumns.concreteOffsetXRight - circleColumns.concreteOffsetXLeft) / 2;
-      const centerZPos = (circleColumns.concreteOffsetZBack - circleColumns.concreteOffsetZFront) / 2;
-      let concretePosition = new BABYLON.Vector3(centerXPos, circleColumns.concreteThickness / 2, centerZPos);
-
-      const blockThickness = 0.5;
-      let frontWavePos = new BABYLON.Vector3(centerXPos, 0, circleColumns.concreteOffsetZBack + blockThickness / 2);
-      let backWavePos = new BABYLON.Vector3(centerXPos, 0, -circleColumns.concreteOffsetZFront - blockThickness / 2);
-      let leftWavePos = new BABYLON.Vector3(-circleColumns.concreteOffsetXLeft - blockThickness / 2, 0, centerZPos);
-      let rightWavePos = new BABYLON.Vector3(circleColumns.concreteOffsetXRight + blockThickness / 2, 0, centerZPos);
-      let finiteBlockPositions = [frontWavePos, backWavePos, leftWavePos, rightWavePos];
+      const { concreteWidth, concreteDepth, concretePosition, finiteBlockPositions } = calculateConcreteLayout({
+        concreteOffsetXRight: circleColumns.concreteOffsetXRight,
+        concreteOffsetXLeft: circleColumns.concreteOffsetXLeft,
+        concreteOffsetZBack: circleColumns.concreteOffsetZBack,
+        concreteOffsetZFront: circleColumns.concreteOffsetZFront,
+        concreteThickness: circleColumns.concreteThickness,
+      });
 
 
       if (!circularColumnsRef.current) {
@@ -309,19 +348,14 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
     } else if (model === 'complexColumn') {
 
-      // Calculate concrete dimensions and positions (same as circular column pattern)
-      const concreteWidth = complexColumnParams.concreteOffsetXRight + complexColumnParams.concreteOffsetXLeft;
-      const concreteDepth = complexColumnParams.concreteOffsetZBack + complexColumnParams.concreteOffsetZFront;
-      const centerXPos = (complexColumnParams.concreteOffsetXRight - complexColumnParams.concreteOffsetXLeft) / 2;
-      const centerZPos = (complexColumnParams.concreteOffsetZBack - complexColumnParams.concreteOffsetZFront) / 2;
-      let concretePosition = new BABYLON.Vector3(centerXPos, complexColumnParams.concreteThickness / 2, centerZPos);
-
-      const blockThickness = 0.5;
-      let frontWavePos = new BABYLON.Vector3(centerXPos, 0, complexColumnParams.concreteOffsetZBack + blockThickness / 2);
-      let backWavePos = new BABYLON.Vector3(centerXPos, 0, -complexColumnParams.concreteOffsetZFront - blockThickness / 2);
-      let leftWavePos = new BABYLON.Vector3(-complexColumnParams.concreteOffsetXLeft - blockThickness / 2, 0, centerZPos);
-      let rightWavePos = new BABYLON.Vector3(complexColumnParams.concreteOffsetXRight + blockThickness / 2, 0, centerZPos);
-      let finiteBlockPositions = [frontWavePos, backWavePos, leftWavePos, rightWavePos];
+      // Calculate concrete dimensions and positions
+      const { concreteWidth, concreteDepth, concretePosition, finiteBlockPositions } = calculateConcreteLayout({
+        concreteOffsetXRight: complexColumnParams.concreteOffsetXRight,
+        concreteOffsetXLeft: complexColumnParams.concreteOffsetXLeft,
+        concreteOffsetZBack: complexColumnParams.concreteOffsetZBack,
+        concreteOffsetZFront: complexColumnParams.concreteOffsetZFront,
+        concreteThickness: complexColumnParams.concreteThickness,
+      });
 
       if (!complexColumnRef.current) {
         disposePreviousStructure();
@@ -371,19 +405,14 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       }
     } else if (model === 'rectangleColumn') {
 
-      // Calculate concrete dimensions and positions (same as circular column pattern)
-      const concreteWidth = rectangleColumnParams.concreteOffsetXRight + rectangleColumnParams.concreteOffsetXLeft;
-      const concreteDepth = rectangleColumnParams.concreteOffsetZBack + rectangleColumnParams.concreteOffsetZFront;
-      const centerXPos = (rectangleColumnParams.concreteOffsetXRight - rectangleColumnParams.concreteOffsetXLeft) / 2;
-      const centerZPos = (rectangleColumnParams.concreteOffsetZBack - rectangleColumnParams.concreteOffsetZFront) / 2;
-      let concretePosition = new BABYLON.Vector3(centerXPos, rectangleColumnParams.concreteThickness / 2, centerZPos);
-
-      const blockThickness = 0.5;
-      let frontWavePos = new BABYLON.Vector3(centerXPos, 0, rectangleColumnParams.concreteOffsetZBack + blockThickness / 2);
-      let backWavePos = new BABYLON.Vector3(centerXPos, 0, -rectangleColumnParams.concreteOffsetZFront - blockThickness / 2);
-      let leftWavePos = new BABYLON.Vector3(-rectangleColumnParams.concreteOffsetXLeft - blockThickness / 2, 0, centerZPos);
-      let rightWavePos = new BABYLON.Vector3(rectangleColumnParams.concreteOffsetXRight + blockThickness / 2, 0, centerZPos);
-      let finiteBlockPositions = [frontWavePos, backWavePos, leftWavePos, rightWavePos];
+      // Calculate concrete dimensions and positions
+      const { concreteWidth, concreteDepth, concretePosition, finiteBlockPositions } = calculateConcreteLayout({
+        concreteOffsetXRight: rectangleColumnParams.concreteOffsetXRight,
+        concreteOffsetXLeft: rectangleColumnParams.concreteOffsetXLeft,
+        concreteOffsetZBack: rectangleColumnParams.concreteOffsetZBack,
+        concreteOffsetZFront: rectangleColumnParams.concreteOffsetZFront,
+        concreteThickness: rectangleColumnParams.concreteThickness,
+      });
 
       // Calculate post positions first
       const columnCenterY = rectangleColumnParams.concreteThickness + 0.75;
