@@ -57,14 +57,17 @@ export const createCircularColumns = (
   circularColumns.concrete = concreteGroup.mesh;
   circularColumns.infiniteBlocks = concreteGroup.infiniteBlocks || [];
 
-  // Create top cylinder
-  const gapDistance = 0.5;
+  // Calculate concrete top position
+  const concreteTopY = 1.5;
+
+  // Create top cylinder on top of concrete
+  const gapDistance = 0;
   const cylinder = BABYLON.MeshBuilder.CreateCylinder(
     'towerCylinder',
     { height: columnHeight, diameter: columnRadius * 2 },
     scene
   );
-  cylinder.position.y = concreteThickness + gapDistance + columnHeight / 2;
+  cylinder.position.y = concreteTopY + gapDistance + columnHeight / 2;
 
   const cylinderMaterial = new BABYLON.StandardMaterial('cylinderMaterial', scene);
   cylinderMaterial.diffuseColor = new BABYLON.Color3(0.91, 0.30, 0.24); // #E74C3C
@@ -76,14 +79,22 @@ export const createCircularColumns = (
   circularColumns.circularColumn = cylinder;
 
   // // Create connecting posts using pre-calculated positions
-  const connectingPostHeight = concreteThickness + gapDistance + 1.5;
+  const postHeight = columnHeight * 2;
 
   postPositions.forEach((postPos) => {
+    // Position post at concrete top surface with adjusted Y
+    const postPositionY = concreteTopY;
+    const adjustedPostPosition = new BABYLON.Vector3(
+      postPos.position.x,
+      postPositionY,
+      postPos.position.z
+    );
+    
     const postGroup = createPost(
       scene,
-      connectingPostHeight,
+      postHeight,
       postRadius * 2,
-      postPos.position,
+      adjustedPostPosition,
       towerGroup,
       `towerPost_${postPos.index}`
     );
@@ -106,7 +117,7 @@ export const updateCircularColumns = (
   postRadius: number = 0.05,
   postPositions: PostPosition[],
 ) => {
-  const gapDistance = 0.5;
+  // const gapDistance = 0.0;
   const scene = circularColumns.group.getScene();
 
   // Update concrete using ConcreteBuilder with offset parameters
@@ -122,15 +133,20 @@ export const updateCircularColumns = (
     isFiniteConcrete);
   circularColumns.concrete = concreteGroup.mesh;
   circularColumns.infiniteBlocks = concreteGroup.infiniteBlocks;
+
+  // Calculate concrete top position
+  const concreteTopY = 1.5;
+
   if (circularColumns.circularColumn) {
     circularColumns.circularColumn.dispose();
 
+    const gapDistance = 0;
     const cylinder = BABYLON.MeshBuilder.CreateCylinder(
       'towerCylinder',
       { height: columnHeight, diameter: columnRadius * 2 },
       scene
     );
-    cylinder.position.y = concreteThickness + gapDistance + columnHeight / 2;
+    cylinder.position.y = concreteTopY + gapDistance + columnHeight / 2;
 
     const cylinderMaterial = new BABYLON.StandardMaterial('cylinderMaterial', scene);
     cylinderMaterial.diffuseColor = new BABYLON.Color3(0.91, 0.30, 0.24); // #E74C3C
@@ -151,18 +167,26 @@ export const updateCircularColumns = (
   }
 
   // Create new posts with pre-calculated positions
-  const connectingPostHeight = concreteThickness / 2 + gapDistance + columnHeight / 2;
+  // const concreteTopY = 1.5;
+  const postHeight = columnHeight * 2;
 
   postPositions.forEach((postPos) => {
-    postPos.position.y = concreteThickness / 2 + connectingPostHeight / 2 + gapDistance;
+    // Position post at concrete top surface with adjusted Y
+    const postPositionY = concreteTopY;
+    const adjustedPostPosition = new BABYLON.Vector3(
+      postPos.position.x,
+      postPositionY,
+      postPos.position.z
+    );
+    
     const postGroup = createPost(
       scene,
-      connectingPostHeight,
+      postHeight,
       postRadius * 2,
-      postPos.position,
+      adjustedPostPosition,
       circularColumns.group,
       `towerPost_${postPos.index}`
     );
     circularColumns.posts!.push(postGroup.mesh!);
-  });;
+  });
 };

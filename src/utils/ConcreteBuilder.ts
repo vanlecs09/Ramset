@@ -206,8 +206,8 @@ const createWaveBlock = (
 ): BABYLON.Mesh => {
     //  blockHeight = 2;
 
-    const amp = 0.2;      // sine amplitude
-    const freq = 5;        // wave frequency
+    const amp = 0.05;      // sine amplitude
+    const freq = 10;        // wave frequency
     const divU = 50;       // subdivisions along wave direction
     const divV = 10;//Math.max(5, Math.floor(blockHeight * 10)); // subdivisions along height
 

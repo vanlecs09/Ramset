@@ -81,7 +81,7 @@ const calculateConcreteLayout = (offsets: ConcreteOffsets): ConcreteLayout => {
   const concretePosition = new BABYLON.Vector3(centerXPos, concreteCenterY, centerZPos);
 
   const blockThickness = 0.5;
-  const blockBottomY = concreteTopY - blockThickness;
+  const blockBottomY = concreteCenterY - (offsets.concreteThickness / 2);
   const frontWavePos = new BABYLON.Vector3(centerXPos, blockBottomY, offsets.concreteOffsetZBack + blockThickness / 2);
   const backWavePos = new BABYLON.Vector3(centerXPos, blockBottomY, -offsets.concreteOffsetZFront - blockThickness / 2);
   const leftWavePos = new BABYLON.Vector3(-offsets.concreteOffsetXLeft - blockThickness / 2, blockBottomY, centerZPos);

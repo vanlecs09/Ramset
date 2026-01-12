@@ -11,7 +11,7 @@ let postMaterial: BABYLON.StandardMaterial | null = null;
 const initializePostMaterial = (scene: BABYLON.Scene) => {
     if (!postMaterial) {
         postMaterial = new BABYLON.StandardMaterial('postMaterial', scene);
-        postMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.1, 0.1); // reddish
+        postMaterial.diffuseColor = new BABYLON.Color3(255, 103, 38).scale(1/255); // reddish
         postMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
     }
     return postMaterial;
@@ -29,7 +29,7 @@ export const createPost = (
 
     const post = BABYLON.MeshBuilder.CreateCylinder(
         name,
-        { height: height, diameter: diameter },
+        { height: height + 0.1, diameter: diameter },
         scene
     );
 
@@ -67,7 +67,7 @@ export const updatePost = (
 
     const post = BABYLON.MeshBuilder.CreateCylinder(
         name,
-        { height: height, diameter: diameter },
+        { height: height + 0.1, diameter: diameter },
         scene
     );
 

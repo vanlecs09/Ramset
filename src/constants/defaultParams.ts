@@ -18,7 +18,7 @@ export const DEFAULT_TOWER_PARAMS: TowerParams = {
   isFiniteConcrete: true,
   concreteThickness: 3,
   cylinderHeight: 1,
-  cylinderRadius: 1.5,
+  cylinderRadius: 0.5,
   postRadius: 0.05,
   postCount: 10,
   circumferenceToPostOffset: 0.06,

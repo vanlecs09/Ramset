@@ -20,8 +20,8 @@ const initializeMaterials = (scene: BABYLON.Scene) => {
         var mat = new BABYLON.StandardMaterial('columnMaterial', scene);
         mat.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8);   // light gray tint
         mat.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
-        mat.alpha = 0.4;                                    // transparency (0 = invisible, 1 = opaque)
-        mat.backFaceCulling = false;
+        // mat.alpha = 0.4;                                    // transparency (0 = invisible, 1 = opaque)
+        // mat.backFaceCulling = false;
         mat.alpha = 0.85;
         columnMaterial = mat;
     }
@@ -59,31 +59,49 @@ export const createRectangleColumn = (
 
     // 1. Create concrete using ConcreteBuilder
     // Pass calculated dimensions to concrete builder
-    const concreteGroup = createConcrete(scene, concreteThickness, concreteWidth, concreteDepth, concretePosition, infiniteBlockPositions, columnGroup, isFiniteConcrete);
+    const concreteGroup = createConcrete(scene, 
+        concreteThickness, 
+        concreteWidth, 
+        concreteDepth, 
+        concretePosition, 
+        infiniteBlockPositions, 
+        columnGroup, 
+        isFiniteConcrete);
     rectangleColumn.concrete = concreteGroup.mesh;
     rectangleColumn.infiniteBlocks = concreteGroup.infiniteBlocks || [];
 
     // 2. Create rectangle column (box on top)
+    const concreteTopY = 1.5;
     let columnHeight = 1;
     const column = BABYLON.MeshBuilder.CreateBox(
         'rectangleColumn',
         { width: columnWidth, height: columnHeight, depth: columnDepth },
         scene
     );
-    column.position.y = concreteThickness + columnHeight / 2; // Sit on top of concrete
+    column.position.y = concreteTopY + columnHeight / 2; // Sit on top of concrete
     column.material = columnMaterial;
 
-    column.receiveShadows = true;
+    // column.receiveShadows = true;
     column.parent = columnGroup;
     rectangleColumn.column = column;
 
     // 3. Create posts connecting concrete to column
+    const postHeight = columnHeight * 2;
+
     postPositions.forEach((postPos) => {
+        // Position post at concrete top surface with adjusted Y
+        const postPositionY = concreteTopY;
+        const adjustedPostPosition = new BABYLON.Vector3(
+            postPos.position.x,
+            postPositionY,
+            postPos.position.z
+        );
+        
         const postGroup = createPost(
             scene,
-            concreteThickness + columnHeight / 2,
+            postHeight,
             postDiameter,
-            postPos.position,
+            adjustedPostPosition,
             columnGroup,
             `rectangleColumnPost_${postPos.index}`
         );
@@ -114,12 +132,21 @@ export const updateRectangleColumn = (
     // Update concrete using ConcreteBuilder
     // Pass calculated dimensions to concrete builder
     const concreteGroup = { mesh: rectangleColumn.concrete, infiniteBlocks: rectangleColumn.infiniteBlocks || [] };
-    updateConcrete(concreteGroup, scene, concreteThickness, concreteWidth, concreteDepth, concretePosition, infiniteBlockPositions, rectangleColumn.group, isFiniteConcrete);
+    updateConcrete(concreteGroup, 
+        scene, 
+        concreteThickness, 
+        concreteWidth, 
+        concreteDepth, 
+        concretePosition, 
+        infiniteBlockPositions, 
+        rectangleColumn.group, 
+        isFiniteConcrete);
     rectangleColumn.concrete = concreteGroup.mesh;
     rectangleColumn.infiniteBlocks = concreteGroup.infiniteBlocks;
 
     // Update column
-     let columnHeight = 1;
+    const concreteTopY = 1.5;
+    let columnHeight = 1;
     if (rectangleColumn.column) {
         rectangleColumn.column.dispose();
 
@@ -128,10 +155,10 @@ export const updateRectangleColumn = (
             { width: columnWidth, height: columnHeight, depth: columnDepth },
             scene
         );
-        column.position.y = concreteThickness + columnHeight / 2; // Sit on top of concrete
+        column.position.y = concreteTopY + columnHeight / 2; // Sit on top of concrete
         column.material = columnMaterial;
 
-        column.receiveShadows = true;
+        // column.receiveShadows = true;
         column.parent = rectangleColumn.group;
         rectangleColumn.column = column;
     }
@@ -145,14 +172,22 @@ export const updateRectangleColumn = (
     }
 
     // Recreate posts with pre-calculated positions
+    const postHeight = columnHeight * 2;
+
     postPositions.forEach((postPos) => {
-        postPos.position.y = concreteThickness + 0.1; // columnHeight;
+        // Position post at concrete top surface with adjusted Y
+        const postPositionY = concreteTopY;
+        const adjustedPostPosition = new BABYLON.Vector3(
+            postPos.position.x,
+            postPositionY,
+            postPos.position.z
+        );
+        
         const postGroup = createPost(
             scene,
-            // concreteThickness + columnHeight / 2,
-            columnHeight * 2,
+            postHeight,
             postDiameter,
-            postPos.position,
+            adjustedPostPosition,
             rectangleColumn.group,
             `rectangleColumnPost_${postPos.index}`
         );
