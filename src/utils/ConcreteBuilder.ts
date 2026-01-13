@@ -26,8 +26,8 @@ const initializeSinBlockMaterial = (scene: BABYLON.Scene) => {
         sinBlockMaterial = new BABYLON.StandardMaterial('sinBlockMaterial', scene);
         sinBlockMaterial.diffuseColor = new BABYLON.Color3(214 / 255, 217 / 255, 200 / 255);   // tan/beige color
         sinBlockMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
-        sinBlockMaterial.alpha = 0.2;  // semi-transparent
-        sinBlockMaterial.backFaceCulling = false;
+        sinBlockMaterial.alpha = 0.5;  // semi-transparent
+        // sinBlockMaterial.backFaceCulling = false;
         sinBlockMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
     }
     return sinBlockMaterial;
@@ -67,6 +67,7 @@ export const createConcrete = (
             concreteWidth,
             concreteDepth,
             concreteThickness,
+            concretePosition,
             parent
         )
         : [];
@@ -124,6 +125,7 @@ export const updateConcrete = (
             concreteWidth,
             concreteDepth,
             concreteThickness,
+            concrete.position,
             parent
         )
         : [];
@@ -139,59 +141,213 @@ const createInfiniteBlocks = (
     concreteWidth: number,
     concreteDepth: number,
     concreteThickness: number,
+    concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
     parent?: BABYLON.TransformNode
 ): BABYLON.Mesh[] => {
     const sinBlockMat = initializeSinBlockMaterial(scene);
-    const blockThickness = 0.5;
 
-    const sinBlocks = [
-        createWaveBlock(
-            scene,
-            'sinBlock_back',
-            finiteBlockPositions[0],
-            concreteWidth,
-            concreteThickness,
-            blockThickness,
-            'z',
-            sinBlockMat
-        ),
-        createWaveBlock(
-            scene,
-            'sinBlock_front',
-            finiteBlockPositions[1],
-            concreteWidth,
-            concreteThickness,
-            blockThickness,
-            '-z',
-            sinBlockMat
-        ),
-        createWaveBlock(
-            scene,
-            'sinBlock_left',
-            finiteBlockPositions[2],
-            concreteDepth,
-            concreteThickness,
-            blockThickness,
-            '-x',
-            sinBlockMat
-        ),
-        createWaveBlock(
-            scene,
-            'sinBlock_right',
-            finiteBlockPositions[3],
-            concreteDepth,
-            concreteThickness,
-            blockThickness,
-            'x',
-            sinBlockMat
-        ),
-    ];
+    // Create a single mesh that surrounds the concrete on all sides
+    const surroundingMesh = createSurroundingConcreteMesh(
+        scene,
+        'infiniteBlock',
+        concreteWidth,
+        concreteDepth,
+        concreteThickness,
+        concretePosition,
+        sinBlockMat
+    );
 
     if (parent) {
-        sinBlocks.forEach(block => block.parent = parent as BABYLON.Node);
+        surroundingMesh.parent = parent as BABYLON.Node;
     }
 
-    return sinBlocks;
+    return [surroundingMesh];
+};
+
+const createSurroundingConcreteMesh = (
+    scene: BABYLON.Scene,
+    name: string,
+    concreteWidth: number,
+    concreteDepth: number,
+    concreteThickness: number,
+    concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
+    material: BABYLON.StandardMaterial
+): BABYLON.Mesh => {
+    const blockThickness = 0.5;
+    const amp = 0.05;
+    const freq = 10;
+    const divU = 50;
+    const divV = 10;
+
+    const positions: number[] = [];
+    const indices: number[] = [];
+    const uvs: number[] = [];
+    let vertexCount = 0;
+
+    // Helper function to add a block's vertices and indices
+    const addBlockVertices = (
+        blockWidth: number,
+        blockHeight: number,
+        blockDepth: number,
+        direction: 'x' | '-x' | 'z' | '-z'
+    ) => {
+        const startVertex = vertexCount;
+
+        // Outer face vertices (wavy surface)
+        const outerWidth = blockWidth + blockDepth * 2;
+        for (let iv = 0; iv <= divV; iv++) {
+            const v = (iv / divV) * blockHeight + concretePosition.y - blockHeight / 2;
+            for (let iu = 0; iu <= divU; iu++) {
+                const u = (iu / divU - 0.5) * outerWidth;
+                const waveDisplacement = Math.sin((iu / divU) * Math.PI * freq) * amp;
+
+                if (direction === 'z') {
+                    positions.push(u + concretePosition.x, v, blockDepth + waveDisplacement + concreteDepth / 2 + concretePosition.z);
+                } else if (direction === '-z') {
+                    positions.push(u + concretePosition.x, v, -blockDepth - waveDisplacement - concreteDepth / 2 + concretePosition.z);
+                } else if (direction === 'x') {
+                    positions.push(blockDepth + waveDisplacement + concreteWidth / 2 + concretePosition.x, v, u + concretePosition.z);
+                } else if (direction === '-x') {
+                    positions.push(-blockDepth - waveDisplacement - concreteWidth / 2 + concretePosition.x, v, u + concretePosition.z);
+                }
+                uvs.push(iu / divU, iv / divV);
+            }
+        }
+
+        // Inner face vertices (flat surface)
+        const offset = divV + 1;
+        for (let iv = 0; iv <= divV; iv++) {
+            const v = (iv / divV) * blockHeight + concretePosition.y - blockHeight / 2;
+            for (let iu = 0; iu <= divU; iu++) {
+                const u = (iu / divU - 0.5) * blockWidth;
+
+                if (direction === 'z') {
+                    positions.push(u + concretePosition.x, v, concreteDepth / 2 + concretePosition.z);
+                } else if (direction === '-z') {
+                    positions.push(u + concretePosition.x, v, - concreteDepth / 2 + concretePosition.z);
+                } else if (direction === 'x') {
+                    positions.push(concreteWidth / 2 + concretePosition.x, v, u + concretePosition.z);
+                } else if (direction === '-x') {
+                    positions.push(-concreteWidth / 2 + concretePosition.x, v, u + concretePosition.z);
+                }
+                uvs.push(iu / divU, iv / divV);
+            }
+        }
+
+        const ring = divU + 1;
+
+        // Outer face triangles
+        for (let iv = 0; iv < divV; iv++) {
+            for (let iu = 0; iu < divU; iu++) {
+                const a = startVertex + iv * ring + iu;
+                const b = a + 1;
+                const c = a + ring;
+                const d = c + 1;
+
+                indices.push(a, b, c);
+                indices.push(b, d, c);
+            }
+        }
+
+        // Inner face triangles
+        for (let iv = 0; iv < divV; iv++) {
+            for (let iu = 0; iu < divU; iu++) {
+                const a = startVertex + offset * ring + iv * ring + iu;
+                const b = a + 1;
+                const c = a + ring;
+                const d = c + 1;
+
+                indices.push(a, c, b);
+                indices.push(b, c, d);
+            }
+        }
+
+        // Side walls
+        const backCol = divU;
+        for (let iv = 0; iv < divV; iv++) {
+            const outerA = startVertex + iv * ring;
+            const outerB = startVertex + (iv + 1) * ring;
+            const innerA = startVertex + offset * ring + iv * ring;
+            const innerB = startVertex + offset * ring + (iv + 1) * ring;
+
+            indices.push(outerA, outerB, innerA);
+            indices.push(innerA, outerB, innerB);
+        }
+
+        for (let iv = 0; iv < divV; iv++) {
+            const outerA = startVertex + iv * ring + backCol;
+            const outerB = startVertex + (iv + 1) * ring + backCol;
+            const innerA = startVertex + offset * ring + iv * ring + backCol;
+            const innerB = startVertex + offset * ring + (iv + 1) * ring + backCol;
+
+            indices.push(outerA, innerA, outerB);
+            indices.push(innerA, innerB, outerB);
+        }
+
+        // Bottom wall
+        for (let iu = 0; iu < divU; iu++) {
+            const outerA = startVertex + iu;
+            const outerB = startVertex + iu + 1;
+            const innerA = startVertex + offset * ring + iu;
+            const innerB = startVertex + offset * ring + iu + 1;
+
+            indices.push(outerA, innerA, outerB);
+            indices.push(innerA, innerB, outerB);
+        }
+
+        // Top wall
+        const topRow = startVertex + divV * ring;
+        for (let iu = 0; iu < divU; iu++) {
+            const outerA = topRow + iu;
+            const outerB = topRow + iu + 1;
+            const innerA = startVertex + offset * ring + divV * ring + iu;
+            const innerB = startVertex + offset * ring + divV * ring + iu + 1;
+
+            indices.push(outerA, outerB, innerA);
+            indices.push(innerA, outerB, innerB);
+        }
+
+        vertexCount += (divV + 1) * (divU + 1) * 2;
+    };
+
+    // Add all four blocks with the margin
+    addBlockVertices(
+        concreteWidth,
+        concreteThickness,
+        blockThickness,
+        'z'
+    );
+    addBlockVertices(
+        concreteWidth,
+        concreteThickness,
+        blockThickness,
+        '-z'
+    );
+    addBlockVertices(
+        concreteDepth,
+        concreteThickness,
+        blockThickness,
+        'x'
+    );
+    addBlockVertices(
+        concreteDepth,
+        concreteThickness,
+        blockThickness,
+        '-x'
+    );
+
+    const mesh = new BABYLON.Mesh(name, scene);
+    mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
+    mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs);
+
+    const normalsArray: number[] = [];
+    BABYLON.VertexData.ComputeNormals(positions, indices, normalsArray);
+    mesh.setVerticesData(BABYLON.VertexBuffer.NormalKind, normalsArray);
+    mesh.setIndices(indices);
+
+    mesh.material = material;
+
+    return mesh;
 };
 
 const createWaveBlock = (
