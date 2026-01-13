@@ -1,14 +1,18 @@
 import * as BABYLON from '@babylonjs/core';
+import * as GUI from '@babylonjs/gui';
+import { createDimensionWithLabel, type DimensionLineResult, type DimensionLabel } from './GeometryHelper';
 
 export interface ConcreteGroup {
     mesh?: BABYLON.Mesh;
     material?: BABYLON.StandardMaterial;
     infiniteBlocks?: BABYLON.Mesh[];
+    dimensionLines?: DimensionLineResult;
 }
 
 // Global concrete material - shared across all concrete instances
 let concreteMaterial: BABYLON.StandardMaterial | null = null;
 let sinBlockMaterial: BABYLON.StandardMaterial | null = null;
+let dimensionLabelTexture: GUI.AdvancedDynamicTexture | null = null;
 
 const initializeConcreteMaterial = (scene: BABYLON.Scene) => {
     if (!concreteMaterial) {
@@ -19,6 +23,13 @@ const initializeConcreteMaterial = (scene: BABYLON.Scene) => {
         concreteMaterial.backFaceCulling = false;
     }
     return concreteMaterial;
+};
+
+const initializeDimensionLabelTexture = () => {
+    if (!dimensionLabelTexture) {
+        dimensionLabelTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('DimensionLabelUI');
+    }
+    return dimensionLabelTexture;
 };
 
 const initializeSinBlockMaterial = (scene: BABYLON.Scene) => {
@@ -42,7 +53,8 @@ export const createConcrete = (
     concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
     finiteBlockPositions: BABYLON.Vector3[] = [],
     parent?: BABYLON.TransformNode,
-    isFiniteConcrete: boolean = true
+    isFiniteConcrete: boolean = true,
+    showDimensions: boolean = true
 ): ConcreteGroup => {
     const material = initializeConcreteMaterial(scene);
 
@@ -59,8 +71,7 @@ export const createConcrete = (
         concrete.parent = parent as BABYLON.Node;
     }
 
-
-    const sinBlocks = !isFiniteConcrete
+        const sinBlocks = !isFiniteConcrete
         ? createInfiniteBlocks(
             scene,
             finiteBlockPositions,
@@ -72,14 +83,124 @@ export const createConcrete = (
         )
         : [];
 
+    // Create dimension lines if requested
+    let dimensionLines: DimensionLineResult | undefined;
+    if (showDimensions) {
+        const dimensionMat = new BABYLON.StandardMaterial('dimensionMat_concrete', scene);
+        dimensionMat.emissiveColor = new BABYLON.Color3(0, 0, 0); // black
+        dimensionMat.disableLighting = true;
+
+        const boundingInfo = concrete.getBoundingInfo();
+        const min = boundingInfo.minimum;
+        const max = boundingInfo.maximum;
+
+        // Apply concrete position to transform bounding box from local to world space
+        const minX = min.x + concretePosition.x;
+        const maxX = max.x + concretePosition.x;
+        const minY = min.y + concretePosition.y;
+        const maxY = max.y + concretePosition.y;
+        const minZ = min.z + concretePosition.z;
+        const maxZ = max.z + concretePosition.z;
+
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+        const centerZ = (minZ + maxZ) / 2;
+
+        const offset = 0.4;
+        const dimensionGroup = new BABYLON.TransformNode('dimensionGroup_concrete', scene);
+        const labels: DimensionLabel[] = [];
+        
+        // Use global AdvancedDynamicTexture for dimension labels
+        const advancedTexture = initializeDimensionLabelTexture();
+
+        // Width dimension (X axis) - offset from Z min edge
+        const widthLabel = createDimensionWithLabel(
+            'width',
+            scene,
+            concreteWidth,
+            new BABYLON.Vector3(centerX, maxY + offset, minZ - offset),
+            new BABYLON.Vector3(0, 0, Math.PI / 2),
+            new BABYLON.Vector3(minX, maxY + offset, minZ - offset),
+            new BABYLON.Vector3(maxX, maxY + offset, minZ - offset),
+            new BABYLON.Vector3(0, 0, 0),
+            new BABYLON.Vector3(0, 0, 0),
+            new BABYLON.Vector3(minX, maxY, minZ),
+            new BABYLON.Vector3(maxX, maxY, minZ),
+            dimensionMat,
+            concreteWidth,
+            dimensionGroup,
+            advancedTexture,
+            0,
+            30
+        );
+        if (widthLabel) labels.push(widthLabel);
+
+        // Depth dimension (Z axis) - offset from X max edge
+        const depthLabel = createDimensionWithLabel(
+            'depth',
+            scene,
+            concreteDepth,
+            new BABYLON.Vector3(minX - offset, maxY + offset, centerZ),
+            new BABYLON.Vector3(Math.PI / 2, 0, 0),
+            new BABYLON.Vector3(minX - offset, maxY + offset, minZ),
+            new BABYLON.Vector3(minX - offset, maxY + offset, maxZ),
+            new BABYLON.Vector3(0, 0, Math.PI / 2),
+            new BABYLON.Vector3(0, 0, Math.PI / 2),
+            new BABYLON.Vector3(minX, maxY, minZ),
+            new BABYLON.Vector3(minX, maxY, maxZ),
+            dimensionMat,
+            concreteDepth,
+            dimensionGroup,
+            advancedTexture,
+            -30,
+            0
+        );
+        if (depthLabel) labels.push(depthLabel);
+
+        // Height dimension (Y axis) - offset from X min, Z min corner
+        const heightLabel = createDimensionWithLabel(
+            'height',
+            scene,
+            concreteThickness,
+            new BABYLON.Vector3(minX - offset, centerY, minZ - offset),
+            new BABYLON.Vector3(0, 0, 0),
+            new BABYLON.Vector3(minX - offset, minY, minZ - offset),
+            new BABYLON.Vector3(minX - offset, maxY, minZ - offset),
+            new BABYLON.Vector3(Math.PI / 2, 0, 0),
+            new BABYLON.Vector3(Math.PI / 2, 0, 0),
+            new BABYLON.Vector3(minX, minY, minZ),
+            new BABYLON.Vector3(minX, maxY, minZ),
+            dimensionMat,
+            concreteThickness,
+            dimensionGroup,
+            advancedTexture,
+            -30,
+            0
+        );
+        if (heightLabel) labels.push(heightLabel);
+
+        dimensionLines = {
+            group: dimensionGroup,
+            meshes: dimensionGroup.getChildren() as BABYLON.Mesh[],
+            labels: labels,
+            width: concreteWidth,
+            depth: concreteDepth,
+            height: concreteThickness
+        };
+
+        if (parent) {
+            dimensionGroup.parent = parent as BABYLON.Node;
+        }
+    }
+
+
     return {
         mesh: concrete,
         material: material,
         infiniteBlocks: sinBlocks,
+        dimensionLines: dimensionLines
     };
-};
-
-export const updateConcrete = (
+};export const updateConcrete = (
     concreteGroup: ConcreteGroup,
     scene: BABYLON.Scene,
     concreteThickness: number = 1,
@@ -88,7 +209,8 @@ export const updateConcrete = (
     concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
     finiteBlockPositions: BABYLON.Vector3[] = [],
     parent?: BABYLON.TransformNode,
-    isFiniteConcrete: boolean = true
+    isFiniteConcrete: boolean = true,
+    showDimensions: boolean = true
 ) => {
     // Dispose old concrete mesh
     if (concreteGroup.mesh) {
@@ -101,6 +223,19 @@ export const updateConcrete = (
             concreteGroup.infiniteBlocks[i].dispose();
         }
         concreteGroup.infiniteBlocks = [];
+    }
+
+    // Dispose old dimension lines
+    if (concreteGroup.dimensionLines) {
+        concreteGroup.dimensionLines.meshes.forEach(mesh => mesh.dispose());
+        // Dispose old labels from AdvancedDynamicTexture
+        const advancedTexture = initializeDimensionLabelTexture();
+        concreteGroup.dimensionLines.labels.forEach(labelData => {
+            advancedTexture.removeControl(labelData.label);
+            labelData.label.dispose();
+        });
+        concreteGroup.dimensionLines.group.dispose();
+        concreteGroup.dimensionLines = undefined;
     }
 
     const material = initializeConcreteMaterial(scene);
@@ -125,14 +260,125 @@ export const updateConcrete = (
             concreteWidth,
             concreteDepth,
             concreteThickness,
-            concrete.position,
+            concretePosition,
             parent
         )
         : [];
 
+    // Create dimension lines if requested
+    let dimensionLines: DimensionLineResult | undefined;
+    if (showDimensions) {
+        const dimensionMat = new BABYLON.StandardMaterial('dimensionMat_concrete', scene);
+        dimensionMat.emissiveColor = new BABYLON.Color3(0, 0, 0); // black
+        dimensionMat.disableLighting = true;
+
+        const boundingInfo = concrete.getBoundingInfo();
+        const min = boundingInfo.minimum;
+        const max = boundingInfo.maximum;
+
+        // Apply concrete position to transform bounding box from local to world space
+        const minX = min.x + concretePosition.x;
+        const maxX = max.x + concretePosition.x;
+        const minY = min.y + concretePosition.y;
+        const maxY = max.y + concretePosition.y;
+        const minZ = min.z + concretePosition.z;
+        const maxZ = max.z + concretePosition.z;
+
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+        const centerZ = (minZ + maxZ) / 2;
+
+        const offset = 0.4;
+        const dimensionGroup = new BABYLON.TransformNode('dimensionGroup_concrete', scene);
+        const labels: DimensionLabel[] = [];
+        
+        // Use global AdvancedDynamicTexture for dimension labels
+        const advancedTexture = initializeDimensionLabelTexture();
+
+        // Width dimension (X axis) - offset from Z min edge
+        const widthLabel = createDimensionWithLabel(
+            'width',
+            scene,
+            concreteWidth,
+            new BABYLON.Vector3(centerX, maxY + offset, minZ - offset),
+            new BABYLON.Vector3(0, 0, Math.PI / 2),
+            new BABYLON.Vector3(minX, maxY + offset, minZ - offset),
+            new BABYLON.Vector3(maxX, maxY + offset, minZ - offset),
+            new BABYLON.Vector3(0, 0, 0),
+            new BABYLON.Vector3(0, 0, 0),
+            new BABYLON.Vector3(minX, maxY, minZ),
+            new BABYLON.Vector3(maxX, maxY, minZ),
+            dimensionMat,
+            concreteWidth,
+            dimensionGroup,
+            advancedTexture,
+            0,
+            30
+        );
+        if (widthLabel) labels.push(widthLabel);
+
+        // Depth dimension (Z axis) - offset from X max edge
+        const depthLabel = createDimensionWithLabel(
+            'depth',
+            scene,
+            concreteDepth,
+            new BABYLON.Vector3(minX - offset, maxY + offset, centerZ),
+            new BABYLON.Vector3(Math.PI / 2, 0, 0),
+            new BABYLON.Vector3(minX - offset, maxY + offset, minZ),
+            new BABYLON.Vector3(minX - offset, maxY + offset, maxZ),
+            new BABYLON.Vector3(0, 0, Math.PI / 2),
+            new BABYLON.Vector3(0, 0, Math.PI / 2),
+            new BABYLON.Vector3(minX, maxY, minZ),
+            new BABYLON.Vector3(minX, maxY, maxZ),
+            dimensionMat,
+            concreteDepth,
+            dimensionGroup,
+            advancedTexture,
+            -30,
+            0
+        );
+        if (depthLabel) labels.push(depthLabel);
+
+        // Height dimension (Y axis) - offset from X min, Z min corner
+        const heightLabel = createDimensionWithLabel(
+            'height',
+            scene,
+            concreteThickness,
+            new BABYLON.Vector3(minX - offset, centerY, minZ - offset),
+            new BABYLON.Vector3(0, 0, 0),
+            new BABYLON.Vector3(minX - offset, minY, minZ - offset),
+            new BABYLON.Vector3(minX - offset, maxY, minZ - offset),
+            new BABYLON.Vector3(Math.PI / 2, 0, 0),
+            new BABYLON.Vector3(Math.PI / 2, 0, 0),
+            new BABYLON.Vector3(minX, minY, minZ),
+            new BABYLON.Vector3(minX, maxY, minZ),
+            dimensionMat,
+            concreteThickness,
+            dimensionGroup,
+            advancedTexture,
+            -30,
+            0
+        );
+        if (heightLabel) labels.push(heightLabel);
+
+        dimensionLines = {
+            group: dimensionGroup,
+            meshes: dimensionGroup.getChildren() as BABYLON.Mesh[],
+            labels: labels,
+            width: concreteWidth,
+            depth: concreteDepth,
+            height: concreteThickness
+        };
+
+        if (parent) {
+            dimensionGroup.parent = parent as BABYLON.Node;
+        }
+    }
+
     concreteGroup.mesh = concrete;
     concreteGroup.material = material;
     concreteGroup.infiniteBlocks = sinBlocks;
+    concreteGroup.dimensionLines = dimensionLines;
 };
 
 const createInfiniteBlocks = (
