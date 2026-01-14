@@ -70,8 +70,9 @@ export const createCircularColumns = (
   cylinder.position.y = concreteTopY + gapDistance + columnHeight / 2;
 
   const cylinderMaterial = new BABYLON.StandardMaterial('cylinderMaterial', scene);
-  cylinderMaterial.diffuseColor = new BABYLON.Color3(0.91, 0.30, 0.24); // #E74C3C
-  cylinderMaterial.alpha = 0.1;
+  cylinderMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8);   // light gray tint
+  cylinderMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+  cylinderMaterial.alpha = 0.4;
   cylinder.material = cylinderMaterial;
 
   cylinder.receiveShadows = true;
@@ -89,7 +90,7 @@ export const createCircularColumns = (
       postPositionY,
       postPos.position.z
     );
-    
+
     const postGroup = createPost(
       scene,
       postHeight,
@@ -149,8 +150,10 @@ export const updateCircularColumns = (
     cylinder.position.y = concreteTopY + gapDistance + columnHeight / 2;
 
     const cylinderMaterial = new BABYLON.StandardMaterial('cylinderMaterial', scene);
-    cylinderMaterial.diffuseColor = new BABYLON.Color3(0.91, 0.30, 0.24); // #E74C3C
-    cylinderMaterial.alpha = 0.4;
+    cylinderMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8);   // light gray tint
+    cylinderMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+    cylinderMaterial.alpha = 0.6;
+    // cylinderMaterial.backFaceCulling = true;
     cylinder.material = cylinderMaterial;
 
     // cylinder.receiveShadows = true;
@@ -178,7 +181,7 @@ export const updateCircularColumns = (
       postPositionY,
       postPos.position.z
     );
-    
+
     const postGroup = createPost(
       scene,
       postHeight,
