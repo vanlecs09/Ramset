@@ -236,8 +236,6 @@ export const createDimensionLine = (
   lineRotation: BABYLON.Vector3,
   arrow1Position: BABYLON.Vector3,
   arrow2Position: BABYLON.Vector3,
-  arrow1Rotation: BABYLON.Vector3,
-  arrow2Rotation: BABYLON.Vector3,
   corner1Position: BABYLON.Vector3,
   corner2Position: BABYLON.Vector3,
   lineMat: BABYLON.Material,
@@ -261,6 +259,22 @@ export const createDimensionLine = (
   line.material = lineMat;
   meshes.push(line);
 
+  // Calculate arrow rotations based on direction from arrow position to corner
+  const direction1 = corner1Position.subtract(arrow1Position).normalize();
+  const direction2 = corner2Position.subtract(arrow2Position).normalize();
+  
+  const arrow1RotationQuaternion = BABYLON.Quaternion.FromUnitVectorsToRef(
+    yAxis,
+    direction1.scale(-1), // Reverse direction for arrow 1 pointing inward
+    new BABYLON.Quaternion()
+  );
+  
+  const arrow2RotationQuaternion = BABYLON.Quaternion.FromUnitVectorsToRef(
+    yAxis,
+    direction2.scale(-1), // Arrow 2 pointing outward
+    new BABYLON.Quaternion()
+  );
+
   // Create arrow 1
   const arrow1 = BABYLON.MeshBuilder.CreateCylinder(name + 'Arrow1', {
     diameterTop: 0,
@@ -268,7 +282,7 @@ export const createDimensionLine = (
     height: arrowSize,
   }, scene);
   arrow1.position = arrow1Position;
-  arrow1.rotation = arrow1Rotation;
+  arrow1.rotationQuaternion = arrow1RotationQuaternion;
   arrow1.material = lineMat;
   meshes.push(arrow1);
 
@@ -279,7 +293,7 @@ export const createDimensionLine = (
     height: arrowSize,
   }, scene);
   arrow2.position = arrow2Position;
-  arrow2.rotation = arrow2Rotation;
+  arrow2.rotationQuaternion = arrow2RotationQuaternion;
   arrow2.material = lineMat;
   meshes.push(arrow2);
 
@@ -290,7 +304,6 @@ export const createDimensionLine = (
     height: distance1,
   }, scene);
   connector1.position = BABYLON.Vector3.Lerp(arrow1Position, corner1Position, 0.5);
-  const direction1 = corner1Position.subtract(arrow1Position).normalize();
   connector1.rotationQuaternion = BABYLON.Quaternion.FromUnitVectorsToRef(
     yAxis,
     direction1,
@@ -306,7 +319,6 @@ export const createDimensionLine = (
     height: distance2,
   }, scene);
   connector2.position = BABYLON.Vector3.Lerp(arrow2Position, corner2Position, 0.5);
-  const direction2 = corner2Position.subtract(arrow2Position).normalize();
   connector2.rotationQuaternion = BABYLON.Quaternion.FromUnitVectorsToRef(
     yAxis,
     direction2,
@@ -341,8 +353,6 @@ export const createDimensionWithLabel = (
   lineRotation: BABYLON.Vector3,
   arrow1Position: BABYLON.Vector3,
   arrow2Position: BABYLON.Vector3,
-  arrow1Rotation: BABYLON.Vector3,
-  arrow2Rotation: BABYLON.Vector3,
   corner1Position: BABYLON.Vector3,
   corner2Position: BABYLON.Vector3,
   material: BABYLON.Material,
@@ -360,8 +370,6 @@ export const createDimensionWithLabel = (
     lineRotation,
     arrow1Position,
     arrow2Position,
-    arrow1Rotation,
-    arrow2Rotation,
     corner1Position,
     corner2Position,
     material,
