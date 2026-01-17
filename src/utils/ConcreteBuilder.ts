@@ -25,7 +25,7 @@ const initializeConcreteMaterial = (scene: BABYLON.Scene) => {
     return concreteMaterial;
 };
 
-const initializeDimensionLabelTexture = () => {
+export const initializeDimensionLabelTexture = () => {
     if (!dimensionLabelTexture) {
         dimensionLabelTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('DimensionLabelUI');
     }
