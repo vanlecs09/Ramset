@@ -84,7 +84,6 @@ export const createComplexColumn = (
     concreteWidth,
     concreteDepth,
     concretePosition,
-    infiniteBlockPositions,
     columnGroup,
     isFiniteConcrete
   );
@@ -198,7 +197,6 @@ export const updateComplexColumn = (
       concreteWidth,
       concreteDepth,
       concretePosition,
-      infiniteBlockPositions,
       complexColumn.group,
       isFiniteConcrete
     );

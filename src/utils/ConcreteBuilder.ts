@@ -51,7 +51,6 @@ export const createConcrete = (
     concreteWidth: number = 3,
     concreteDepth: number = 3,
     concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
-    finiteBlockPositions: BABYLON.Vector3[] = [],
     parent?: BABYLON.TransformNode,
     isFiniteConcrete: boolean = true,
     showDimensions: boolean = true
@@ -74,7 +73,6 @@ export const createConcrete = (
         const sinBlocks = !isFiniteConcrete
         ? createInfiniteBlocks(
             scene,
-            finiteBlockPositions,
             concreteWidth,
             concreteDepth,
             concreteThickness,
@@ -194,14 +192,15 @@ export const createConcrete = (
         infiniteBlocks: sinBlocks,
         dimensionLines: dimensionLines
     };
-};export const updateConcrete = (
+};
+
+export const updateConcrete = (
     concreteGroup: ConcreteGroup,
     scene: BABYLON.Scene,
     concreteThickness: number = 1,
     concreteWidth: number = 3,
     concreteDepth: number = 3,
     concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
-    finiteBlockPositions: BABYLON.Vector3[] = [],
     parent?: BABYLON.TransformNode,
     isFiniteConcrete: boolean = true,
     showDimensions: boolean = true
@@ -250,7 +249,6 @@ export const createConcrete = (
     const sinBlocks = !isFiniteConcrete
         ? createInfiniteBlocks(
             scene,
-            finiteBlockPositions,
             concreteWidth,
             concreteDepth,
             concreteThickness,
@@ -371,7 +369,6 @@ export const createConcrete = (
 
 const createInfiniteBlocks = (
     scene: BABYLON.Scene,
-    finiteBlockPositions: BABYLON.Vector3[] = [],
     concreteWidth: number,
     concreteDepth: number,
     concreteThickness: number,

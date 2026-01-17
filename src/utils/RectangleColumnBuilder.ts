@@ -37,7 +37,6 @@ export const createRectangleColumn = (
     concreteWidth: number = 3,
     concreteDepth: number = 3,
     concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
-    infiniteBlockPositions: BABYLON.Vector3[] = [],
     isFiniteConcrete: boolean = true
 ): RectangleColumnGroup => {
     const columnGroup = new BABYLON.TransformNode('rectangleColumn', scene);
@@ -64,7 +63,6 @@ export const createRectangleColumn = (
         concreteWidth, 
         concreteDepth, 
         concretePosition, 
-        infiniteBlockPositions, 
         columnGroup, 
         isFiniteConcrete);
     rectangleColumn.concrete = concreteGroup.mesh;
@@ -121,7 +119,6 @@ export const updateRectangleColumn = (
     concreteWidth: number = 3,
     concreteDepth: number = 3,
     concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
-    infiniteBlockPositions: BABYLON.Vector3[] = [],
     isFiniteConcrete: boolean = true
 ) => {
     const scene = rectangleColumn.group.getScene();
@@ -138,7 +135,6 @@ export const updateRectangleColumn = (
         concreteWidth, 
         concreteDepth, 
         concretePosition, 
-        infiniteBlockPositions, 
         rectangleColumn.group, 
         isFiniteConcrete);
     rectangleColumn.concrete = concreteGroup.mesh;

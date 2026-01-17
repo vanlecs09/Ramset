@@ -337,7 +337,6 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           concreteWidth,
           concreteDepth,
           concretePosition,
-          finiteBlockPositions,
           circleColumns.isFiniteConcrete,
           circleColumns.cylinderHeight,
           circleColumns.cylinderRadius,
@@ -438,7 +437,6 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           concreteWidth,
           concreteDepth,
           concretePosition,
-          finiteBlockPositions,
           rectangleColumnParams.isFiniteConcrete
         );
       } else {
@@ -452,7 +450,6 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           concreteWidth,
           concreteDepth,
           concretePosition,
-          finiteBlockPositions,
           rectangleColumnParams.isFiniteConcrete
         );
       }

@@ -54,7 +54,6 @@ export const createCircularColumns = (
     concreteWidth,
     concreteDepth,
     concretePosition,
-    infiniteBlockPositions,
     towerGroup,
     isFiniteConcrete);
 
@@ -166,7 +165,6 @@ export const updateCircularColumns = (
   concreteWidth: number = 3,
   concreteDepth: number = 3,
   concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
-  infiniteBlockPositions: BABYLON.Vector3[] = [],
   isFiniteConcrete: boolean = true,
   columnHeight: number = 1,
   columnRadius: number = 1.5,
@@ -184,7 +182,6 @@ export const updateCircularColumns = (
     concreteWidth,
     concreteDepth,
     concretePosition,
-    infiniteBlockPositions,
     circularColumns.group,
     isFiniteConcrete);
   circularColumns.concrete = concreteGroup.mesh;
