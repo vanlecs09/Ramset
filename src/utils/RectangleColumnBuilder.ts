@@ -117,7 +117,7 @@ export const createRectangleColumn = (
 
     // 2. Create rectangle column (box on top)
     const concreteTopY = 1.5;
-    let columnHeight = 1;
+    let columnHeight = 0.3;
     const column = BABYLON.MeshBuilder.CreateBox(
         'rectangleColumn',
         { width: columnWidth, height: columnHeight, depth: columnDepth },
@@ -189,7 +189,7 @@ export const updateRectangleColumn = (
     rectangleColumn.setConcreteGroup(concreteGroup);
 
     const concreteTopY = 1.5;
-    let columnHeight = 1;
+    let columnHeight = 0.3;
 
     const newColumn = BABYLON.MeshBuilder.CreateBox(
         'rectangleColumn',
@@ -204,7 +204,7 @@ export const updateRectangleColumn = (
     rectangleColumn.setColumn(newColumn);
 
     // Update column
-    addWaveBlocksOnTop(rectangleColumn, columnWidth, columnDepth, 0.5, 1); // Assuming columnHeight = 1
+    addWaveBlocksOnTop(rectangleColumn, columnWidth, columnDepth, 0.2, columnHeight); // Assuming columnHeight = 1
 
     // Remove and recreate posts
     // rectangleColumn.clearPosts();
@@ -240,7 +240,6 @@ export const updateRectangleColumn = (
  * @param blockDepth - Depth of the rectangle column
  * @param columnHeight - Height of the rectangle column
  * @param blockHeight - Height of each wave block (default: 0.5)
- * @param blockCount - Number of blocks to create stacked upward (default: 3)
  */
 export const addWaveBlocksOnTop = (
     rectangleColumn: RectangleColumnGroup,

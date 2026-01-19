@@ -88,191 +88,6 @@ export class DimensionLineResult implements BaseStructureGroup {
   }
 }
 
-/**
- * Creates dimension lines for width, depth, and height of any mesh/object
- * @param targetMesh - The mesh or object to measure (or provide bounds directly)
- * @param scene - The Babylon scene
- * @param options - Configuration options
- * @returns Object containing all dimension meshes and parent group
- */
-export const createDimensionLineSystem = (
-  targetMesh: BABYLON.AbstractMesh | null,
-  scene: BABYLON.Scene,
-  options: DimensionLineOptions = {}
-): DimensionLineResult => {
-  // Set defaults
-  const {
-    dimensions = ['width', 'depth', 'height'],
-    offset = 0.3,
-    color = new BABYLON.Color3(1, 1, 1),
-    scale = 1.0,
-    arrowSize = 0.15,
-    showLabel = true,
-    bounds = null,
-  } = options;
-
-  // Get mesh bounds
-  let minX: number,
-    maxX: number,
-    minY: number,
-    maxY: number,
-    minZ: number,
-    maxZ: number;
-
-  if (bounds) {
-    minX = bounds.minX;
-    maxX = bounds.maxX;
-    minY = bounds.minY;
-    maxY = bounds.maxY;
-    minZ = bounds.minZ;
-    maxZ = bounds.maxZ;
-  } else if (targetMesh instanceof BABYLON.AbstractMesh) {
-    const boundingInfo = targetMesh.getBoundingInfo();
-    const min = boundingInfo.minimum;
-    const max = boundingInfo.maximum;
-    minX = min.x;
-    maxX = max.x;
-    minY = min.y;
-    maxY = max.y;
-    minZ = min.z;
-    maxZ = max.z;
-  } else {
-    throw new Error('targetMesh must be a Babylon mesh or bounds must be provided');
-  }
-
-  const width = maxX - minX;
-  const depth = maxZ - minZ;
-  const height = maxY - minY;
-
-  const centerX = (minX + maxX) / 2;
-  const centerY = (minY + maxY) / 2;
-  const centerZ = (minZ + maxZ) / 2;
-
-  // Create material
-  const dimensionMat = new BABYLON.StandardMaterial('dimensionMat_' + Math.random(), scene);
-  dimensionMat.diffuseColor = color;
-  dimensionMat.emissiveColor = color;
-  dimensionMat.disableLighting = true;
-
-  // Parent group for all dimension elements
-  const dimensionGroup = new BABYLON.TransformNode('dimensionGroup', scene);
-
-  const result = new DimensionLineResult(dimensionGroup, width, depth, height);
-
-  const lineThickness = 0.002 * scale;
-  const arrowDiameter = 0.01 * scale;
-  const arrowSizeScaled = arrowSize * scale;
-  const yAxis = new BABYLON.Vector3(0, 1, 0);
-
-  // Helper function to create a dimension line between two points
-  const createDimensionBetweenPoints = (
-    p1: BABYLON.Vector3,
-    p2: BABYLON.Vector3,
-    dimension: string,
-    value: number
-  ) => {
-    const distance = BABYLON.Vector3.Distance(p1, p2);
-    const midpoint = BABYLON.Vector3.Lerp(p1, p2, 0.5);
-    const direction = p2.subtract(p1).normalize();
-
-    // Main dimension line
-    const line = BABYLON.MeshBuilder.CreateCylinder(`dimLine_${dimension}`, {
-      diameter: lineThickness,
-      height: distance,
-    }, scene);
-    line.position = midpoint;
-    line.rotationQuaternion = BABYLON.Quaternion.FromUnitVectorsToRef(
-      yAxis,
-      direction,
-      new BABYLON.Quaternion()
-    );
-    line.material = dimensionMat;
-    line.parent = dimensionGroup;
-    result.addMesh(line);
-
-    // Arrow 1
-    const arrow1 = BABYLON.MeshBuilder.CreateCylinder(`dimArrow1_${dimension}`, {
-      diameterTop: 0,
-      diameterBottom: arrowDiameter,
-      height: arrowSizeScaled * 0.3,
-    }, scene);
-    arrow1.position = p1;
-    arrow1.rotationQuaternion = BABYLON.Quaternion.FromUnitVectorsToRef(
-      yAxis,
-      direction.scale(-1),
-      new BABYLON.Quaternion()
-    );
-    arrow1.material = dimensionMat;
-    arrow1.parent = dimensionGroup;
-    result.addMesh(arrow1);
-
-    // Arrow 2
-    const arrow2 = BABYLON.MeshBuilder.CreateCylinder(`dimArrow2_${dimension}`, {
-      diameterTop: 0,
-      diameterBottom: arrowDiameter,
-      height: arrowSizeScaled * 0.3,
-    }, scene);
-    arrow2.position = p2;
-    arrow2.rotationQuaternion = BABYLON.Quaternion.FromUnitVectorsToRef(
-      yAxis,
-      direction,
-      new BABYLON.Quaternion()
-    );
-    arrow2.material = dimensionMat;
-    arrow2.parent = dimensionGroup;
-    result.addMesh(arrow2);
-
-    // Create label if enabled
-    if (showLabel) {
-      const labelText = `${dimension.toUpperCase()}: ${value.toFixed(2)}`;
-      const label = new GUI.TextBlock();
-      label.text = labelText;
-      label.color = `#${Math.floor(color.r * 255)
-        .toString(16)
-        .padStart(2, '0')}${Math.floor(color.g * 255)
-          .toString(16)
-          .padStart(2, '0')}${Math.floor(color.b * 255)
-            .toString(16)
-            .padStart(2, '0')}`;
-      label.fontSize = 14;
-      label.fontWeight = 'bold';
-      //   label.background = 'rgba(0, 0, 0, 0.5)';
-      label.paddingLeftInPixels = 5;
-      label.paddingRightInPixels = 5;
-      // Create a placeholder line mesh for linking (will be replaced by actual line mesh in future)
-      result.addLabel({
-        label,
-        lineMesh: result.getMeshes()[0],
-        linePosition: midpoint.clone(),
-        offsetX: 0,
-        offsetY: 0
-      });
-    }
-  };
-
-  // Create dimension lines based on requested dimensions
-  if (dimensions.includes('width')) {
-    const p1 = new BABYLON.Vector3(minX, centerY, centerZ - offset);
-    const p2 = new BABYLON.Vector3(maxX, centerY, centerZ - offset);
-    createDimensionBetweenPoints(p1, p2, 'width', width);
-  }
-
-  if (dimensions.includes('depth')) {
-    const p1 = new BABYLON.Vector3(centerX + offset, centerY, minZ);
-    const p2 = new BABYLON.Vector3(centerX + offset, centerY, maxZ);
-    createDimensionBetweenPoints(p1, p2, 'depth', depth);
-  }
-
-  if (dimensions.includes('height')) {
-    const p1 = new BABYLON.Vector3(centerX - offset, minY, centerZ);
-    const p2 = new BABYLON.Vector3(centerX - offset, maxY, centerZ);
-    createDimensionBetweenPoints(p1, p2, 'height', height);
-  }
-
-  return result;
-};
-
-
 
 export const createDimensionLine = (
   name: string,
@@ -288,9 +103,9 @@ export const createDimensionLine = (
   showLabel: boolean = true,
   labelValue?: number
 ): { meshes: BABYLON.Mesh[]; lineMesh: BABYLON.Mesh; label?: GUI.TextBlock } => {
-  const lineThickness = 0.015;
-  const arrowSize = 0.15;
-  const arrowDiameter = 0.08;
+  const lineThickness = 0.005;
+  const arrowSize = 0.05;
+  const arrowDiameter = 0.03;
   const connectorThickness = 0.01;
   const yAxis = new BABYLON.Vector3(0, 1, 0);
   const meshes: BABYLON.Mesh[] = [];
@@ -311,13 +126,13 @@ export const createDimensionLine = (
 
   const arrow1RotationQuaternion = BABYLON.Quaternion.FromUnitVectorsToRef(
     yAxis,
-    direction1.scale(-1), // Reverse direction for arrow 1 pointing inward
+    direction1, // Reverse direction for arrow 1 pointing inward
     new BABYLON.Quaternion()
   );
 
   const arrow2RotationQuaternion = BABYLON.Quaternion.FromUnitVectorsToRef(
     yAxis,
-    direction2.scale(-1), // Arrow 2 pointing outward
+    direction2, // Arrow 2 pointing outward
     new BABYLON.Quaternion()
   );
 
@@ -327,7 +142,7 @@ export const createDimensionLine = (
     diameterBottom: arrowDiameter,
     height: arrowSize,
   }, scene);
-  arrow1.position = arrow1Position;
+  arrow1.position = corner1Position;
   arrow1.rotationQuaternion = arrow1RotationQuaternion;
   arrow1.material = lineMat;
   meshes.push(arrow1);
@@ -338,7 +153,7 @@ export const createDimensionLine = (
     diameterBottom: arrowDiameter,
     height: arrowSize,
   }, scene);
-  arrow2.position = arrow2Position;
+  arrow2.position = corner2Position;
   arrow2.rotationQuaternion = arrow2RotationQuaternion;
   arrow2.material = lineMat;
   meshes.push(arrow2);

@@ -55,7 +55,7 @@ export interface RectangleColumnParams {
 }
 
 function App() {
-  const [currentModel, setCurrentModel] = useState< 'circularColumns' | 'complexColumn' | 'rectangleColumn'>('circularColumns');
+  const [currentModel, setCurrentModel] = useState< 'circularColumns' | 'complexColumn' | 'rectangleColumn'>('complexColumn');
   const [towerParams, setTowerParams] = useState<CircularColumnParams>(DEFAULT_TOWER_PARAMS);
   const [complexColumnParams, setComplexColumnParams] = useState<ComplexColumnParams>(DEFAULT_COMPLEX_COLUMN_PARAMS);
   const [rectangleColumnParams, setRectangleColumnParams] = useState<RectangleColumnParams>(DEFAULT_RECTANGLE_COLUMN_PARAMS);
@@ -68,10 +68,6 @@ function App() {
         onComplexColumnParamsChange={setComplexColumnParams}
         onRectangleColumnParamsChange={setRectangleColumnParams}
       />
-      <header className="app-header">
-        <h1>3D Construction Model Viewer</h1>
-        <p>Drag to rotate | Scroll to zoom</p>
-      </header>
       <div className="viewer-container">
         <ConstructionViewer
           model={currentModel}

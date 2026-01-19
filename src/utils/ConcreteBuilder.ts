@@ -311,7 +311,7 @@ export const updateConcrete = (
         const centerY = (minY + maxY) / 2;
         const centerZ = (minZ + maxZ) / 2;
 
-        const offset = 0.4;
+        const offset = 0.1;
         const dimensionGroup = new BABYLON.TransformNode('dimensionGroup_concrete', scene);
         const labels: DimensionLabel[] = [];
         
@@ -439,7 +439,7 @@ const createSurroundingConcreteMesh = (
     concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
     material: BABYLON.StandardMaterial
 ): BABYLON.Mesh => {
-    const blockThickness = 0.5;
+    const blockThickness = 0.2;
     const amp = 0.05;
     const freq = 10;
     const divU = 50;

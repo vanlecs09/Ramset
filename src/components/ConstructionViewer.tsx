@@ -117,10 +117,10 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   complexColumnParams = {
     isFiniteConcrete: false,
     concreteThickness: 1,
-    concreteOffsetXRight: 1.5,
-    concreteOffsetXLeft: 1.5,
-    concreteOffsetZBack: 1.5,
-    concreteOffsetZFront: 1.5,
+    concreteOffsetXRight: 0.5,
+    concreteOffsetXLeft: 0.5,
+    concreteOffsetZBack: 0.5,
+    concreteOffsetZFront: 0.5,
     cuboid1SizeX: 2,
     cuboid1SizeZ: 2,
     cuboid1PostCountLeftEdge: 2,
@@ -182,11 +182,12 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       "camera",
       Math.PI / 4,     // alpha
       Math.PI / 3,     // beta
-      10,               // radius
+      5,               // radius
       BABYLON.Vector3.Zero(), // target
       scene
     );
     camera.attachControl(canvas, true); // mouse drag to rotate, wheel to zoom
+    camera.wheelPrecision = 50; // Slow down zoom speed (higher value = slower zoom)
 
     // Light
     const light = new BABYLON.HemisphericLight(
