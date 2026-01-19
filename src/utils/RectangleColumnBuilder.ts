@@ -1,16 +1,66 @@
 import * as BABYLON from '@babylonjs/core';
-import { createConcrete, updateConcrete } from './ConcreteBuilder';
+import { createConcrete, updateConcrete, ConcreteGroup } from './ConcreteBuilder';
 import { createPost } from './PostBuilder';
 import { createWaveBlock } from './WaveBuilder';
 import type { BaseStructureGroup } from './CircularColumnsBuilder';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 
-export interface RectangleColumnGroup extends BaseStructureGroup {
+export class RectangleColumnGroup implements BaseStructureGroup {
     group: BABYLON.TransformNode;
-    concrete?: BABYLON.Mesh;
-    infiniteBlocks?: BABYLON.Mesh[];
-    column?: BABYLON.Mesh;
-    posts?: BABYLON.Mesh[];
+    private concreteGroup?: ConcreteGroup;
+    private column?: BABYLON.Mesh;
+    private posts?: BABYLON.Mesh[];
+
+    constructor(group: BABYLON.TransformNode) {
+        this.group = group;
+        this.posts = [];
+    }
+
+    // Expose methods for safe access
+    getConcreteGroup(): ConcreteGroup | undefined {
+        return this.concreteGroup;
+    }
+
+    setConcreteGroup(concreteGroup: ConcreteGroup): void {
+        this.concreteGroup = concreteGroup;
+    }
+
+    getColumn(): BABYLON.Mesh | undefined {
+        return this.column;
+    }
+
+    setColumn(column: BABYLON.Mesh): void {
+        this.column = column;
+    }
+
+    getPosts(): BABYLON.Mesh[] {
+        return this.posts || [];
+    }
+
+    addPost(post: BABYLON.Mesh): void {
+        if (!this.posts) {
+            this.posts = [];
+        }
+        this.posts.push(post);
+    }
+
+    clearPosts(): void {
+        if (this.posts) {
+            this.posts.forEach(post => post.dispose());
+            this.posts = [];
+        }
+    }
+
+    dispose(): void {
+        // Dispose concrete group and its dimension lines
+        if (this.concreteGroup) {
+            this.concreteGroup.dispose();
+        }
+        this.column?.dispose();
+        if (this.posts) {
+            this.posts.forEach(post => post.dispose());
+        }
+    }
 }
 
 // Global materials - shared across create and update functions
@@ -50,24 +100,12 @@ export const createRectangleColumn = (
     isFiniteConcrete: boolean = true
 ): RectangleColumnGroup => {
     const columnGroup = new BABYLON.TransformNode('rectangleColumn', scene);
-    const rectangleColumn: RectangleColumnGroup = {
-        group: columnGroup,
-        posts: [],
-        dispose: function (): void {
-            // columnGroup.dispose();
-            this.concrete?.dispose();
-            this.infiniteBlocks?.forEach(block => block.dispose());
-            this.column?.dispose();
-            this.posts?.forEach(post => post.dispose());
-            // throw new Error('Function not implemented.');
-        }
-    };
+    const rectangleColumn = new RectangleColumnGroup(columnGroup);
 
     // Initialize materials
     initializeMaterials(scene);
 
     // 1. Create concrete using ConcreteBuilder
-    // Pass calculated dimensions to concrete builder
     const concreteGroup = createConcrete(scene,
         concreteThickness,
         concreteWidth,
@@ -75,8 +113,7 @@ export const createRectangleColumn = (
         concretePosition,
         columnGroup,
         isFiniteConcrete);
-    rectangleColumn.concrete = concreteGroup.mesh;
-    rectangleColumn.infiniteBlocks = concreteGroup.infiniteBlocks || [];
+    rectangleColumn.setConcreteGroup(concreteGroup);
 
     // 2. Create rectangle column (box on top)
     const concreteTopY = 1.5;
@@ -91,7 +128,7 @@ export const createRectangleColumn = (
 
     // column.receiveShadows = true;
     column.parent = columnGroup;
-    rectangleColumn.column = column;
+    rectangleColumn.setColumn(column);
 
     // 3. Create posts connecting concrete to column
     const postHeight = columnHeight * 2;
@@ -113,7 +150,7 @@ export const createRectangleColumn = (
             columnGroup,
             `rectangleColumnPost_${postPos.index}`
         );
-        rectangleColumn.posts!.push(postGroup.mesh!);
+        rectangleColumn.addPost(postGroup.mesh!);
     });
 
     return rectangleColumn;
@@ -135,10 +172,12 @@ export const updateRectangleColumn = (
 
     // Initialize materials
     initializeMaterials(scene);
-
+    rectangleColumn.dispose();
     // Update concrete using ConcreteBuilder
-    // Pass calculated dimensions to concrete builder
-    const concreteGroup = { mesh: rectangleColumn.concrete, infiniteBlocks: rectangleColumn.infiniteBlocks || [] };
+    let concreteGroup = rectangleColumn.getConcreteGroup();
+    if (!concreteGroup) {
+        concreteGroup = {} as ConcreteGroup;
+    }
     updateConcrete(concreteGroup,
         scene,
         concreteThickness,
@@ -147,38 +186,28 @@ export const updateRectangleColumn = (
         concretePosition,
         rectangleColumn.group,
         isFiniteConcrete);
-    rectangleColumn.concrete = concreteGroup.mesh;
-    rectangleColumn.infiniteBlocks = concreteGroup.infiniteBlocks;
-
+    rectangleColumn.setConcreteGroup(concreteGroup);
 
     const concreteTopY = 1.5;
     let columnHeight = 1;
-    if (rectangleColumn.column) {
-        rectangleColumn.column.dispose();
 
-        const column = BABYLON.MeshBuilder.CreateBox(
-            'rectangleColumn',
-            { width: columnWidth, height: columnHeight, depth: columnDepth },
-            scene
-        );
-        column.position.y = concreteTopY + columnHeight / 2; // Sit on top of concrete
-        column.material = columnMaterial;
+    const newColumn = BABYLON.MeshBuilder.CreateBox(
+        'rectangleColumn',
+        { width: columnWidth, height: columnHeight, depth: columnDepth },
+        scene
+    );
+    newColumn.position.y = concreteTopY + columnHeight / 2; // Sit on top of concrete
+    newColumn.material = columnMaterial;
 
-        // column.receiveShadows = true;
-        column.parent = rectangleColumn.group;
-        rectangleColumn.column = column;
-    }
+    // column.receiveShadows = true;
+    newColumn.parent = rectangleColumn.group;
+    rectangleColumn.setColumn(newColumn);
 
     // Update column
     addWaveBlocksOnTop(rectangleColumn, columnWidth, columnDepth, 0.5, 1); // Assuming columnHeight = 1
 
     // Remove and recreate posts
-    if (rectangleColumn.posts) {
-        rectangleColumn.posts.forEach((post) => {
-            post.dispose();
-        });
-        rectangleColumn.posts = [];
-    }
+    // rectangleColumn.clearPosts();
 
     // Recreate posts with pre-calculated positions
     const postHeight = columnHeight * 2;
@@ -200,7 +229,7 @@ export const updateRectangleColumn = (
             rectangleColumn.group,
             `rectangleColumnPost_${postPos.index}`
         );
-        rectangleColumn.posts!.push(postGroup.mesh!);
+        rectangleColumn.addPost(postGroup.mesh!);
     });
 };
 
@@ -220,13 +249,14 @@ export const addWaveBlocksOnTop = (
     blockHeight: number = 0.5,
     columnHeight: number = 1,
 ) => {
-    if (!rectangleColumn.column) {
+    const column = rectangleColumn.getColumn();
+    if (!column) {
         console.warn('Rectangle column not found, cannot add wave blocks');
         return;
     }
 
     const scene = rectangleColumn.group.getScene();
-    const columnTopY = rectangleColumn.column.position.y + columnHeight / 2;
+    const columnTopY = column.position.y + columnHeight / 2;
 
     // Initialize materials
     initializeMaterials(scene);
@@ -258,10 +288,16 @@ export const addWaveBlocksOnTop = (
 
     waveBlocks.push(blockMesh);
 
-    // Add to infinite blocks array if it doesn't exist
-    if (!rectangleColumn.infiniteBlocks) {
-        rectangleColumn.infiniteBlocks = [];
+    // Add to concrete group's infinite blocks array if it doesn't exist
+    let concreteGroup = rectangleColumn.getConcreteGroup();
+    if (!concreteGroup) {
+        concreteGroup = new ConcreteGroup(rectangleColumn.group);
+        rectangleColumn.setConcreteGroup(concreteGroup);
+    }
+    const infiniteBlocks = concreteGroup.getInfiniteBlocks();
+    if (!infiniteBlocks || infiniteBlocks.length === 0) {
+        concreteGroup.setInfiniteBlocks([]);
     }
 
-    rectangleColumn.infiniteBlocks.push(...waveBlocks);
+    concreteGroup.getInfiniteBlocks()?.push(...waveBlocks);
 };

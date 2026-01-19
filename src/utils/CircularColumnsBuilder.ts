@@ -1,5 +1,5 @@
 import * as BABYLON from '@babylonjs/core';
-import { createConcrete, updateConcrete } from './ConcreteBuilder';
+import { createConcrete, updateConcrete, ConcreteGroup } from './ConcreteBuilder';
 import { createPost } from './PostBuilder';
 import { createTorqueVisualization } from './GeometryHelper';
 import type { PostPosition } from './CircularPostPositionCalculator';
@@ -9,13 +9,83 @@ export interface BaseStructureGroup {
   dispose(): void;
 }
 
-export interface CircularColumnsGroup extends BaseStructureGroup {
-  concrete?: BABYLON.Mesh;
-  infiniteBlocks?: BABYLON.Mesh[];
-  circularColumn?: BABYLON.Mesh;
-  posts?: BABYLON.Mesh[];
-  torqueMeshes?: BABYLON.Mesh[];
-  dispose(): void;
+export class CircularColumnsGroup implements BaseStructureGroup {
+  group: BABYLON.TransformNode;
+  private concreteGroup?: ConcreteGroup;
+  private circularColumn?: BABYLON.Mesh;
+  private posts?: BABYLON.Mesh[];
+  private torqueMeshes?: BABYLON.Mesh[];
+
+  constructor(group: BABYLON.TransformNode) {
+    this.group = group;
+    this.posts = [];
+    this.torqueMeshes = [];
+  }
+
+  getConcreteGroup(): ConcreteGroup | undefined {
+    return this.concreteGroup;
+  }
+
+  setConcreteGroup(concreteGroup: ConcreteGroup): void {
+    this.concreteGroup = concreteGroup;
+  }
+
+  getCircularColumn(): BABYLON.Mesh | undefined {
+    return this.circularColumn;
+  }
+
+  setCircularColumn(column: BABYLON.Mesh): void {
+    this.circularColumn = column;
+  }
+
+  getPosts(): BABYLON.Mesh[] {
+    return this.posts || [];
+  }
+
+  addPost(post: BABYLON.Mesh): void {
+    if (!this.posts) {
+      this.posts = [];
+    }
+    this.posts.push(post);
+  }
+
+  clearPosts(): void {
+    if (this.posts) {
+      this.posts.forEach(post => post.dispose());
+      this.posts = [];
+    }
+  }
+
+  getTorqueMeshes(): BABYLON.Mesh[] {
+    return this.torqueMeshes || [];
+  }
+
+  addTorqueMesh(mesh: BABYLON.Mesh): void {
+    if (!this.torqueMeshes) {
+      this.torqueMeshes = [];
+    }
+    this.torqueMeshes.push(mesh);
+  }
+
+  dispose(): void {
+    // Dispose concrete group and all its resources
+    if (this.concreteGroup) {
+      this.concreteGroup.dispose();
+    }
+    
+    // Dispose circular column
+    this.circularColumn?.dispose();
+    
+    // Dispose posts
+    if (this.posts) {
+      this.posts.forEach(post => post.dispose());
+    }
+    
+    // Dispose torque meshes
+    if (this.torqueMeshes) {
+      this.torqueMeshes.forEach(mesh => mesh.dispose());
+    }
+  }
 }
 
 export const createCircularColumns = (
@@ -24,7 +94,7 @@ export const createCircularColumns = (
   concreteWidth: number = 3,
   concreteDepth: number = 3,
   concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
-  infiniteBlockPositions: BABYLON.Vector3[] = [],
+  _infiniteBlockPositions: BABYLON.Vector3[] = [],
   isFiniteConcrete: boolean = true,
   columnHeight: number = 1,
   columnRadius: number = 1.5,
@@ -32,20 +102,7 @@ export const createCircularColumns = (
   postPositions: PostPosition[],
 ): CircularColumnsGroup => {
   const towerGroup = new BABYLON.TransformNode('CircularColumns', scene);
-  const circularColumns: CircularColumnsGroup = {
-    group: towerGroup,
-    posts: [],
-    infiniteBlocks: [],
-    torqueMeshes: [],
-    dispose() {
-      this.concrete?.dispose();
-      this.infiniteBlocks?.forEach(block => block.dispose());
-      this.circularColumn?.dispose();
-      this.posts?.forEach(post => post.dispose());
-      this.torqueMeshes?.forEach(mesh => mesh.dispose());
-      // Don't dispose the group itself, let React/cleanup handle that
-    }
-  };
+  const circularColumns = new CircularColumnsGroup(towerGroup);
 
   // Create bottom concrete using ConcreteBuilder with offset parameters
   const concreteGroup = createConcrete(
@@ -57,8 +114,7 @@ export const createCircularColumns = (
     towerGroup,
     isFiniteConcrete);
 
-  circularColumns.concrete = concreteGroup.mesh;
-  circularColumns.infiniteBlocks = concreteGroup.infiniteBlocks || [];
+  circularColumns.setConcreteGroup(concreteGroup);
 
   // Calculate concrete top position
   const concreteTopY = 1.5;
@@ -80,7 +136,7 @@ export const createCircularColumns = (
 
   cylinder.receiveShadows = true;
   cylinder.parent = towerGroup;
-  circularColumns.circularColumn = cylinder;
+  circularColumns.setCircularColumn(cylinder);
 
   // // Create connecting posts using pre-calculated positions
   const postHeight = columnHeight * 2;
@@ -102,7 +158,7 @@ export const createCircularColumns = (
       towerGroup,
       `towerPost_${postPos.index}`
     );
-    circularColumns.posts!.push(postGroup.mesh!);
+    circularColumns.addPost(postGroup.mesh!);
   });
 
   return circularColumns;
@@ -153,42 +209,44 @@ export const addTorqueVisualizationToRightFace = (
   // Add meshes to the group
   torque.meshes.forEach(mesh => {
     mesh.parent = circularColumns.group;
-    circularColumns.torqueMeshes!.push(mesh);
+    circularColumns.addTorqueMesh(mesh);
   });
 
   return torque;
 };
 
 export const updateCircularColumns = (
-  circularColumns: CircularColumnsGroup,
+  circularColumnsGroup: CircularColumnsGroup,
   concreteThickness: number = 1.5,
   concreteWidth: number = 3,
   concreteDepth: number = 3,
   concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
   isFiniteConcrete: boolean = true,
   columnHeight: number = 1,
-  columnRadius: number = 1.5,
+  columnRadius: number = 1.5, 
   postRadius: number = 0.05,
   postPositions: PostPosition[],
 ) => {
   // const gapDistance = 0.0;
-  const scene = circularColumns.group.getScene();
+  const scene = circularColumnsGroup.group.getScene();
+  circularColumnsGroup.dispose();
 
   // Update concrete using ConcreteBuilder with offset parameters
-  const concreteGroup = { mesh: circularColumns.concrete, infiniteBlocks: circularColumns.infiniteBlocks || [] };
-  updateConcrete(concreteGroup,
-    scene,
-    concreteThickness,
-    concreteWidth,
-    concreteDepth,
-    concretePosition,
-    circularColumns.group,
-    isFiniteConcrete);
-  circularColumns.concrete = concreteGroup.mesh;
-  circularColumns.infiniteBlocks = concreteGroup.infiniteBlocks;
+  const concreteGroup = circularColumnsGroup.getConcreteGroup();
+  if (concreteGroup) {
+    updateConcrete(
+      concreteGroup,
+      scene,
+      concreteThickness,
+      concreteWidth,
+      concreteDepth,
+      concretePosition,
+      circularColumnsGroup.group,
+      isFiniteConcrete);
+  }
 
   addTorqueVisualizationToRightFace(
-    circularColumns,
+    circularColumnsGroup,
     concreteWidth,
     concretePosition,
     new BABYLON.Vector3(1, 0, 0) // X-axis torque direction
@@ -197,9 +255,8 @@ export const updateCircularColumns = (
   // Calculate concrete top position
   const concreteTopY = 1.5;
 
-  if (circularColumns.circularColumn) {
-    circularColumns.circularColumn.dispose();
-
+  const currentColumn = circularColumnsGroup.getCircularColumn();
+  if (currentColumn) {
     const gapDistance = 0;
     const cylinder = BABYLON.MeshBuilder.CreateCylinder(
       'towerCylinder',
@@ -216,16 +273,8 @@ export const updateCircularColumns = (
     cylinder.material = cylinderMaterial;
 
     // cylinder.receiveShadows = true;
-    cylinder.parent = circularColumns.group;
-    circularColumns.circularColumn = cylinder;
-  }
-
-  // Remove and recreate posts
-  if (circularColumns.posts) {
-    circularColumns.posts.forEach((post) => {
-      post.dispose();
-    });
-    circularColumns.posts = [];
+    cylinder.parent = circularColumnsGroup.group;
+    circularColumnsGroup.setCircularColumn(cylinder);
   }
 
   // Create new posts with pre-calculated positions
@@ -246,9 +295,9 @@ export const updateCircularColumns = (
       postHeight,
       postRadius * 2,
       adjustedPostPosition,
-      circularColumns.group,
+      circularColumnsGroup.group,
       `towerPost_${postPos.index}`
     );
-    circularColumns.posts!.push(postGroup.mesh!);
+    circularColumnsGroup.addPost(postGroup.mesh!);
   });
 };

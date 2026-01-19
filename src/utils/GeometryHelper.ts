@@ -1,6 +1,7 @@
 import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
 import { initializeDimensionLabelTexture } from './ConcreteBuilder';
+import type { BaseStructureGroup } from './CircularColumnsBuilder';
 
 export interface DimensionLineOptions {
   dimensions?: ('width' | 'depth' | 'height')[];
@@ -27,13 +28,64 @@ export interface DimensionLabel {
   offsetY: number;
 }
 
-export interface DimensionLineResult {
+export class DimensionLineResult implements BaseStructureGroup {
   group: BABYLON.TransformNode;
-  meshes: BABYLON.Mesh[];
-  labels: DimensionLabel[];
+  private meshes: BABYLON.Mesh[] = [];
+  private labels: DimensionLabel[] = [];
   width: number;
   depth: number;
   height: number;
+
+  constructor(
+    group: BABYLON.TransformNode,
+    width: number = 0,
+    depth: number = 0,
+    height: number = 0
+  ) {
+    this.group = group;
+    this.width = width;
+    this.depth = depth;
+    this.height = height;
+  }
+
+  getMeshes(): BABYLON.Mesh[] {
+    return this.meshes;
+  }
+
+  setMeshes(meshes: BABYLON.Mesh[]): void {
+    this.meshes = meshes;
+  }
+
+  addMesh(mesh: BABYLON.Mesh): void {
+    this.meshes.push(mesh);
+  }
+
+  getLabels(): DimensionLabel[] {
+    return this.labels;
+  }
+
+  setLabels(labels: DimensionLabel[]): void {
+    this.labels = labels;
+  }
+
+  addLabel(label: DimensionLabel): void {
+    this.labels.push(label);
+  }
+
+  dispose(): void {
+    // Dispose all meshes
+    this.meshes.forEach(mesh => {
+      mesh.dispose();
+    });
+
+    // Dispose all labels
+    this.labels.forEach(labelData => {
+      labelData.label.dispose();
+    });
+
+    // Dispose the transform node
+    this.group.dispose();
+  }
 }
 
 /**
@@ -105,14 +157,7 @@ export const createDimensionLineSystem = (
   // Parent group for all dimension elements
   const dimensionGroup = new BABYLON.TransformNode('dimensionGroup', scene);
 
-  const result: DimensionLineResult = {
-    group: dimensionGroup,
-    meshes: [],
-    labels: [],
-    width,
-    depth,
-    height,
-  };
+  const result = new DimensionLineResult(dimensionGroup, width, depth, height);
 
   const lineThickness = 0.002 * scale;
   const arrowDiameter = 0.01 * scale;
@@ -143,7 +188,7 @@ export const createDimensionLineSystem = (
     );
     line.material = dimensionMat;
     line.parent = dimensionGroup;
-    result.meshes.push(line);
+    result.addMesh(line);
 
     // Arrow 1
     const arrow1 = BABYLON.MeshBuilder.CreateCylinder(`dimArrow1_${dimension}`, {
@@ -159,7 +204,7 @@ export const createDimensionLineSystem = (
     );
     arrow1.material = dimensionMat;
     arrow1.parent = dimensionGroup;
-    result.meshes.push(arrow1);
+    result.addMesh(arrow1);
 
     // Arrow 2
     const arrow2 = BABYLON.MeshBuilder.CreateCylinder(`dimArrow2_${dimension}`, {
@@ -175,7 +220,7 @@ export const createDimensionLineSystem = (
     );
     arrow2.material = dimensionMat;
     arrow2.parent = dimensionGroup;
-    result.meshes.push(arrow2);
+    result.addMesh(arrow2);
 
     // Create label if enabled
     if (showLabel) {
@@ -185,19 +230,19 @@ export const createDimensionLineSystem = (
       label.color = `#${Math.floor(color.r * 255)
         .toString(16)
         .padStart(2, '0')}${Math.floor(color.g * 255)
-        .toString(16)
-        .padStart(2, '0')}${Math.floor(color.b * 255)
-        .toString(16)
-        .padStart(2, '0')}`;
+          .toString(16)
+          .padStart(2, '0')}${Math.floor(color.b * 255)
+            .toString(16)
+            .padStart(2, '0')}`;
       label.fontSize = 14;
       label.fontWeight = 'bold';
-    //   label.background = 'rgba(0, 0, 0, 0.5)';
+      //   label.background = 'rgba(0, 0, 0, 0.5)';
       label.paddingLeftInPixels = 5;
       label.paddingRightInPixels = 5;
       // Create a placeholder line mesh for linking (will be replaced by actual line mesh in future)
-      result.labels.push({ 
-        label, 
-        lineMesh: result.meshes[0],
+      result.addLabel({
+        label,
+        lineMesh: result.getMeshes()[0],
         linePosition: midpoint.clone(),
         offsetX: 0,
         offsetY: 0
@@ -263,13 +308,13 @@ export const createDimensionLine = (
   // Calculate arrow rotations based on direction from arrow position to corner
   const direction1 = corner1Position.subtract(arrow1Position).normalize();
   const direction2 = corner2Position.subtract(arrow2Position).normalize();
-  
+
   const arrow1RotationQuaternion = BABYLON.Quaternion.FromUnitVectorsToRef(
     yAxis,
     direction1.scale(-1), // Reverse direction for arrow 1 pointing inward
     new BABYLON.Quaternion()
   );
-  
+
   const arrow2RotationQuaternion = BABYLON.Quaternion.FromUnitVectorsToRef(
     yAxis,
     direction2.scale(-1), // Arrow 2 pointing outward
@@ -387,7 +432,7 @@ export const createDimensionWithLabel = (
   if (result.label) {
     advancedTexture.addControl(result.label);
     result.label.linkWithMesh(result.lineMesh);
-    
+
     // Apply offsets
     result.label.linkOffsetX = labelOffsetX;
     result.label.linkOffsetY = labelOffsetY;
@@ -459,12 +504,12 @@ export const createTorqueVisualization = (
     const angle = (i / segments) * arcRadians;
     const y = torusRadius * Math.cos(angle);
     const z = torusRadius * Math.sin(angle);
-    
+
     // Build point in the perpendicular plane
     const point = centerPosition
       .add(perpendicular1.scale(y))
       .add(perpendicular2.scale(z));
-    
+
     path.push(point);
   }
 
@@ -482,7 +527,7 @@ export const createTorqueVisualization = (
   const endAngle = arcRadians;
   const endY = torusRadius * Math.cos(endAngle);
   const endZ = torusRadius * Math.sin(endAngle);
-  
+
   // Calculate tangent direction for arrow orientation (perpendicular to radius in the plane)
   const tangentAngle = endAngle + Math.PI / 2;
   const tangentDirection = perpendicular1
@@ -501,9 +546,9 @@ export const createTorqueVisualization = (
   const torusArrowPosition = centerPosition
     .add(perpendicular1.scale(endY))
     .add(perpendicular2.scale(endZ));
-  
+
   torusArrow.position = torusArrowPosition;
-  
+
   // Align arrow with tangent direction using quaternion
   const torusArrowRotation = BABYLON.Quaternion.FromUnitVectorsToRef(
     yAxis,
@@ -525,7 +570,7 @@ export const createTorqueVisualization = (
   }, scene);
 
   lineArrow.position = BABYLON.Vector3.Lerp(lineArrowStart, lineArrowEnd, 0.5);
-  
+
   // Align line with direction using quaternion
   const lineRotation = BABYLON.Quaternion.FromUnitVectorsToRef(
     yAxis,
@@ -558,7 +603,7 @@ export const createTorqueVisualization = (
 
   // Add label to the torus using singleton texture
   const advancedTexture = initializeDimensionLabelTexture();
-  
+
   const torqueLabel = new GUI.TextBlock();
   torqueLabel.text = '100';
   torqueLabel.color = 'black';

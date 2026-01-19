@@ -1,12 +1,56 @@
 import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
-import { createDimensionWithLabel, type DimensionLineResult, type DimensionLabel } from './GeometryHelper';
+import { createDimensionWithLabel, DimensionLineResult, type DimensionLabel } from './GeometryHelper';
+import type { BaseStructureGroup } from './CircularColumnsBuilder';
 
-export interface ConcreteGroup {
-    mesh?: BABYLON.Mesh;
-    material?: BABYLON.StandardMaterial;
-    infiniteBlocks?: BABYLON.Mesh[];
-    dimensionLines?: DimensionLineResult;
+export class ConcreteGroup implements BaseStructureGroup {
+    group: BABYLON.TransformNode;
+    private mesh?: BABYLON.Mesh;
+    private material?: BABYLON.StandardMaterial;
+    private infiniteBlocks?: BABYLON.Mesh[];
+    private dimensionLines?: DimensionLineResult;
+
+    constructor(group: BABYLON.TransformNode) {
+        this.group = group;
+    }
+
+    getMesh(): BABYLON.Mesh | undefined {
+        return this.mesh;
+    }
+
+    setMesh(mesh: BABYLON.Mesh | undefined): void {
+        this.mesh = mesh;
+    }
+
+    getMaterial(): BABYLON.StandardMaterial | undefined {
+        return this.material;
+    }
+
+    setMaterial(material: BABYLON.StandardMaterial | undefined): void {
+        this.material = material;
+    }
+
+    getInfiniteBlocks(): BABYLON.Mesh[] | undefined {
+        return this.infiniteBlocks;
+    }
+
+    setInfiniteBlocks(blocks: BABYLON.Mesh[] | undefined): void {
+        this.infiniteBlocks = blocks;
+    }
+
+    getDimensionLines(): DimensionLineResult | undefined {
+        return this.dimensionLines;
+    }
+
+    setDimensionLines(dimensionLines: DimensionLineResult | undefined): void {
+        this.dimensionLines = dimensionLines;
+    }
+
+    dispose(): void {
+        this.dimensionLines?.dispose?.();
+        this.mesh?.dispose();
+        this.infiniteBlocks?.forEach(block => block.dispose());
+    }
 }
 
 // Global concrete material - shared across all concrete instances
@@ -55,6 +99,13 @@ export const createConcrete = (
     isFiniteConcrete: boolean = true,
     showDimensions: boolean = true
 ): ConcreteGroup => {
+    // Create a transform node to group concrete elements
+    const concreteTransformNode = new BABYLON.TransformNode('concreteGroup', scene);
+    if (parent) {
+        concreteTransformNode.parent = parent as BABYLON.Node;
+    }
+
+    const concreteGroup = new ConcreteGroup(concreteTransformNode);
     const material = initializeConcreteMaterial(scene);
 
     const concrete = BABYLON.MeshBuilder.CreateBox(
@@ -171,27 +222,30 @@ export const createConcrete = (
         );
         if (heightLabel) labels.push(heightLabel);
 
-        dimensionLines = {
-            group: dimensionGroup,
-            meshes: dimensionGroup.getChildren() as BABYLON.Mesh[],
-            labels: labels,
-            width: concreteWidth,
-            depth: concreteDepth,
-            height: concreteThickness
-        };
+        const dimensionLineResult = new DimensionLineResult(
+            dimensionGroup,
+            concreteWidth,
+            concreteDepth,
+            concreteThickness
+        );
+        dimensionLineResult.setLabels(labels);
+        // Add meshes from dimension group
+        (dimensionGroup.getChildren() as BABYLON.Mesh[]).forEach(mesh => {
+            dimensionLineResult.addMesh(mesh);
+        });
+        dimensionLines = dimensionLineResult;
 
         if (parent) {
             dimensionGroup.parent = parent as BABYLON.Node;
         }
     }
 
+    concreteGroup.setMesh(concrete);
+    concreteGroup.setMaterial(material);
+    concreteGroup.setInfiniteBlocks(sinBlocks);
+    concreteGroup.setDimensionLines(dimensionLines);
 
-    return {
-        mesh: concrete,
-        material: material,
-        infiniteBlocks: sinBlocks,
-        dimensionLines: dimensionLines
-    };
+    return concreteGroup;
 };
 
 export const updateConcrete = (
@@ -206,30 +260,7 @@ export const updateConcrete = (
     showDimensions: boolean = true
 ) => {
     // Dispose old concrete mesh
-    if (concreteGroup.mesh) {
-        concreteGroup.mesh.dispose();
-    }
-
-    // Dispose old sin blocks
-    if (concreteGroup.infiniteBlocks) {
-        for (let i = concreteGroup.infiniteBlocks.length - 1; i >= 0; i--) {
-            concreteGroup.infiniteBlocks[i].dispose();
-        }
-        concreteGroup.infiniteBlocks = [];
-    }
-
-    // Dispose old dimension lines
-    if (concreteGroup.dimensionLines) {
-        concreteGroup.dimensionLines.meshes.forEach(mesh => mesh.dispose());
-        // Dispose old labels from AdvancedDynamicTexture
-        const advancedTexture = initializeDimensionLabelTexture();
-        concreteGroup.dimensionLines.labels.forEach(labelData => {
-            advancedTexture.removeControl(labelData.label);
-            labelData.label.dispose();
-        });
-        concreteGroup.dimensionLines.group.dispose();
-        concreteGroup.dimensionLines = undefined;
-    }
+    concreteGroup.dispose();
 
     const material = initializeConcreteMaterial(scene);
 
@@ -347,24 +378,28 @@ export const updateConcrete = (
         );
         if (heightLabel) labels.push(heightLabel);
 
-        dimensionLines = {
-            group: dimensionGroup,
-            meshes: dimensionGroup.getChildren() as BABYLON.Mesh[],
-            labels: labels,
-            width: concreteWidth,
-            depth: concreteDepth,
-            height: concreteThickness
-        };
+        const dimensionLineResult2 = new DimensionLineResult(
+            dimensionGroup,
+            concreteWidth,
+            concreteDepth,
+            concreteThickness
+        );
+        dimensionLineResult2.setLabels(labels);
+        // Add meshes from dimension group
+        (dimensionGroup.getChildren() as BABYLON.Mesh[]).forEach(mesh => {
+            dimensionLineResult2.addMesh(mesh);
+        });
+        dimensionLines = dimensionLineResult2;
 
         if (parent) {
             dimensionGroup.parent = parent as BABYLON.Node;
         }
     }
 
-    concreteGroup.mesh = concrete;
-    concreteGroup.material = material;
-    concreteGroup.infiniteBlocks = sinBlocks;
-    concreteGroup.dimensionLines = dimensionLines;
+    concreteGroup.setMesh(concrete);
+    concreteGroup.setMaterial(material);
+    concreteGroup.setInfiniteBlocks(sinBlocks);
+    concreteGroup.setDimensionLines(dimensionLines);
 };
 
 const createInfiniteBlocks = (

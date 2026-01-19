@@ -34,11 +34,75 @@ export const createCross = (
   return crossGroup;
 };
 
-export interface ComplexColumnGroup extends BaseStructureGroup {
-  concrete?: ConcreteGroup;
-  cuboid1?: BABYLON.Mesh;
-  cuboid2?: BABYLON.Mesh;
-  posts?: BABYLON.Mesh[];
+export class ComplexColumnGroup implements BaseStructureGroup {
+  group: BABYLON.TransformNode;
+  private concreteGroup?: ConcreteGroup;
+  private cuboid1?: BABYLON.Mesh;
+  private cuboid2?: BABYLON.Mesh;
+  private posts?: BABYLON.Mesh[];
+
+  constructor(group: BABYLON.TransformNode) {
+    this.group = group;
+    this.posts = [];
+  }
+
+  getConcreteGroup(): ConcreteGroup | undefined {
+    return this.concreteGroup;
+  }
+
+  setConcreteGroup(concreteGroup: ConcreteGroup): void {
+    this.concreteGroup = concreteGroup;
+  }
+
+  getCuboid1(): BABYLON.Mesh | undefined {
+    return this.cuboid1;
+  }
+
+  setCuboid1(cuboid: BABYLON.Mesh): void {
+    this.cuboid1 = cuboid;
+  }
+
+  getCuboid2(): BABYLON.Mesh | undefined {
+    return this.cuboid2;
+  }
+
+  setCuboid2(cuboid: BABYLON.Mesh): void {
+    this.cuboid2 = cuboid;
+  }
+
+  getPosts(): BABYLON.Mesh[] {
+    return this.posts || [];
+  }
+
+  addPost(post: BABYLON.Mesh): void {
+    if (!this.posts) {
+      this.posts = [];
+    }
+    this.posts.push(post);
+  }
+
+  clearPosts(): void {
+    if (this.posts) {
+      this.posts.forEach(post => post.dispose());
+      this.posts = [];
+    }
+  }
+
+  dispose(): void {
+    // Dispose concrete group and all its resources
+    if (this.concreteGroup) {
+      this.concreteGroup.dispose();
+    }
+    
+    // Dispose cuboids
+    this.cuboid1?.dispose();
+    this.cuboid2?.dispose();
+    
+    // Dispose posts
+    if (this.posts) {
+      this.posts.forEach(post => post.dispose());
+    }
+  }
 }
 
 export const createComplexColumn = (
@@ -47,7 +111,7 @@ export const createComplexColumn = (
   concreteWidth: number = 3,
   concreteDepth: number = 3,
   concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
-  infiniteBlockPositions: BABYLON.Vector3[] = [],
+  _infiniteBlockPositions: BABYLON.Vector3[] = [],
   isFiniteConcrete: boolean = true,
   cuboid1SizeX: number = 2,
   cuboid1SizeZ: number = 2,
@@ -63,19 +127,7 @@ export const createComplexColumn = (
   postOffset: number = 0.1
 ): ComplexColumnGroup => {
   const columnGroup = new BABYLON.TransformNode('complexColumn', scene);
-  const complexColumn: ComplexColumnGroup = {
-    group: columnGroup,
-    posts: [],
-    dispose() {
-      this.concrete?.mesh?.dispose();
-      this.concrete?.material?.dispose();
-      this.concrete?.infiniteBlocks?.forEach(block => block.dispose());
-      this.cuboid1?.dispose();
-      this.cuboid2?.dispose();
-      this.posts?.forEach(post => post.dispose());
-      // Don't dispose the group itself, let React/cleanup handle that
-    }
-  };
+  const complexColumn = new ComplexColumnGroup(columnGroup);
 
   // 1. Create concrete base using ConcreteBuilder
   const concreteGroup = createConcrete(
@@ -87,7 +139,7 @@ export const createComplexColumn = (
     columnGroup,
     isFiniteConcrete
   );
-  complexColumn.concrete = concreteGroup;
+  complexColumn.setConcreteGroup(concreteGroup);
 
   // 2. Create 2 cuboids that cross each other on top
   const cuboidMaterial = new BABYLON.StandardMaterial('cuboidMaterial', scene);
@@ -106,7 +158,7 @@ export const createComplexColumn = (
   cuboid1.material = cuboidMaterial;
   cuboid1.receiveShadows = true;
   cuboid1.parent = columnGroup;
-  complexColumn.cuboid1 = cuboid1;
+  complexColumn.setCuboid1(cuboid1);
 
   // Second cuboid (along Z axis)
   const cuboid2 = BABYLON.MeshBuilder.CreateBox('cuboid2', { width: cuboid2SizeX, height: cuboidHeight, depth: cuboid2SizeZ }, scene);
@@ -114,7 +166,7 @@ export const createComplexColumn = (
   cuboid2.material = cuboidMaterial;
   cuboid2.receiveShadows = true;
   cuboid2.parent = columnGroup;
-  complexColumn.cuboid2 = cuboid2;
+  complexColumn.setCuboid2(cuboid2);
 
   // 3. Create posts around the perimeter of cuboids
   const cuboid1Positions = calculateCuboidPostPositions(
@@ -159,19 +211,19 @@ export const createComplexColumn = (
       columnGroup,
       `complexColumnPost_${postPos.index}`
     );
-    complexColumn.posts!.push(postGroup.mesh!);
+    complexColumn.addPost(postGroup.mesh!);
   });
 
   return complexColumn;
 };
 
 export const updateComplexColumn = (
-  complexColumn: ComplexColumnGroup,
+  complexColumnGroup: ComplexColumnGroup,
   concreteThickness: number = 1,
   concreteWidth: number = 3,
   concreteDepth: number = 3,
   concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
-  infiniteBlockPositions: BABYLON.Vector3[] = [],
+  _infiniteBlockPositions: BABYLON.Vector3[] = [],
   isFiniteConcrete: boolean = true,
   cuboid1SizeX: number = 2,
   cuboid1SizeZ: number = 2,
@@ -186,18 +238,19 @@ export const updateComplexColumn = (
   postRadius: number = 0.05,
   postOffset: number = 0.1
 ) => {
-  const scene = complexColumn.group.getScene();
-
+  const scene = complexColumnGroup.group.getScene();
+  complexColumnGroup.dispose();
   // 1. Update concrete using ConcreteBuilder
-  if (complexColumn.concrete) {
+  const concreteGroup = complexColumnGroup.getConcreteGroup();
+  if (concreteGroup) {
     updateConcrete(
-      complexColumn.concrete,
+      concreteGroup,
       scene,
       concreteThickness,
       concreteWidth,
       concreteDepth,
       concretePosition,
-      complexColumn.group,
+      complexColumnGroup.group,
       isFiniteConcrete
     );
   }
@@ -214,37 +267,27 @@ export const updateComplexColumn = (
   const cuboidCenterY = concreteTopY + cuboidGap + cuboidHeight / 2;
 
   // Update cuboid 1
-  if (complexColumn.cuboid1) {
-    complexColumn.cuboid1.dispose();
-
+  const currentCuboid1 = complexColumnGroup.getCuboid1();
+  if (currentCuboid1) {
     const cuboid1 = BABYLON.MeshBuilder.CreateBox('cuboid1', 
       { width: cuboid1SizeX, height: cuboidHeight, depth: cuboid1SizeZ }, scene);
     cuboid1.position = new BABYLON.Vector3(0, cuboidCenterY, 0);
     cuboid1.material = cuboidMaterial;
     cuboid1.receiveShadows = true;
-    cuboid1.parent = complexColumn.group;
-    complexColumn.cuboid1 = cuboid1;
+    cuboid1.parent = complexColumnGroup.group;
+    complexColumnGroup.setCuboid1(cuboid1);
   }
 
   // Update cuboid 2
-  if (complexColumn.cuboid2) {
-    complexColumn.cuboid2.dispose();
-
+  const currentCuboid2 = complexColumnGroup.getCuboid2();
+  if (currentCuboid2) {
     const cuboid2 = BABYLON.MeshBuilder.CreateBox('cuboid2', 
       { width: cuboid2SizeX, height: cuboidHeight, depth: cuboid2SizeZ }, scene);
     cuboid2.position = new BABYLON.Vector3(cuboid2TranslateX, cuboidCenterY, cuboid2TranslateZ);
     cuboid2.material = cuboidMaterial;
     cuboid2.receiveShadows = true;
-    cuboid2.parent = complexColumn.group;
-    complexColumn.cuboid2 = cuboid2;
-  }
-
-  // Remove and recreate posts
-  if (complexColumn.posts) {
-    complexColumn.posts.forEach((post) => {
-      post.dispose();
-    });
-    complexColumn.posts = [];
+    cuboid2.parent = complexColumnGroup.group;
+    complexColumnGroup.setCuboid2(cuboid2);
   }
 
   // Create new posts with updated parameters
@@ -287,9 +330,9 @@ export const updateComplexColumn = (
       postHeight,
       postRadius * 2, // diameter
       adjustedPostPosition,
-      complexColumn.group,
+      complexColumnGroup.group,
       `complexColumnPost_${postPos.index}`
     );
-    complexColumn.posts!.push(postGroup.mesh!);
+    complexColumnGroup.addPost(postGroup.mesh!);
   });
 };
