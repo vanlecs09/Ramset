@@ -57,8 +57,8 @@ const addBlockVertices = (
     const startVertex = vertexCount;
     const divU = 50;
     const divV = 10;
-    const amp = 0.02;
-    const freq = 10;
+    const amp = 0.04;
+    const freq = 5;
 
     // Helper function to apply rotation and scaling
     const transformVertex = (vertex: [number, number, number]): [number, number, number] => {

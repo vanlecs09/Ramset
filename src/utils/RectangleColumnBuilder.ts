@@ -118,17 +118,18 @@ export const createRectangleColumn = (
     // 2. Create rectangle column (box on top)
     const concreteTopY = 1.5;
     let columnHeight = 0.3;
-    const column = BABYLON.MeshBuilder.CreateBox(
-        'rectangleColumn',
-        { width: columnWidth, height: columnHeight, depth: columnDepth },
-        scene
-    );
-    column.position.y = concreteTopY + columnHeight / 2; // Sit on top of concrete
-    column.material = columnMaterial;
+    // const column = BABYLON.MeshBuilder.CreateBox(
+    //     'rectangleColumn',
+    //     { width: columnWidth, height: columnHeight, depth: columnDepth },
+    //     scene
+    // );
+    // column.position.y = concreteTopY + columnHeight / 2; // Sit on top of concrete
+    // column.material = columnMaterial;
 
-    // column.receiveShadows = true;
-    column.parent = columnGroup;
-    rectangleColumn.setColumn(column);
+    // // column.receiveShadows = true;
+    // column.parent = columnGroup;
+    // rectangleColumn.setColumn(column);
+     addWaveBlocksOnTop(rectangleColumn, columnWidth, columnDepth, columnHeight + 0.2);
 
     // 3. Create posts connecting concrete to column
     const postHeight = columnHeight * 2;
@@ -191,20 +192,20 @@ export const updateRectangleColumn = (
     const concreteTopY = 1.5;
     let columnHeight = 0.3;
 
-    const newColumn = BABYLON.MeshBuilder.CreateBox(
-        'rectangleColumn',
-        { width: columnWidth, height: columnHeight, depth: columnDepth },
-        scene
-    );
-    newColumn.position.y = concreteTopY + columnHeight / 2; // Sit on top of concrete
-    newColumn.material = columnMaterial;
+    // const newColumn = BABYLON.MeshBuilder.CreateBox(
+    //     'rectangleColumn',
+    //     { width: columnWidth, height: columnHeight, depth: columnDepth },
+    //     scene
+    // );
+    // newColumn.position.y = concreteTopY + columnHeight / 2; // Sit on top of concrete
+    // newColumn.material = columnMaterial;
 
-    // column.receiveShadows = true;
-    newColumn.parent = rectangleColumn.group;
-    rectangleColumn.setColumn(newColumn);
+    // // column.receiveShadows = true;
+    // newColumn.parent = rectangleColumn.group;
+    // rectangleColumn.setColumn(newColumn);
 
     // Update column
-    addWaveBlocksOnTop(rectangleColumn, columnWidth, columnDepth, 0.2, columnHeight); // Assuming columnHeight = 1
+    addWaveBlocksOnTop(rectangleColumn, columnWidth, columnDepth, columnHeight + 0.2); // Assuming columnHeight = 1
 
     // Remove and recreate posts
     // rectangleColumn.clearPosts();
@@ -246,7 +247,6 @@ export const addWaveBlocksOnTop = (
     blockWidth: number = 3,
     blockDepth: number = 2,
     blockHeight: number = 0.5,
-    columnHeight: number = 1,
 ) => {
     const column = rectangleColumn.getColumn();
     if (!column) {
@@ -255,7 +255,7 @@ export const addWaveBlocksOnTop = (
     }
 
     const scene = rectangleColumn.group.getScene();
-    const columnTopY = column.position.y + columnHeight / 2;
+    const columnTopY = column.position.y;
 
     // Initialize materials
     initializeMaterials(scene);
@@ -266,7 +266,7 @@ export const addWaveBlocksOnTop = (
     // Position each block above the column
     const blockPosition = new BABYLON.Vector3(
         0,
-        columnTopY + blockHeight / 2,
+        columnTopY,
         0
     );
 

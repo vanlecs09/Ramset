@@ -49,7 +49,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onComplexColumnParamsChange,
   onRectangleColumnParamsChange,
 }) => {
-  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn'>('complexColumn');
+  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn'>('rectangleColumn');
 
   // Tower parameters
   const [towerIsFiniteConcrete, setTowerIsFiniteConcrete] = useState(DEFAULT_TOWER_PARAMS.isFiniteConcrete);
