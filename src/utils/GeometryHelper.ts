@@ -20,7 +20,7 @@ export interface DimensionLineOptions {
   };
 }
 
-export interface DimensionLabel {
+export interface DimensionLabelNode {
   label: GUI.TextBlock;
   lineMesh: BABYLON.Mesh;
   linePosition: BABYLON.Vector3;
@@ -31,7 +31,7 @@ export interface DimensionLabel {
 export class DimensionLineNode implements BaseStructureGroup {
   group: BABYLON.TransformNode;
   private meshes: BABYLON.Mesh[] = [];
-  private labels: DimensionLabel[] = [];
+  private labels: DimensionLabelNode[] = [];
   width: number;
   depth: number;
   height: number;
@@ -60,15 +60,15 @@ export class DimensionLineNode implements BaseStructureGroup {
     this.meshes.push(mesh);
   }
 
-  getLabels(): DimensionLabel[] {
+  getLabels(): DimensionLabelNode[] {
     return this.labels;
   }
 
-  setLabels(labels: DimensionLabel[]): void {
+  setLabels(labels: DimensionLabelNode[]): void {
     this.labels = labels;
   }
 
-  addLabel(label: DimensionLabel): void {
+  addLabel(label: DimensionLabelNode): void {
     this.labels.push(label);
   }
 
@@ -222,7 +222,7 @@ export const createDimensionWithLabel = (
   advancedTexture: GUI.AdvancedDynamicTexture,
   labelOffsetX: number = 0,
   labelOffsetY: number = 0
-): DimensionLabel | null => {
+): DimensionLabelNode | null => {
   const result = createDimensionLine(
     dimensionName,
     scene,

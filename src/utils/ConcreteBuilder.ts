@@ -1,6 +1,6 @@
 import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
-import { createDimensionWithLabel, DimensionLineNode, type DimensionLabel } from './GeometryHelper';
+import { createDimensionWithLabel, DimensionLineNode, type DimensionLabelNode } from './GeometryHelper';
 import type { BaseStructureGroup as BaseStructureNode } from './CircularColumnsBuilder';
 
 export class ConcreteNode implements BaseStructureNode {
@@ -157,7 +157,7 @@ export const createConcrete = (
 
         const offset = 0.4;
         const dimensionGroup = new BABYLON.TransformNode('dimensionGroup_concrete', scene);
-        const labels: DimensionLabel[] = [];
+        const labels: DimensionLabelNode[] = [];
         
         // Use global AdvancedDynamicTexture for dimension labels
         const advancedTexture = initializeDimensionLabelTexture();
@@ -313,7 +313,7 @@ export const updateConcrete = (
 
         const offset = 0.1;
         const dimensionGroup = new BABYLON.TransformNode('dimensionGroup_concrete', scene);
-        const labels: DimensionLabel[] = [];
+        const labels: DimensionLabelNode[] = [];
         
         // Use global AdvancedDynamicTexture for dimension labels
         const advancedTexture = initializeDimensionLabelTexture();

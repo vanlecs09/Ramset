@@ -3,12 +3,14 @@ import * as BABYLON from '@babylonjs/core';
 import { createComplexColumn, updateComplexColumn } from '../utils/ComplexColumnsBuilder';
 import { createCircularColumns, updateCircularColumns } from '../utils/CircularColumnsBuilder';
 import { createRectangleColumn, updateRectangleColumn } from '../utils/RectangleColumnBuilder';
+import { createSlab, updateSlab } from '../utils/SlabBuilder';
 import { calculateCircularPostPositions } from '../utils/CircularPostPositionCalculator';
-import { calculateRectanglePostPositions } from '../utils/RectanglePostPositionCalculator';
-import type { CircularColumnsGroup } from '../utils/CircularColumnsBuilder';
-import type { ComplexColumnGroup } from '../utils/ComplexColumnsBuilder';
-import type { RectangleColumnGroup } from '../utils/RectangleColumnBuilder';
-import type { RectangleColumnParams } from '../App';
+import { calculateRectanglePostPositions, calculateYSurfacePostPositions } from '../utils/RectanglePostPositionCalculator';
+import type { CircularColumnsNode } from '../utils/CircularColumnsBuilder';
+import type { ComplexColumnNode } from '../utils/ComplexColumnsBuilder';
+import type { RectangleColumnNode } from '../utils/RectangleColumnBuilder';
+import type { SlabNode } from '../utils/SlabBuilder';
+import type { RectangleColumnParams, SlabParams } from '../App';
 
 interface TowerParams {
   isFiniteConcrete: boolean;
@@ -47,10 +49,11 @@ interface ComplexColumnParams {
 
 interface ConstructionViewerProps {
   onSceneReady?: (scene: BABYLON.Scene) => void;
-  model?: 'circularColumns' | 'complexColumn' | 'rectangleColumn';
+  model?: 'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab';
   towerParams?: TowerParams;
   complexColumnParams?: ComplexColumnParams;
   rectangleColumnParams?: RectangleColumnParams;
+  slabParams?: SlabParams;
 }
 
 interface ConcreteLayout {
@@ -148,13 +151,28 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     concreteOffsetZBack: 1.5,
     concreteOffsetZFront: 1.5,
   },
+  slabParams = {
+    isFiniteConcrete: true,
+    concreteThickness: 1,
+    slabWidth: 0.1,
+    slabDepth: 1,
+    postCountX: 3,
+    postCountZ: 2,
+    postDiameter: 0.03,
+    postOffset: 0.02,
+    concreteOffsetXRight: 0.1,
+    concreteOffsetXLeft: 0.1,
+    concreteOffsetZBack: 0.5,
+    concreteOffsetZFront: 0.5,
+  },
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<BABYLON.Scene | null>(null);
   const engineRef = useRef<BABYLON.Engine | null>(null);
-  const circularColumnsRef = useRef<CircularColumnsGroup | null>(null);
-  const complexColumnRef = useRef<ComplexColumnGroup | null>(null);
-  const rectangleColumnRef = useRef<RectangleColumnGroup | null>(null);
+  const circularColumnsRef = useRef<CircularColumnsNode | null>(null);
+  const complexColumnRef = useRef<ComplexColumnNode | null>(null);
+  const rectangleColumnRef = useRef<RectangleColumnNode | null>(null);
+  const slabRef = useRef<SlabNode | null>(null);
 
   // Initialize scene and engine (once on mount)
   useEffect(() => {
@@ -292,6 +310,10 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         rectangleColumnRef.current.dispose();
         rectangleColumnRef.current = null;
       }
+      if (slabRef.current) {
+        slabRef.current.dispose();
+        slabRef.current = null;
+      }
     };
 
     if (model === 'circularColumns') {
@@ -406,7 +428,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     } else if (model === 'rectangleColumn') {
 
       // Calculate concrete dimensions and positions
-      const { concreteWidth, concreteDepth, concretePosition, finiteBlockPositions } = calculateConcreteLayout({
+      const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
         concreteOffsetXRight: rectangleColumnParams.concreteOffsetXRight,
         concreteOffsetXLeft: rectangleColumnParams.concreteOffsetXLeft,
         concreteOffsetZBack: rectangleColumnParams.concreteOffsetZBack,
@@ -454,6 +476,58 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           rectangleColumnParams.isFiniteConcrete
         );
       }
+    } else if (model === 'slab') {
+
+      // Calculate concrete dimensions and positions
+      const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
+        concreteOffsetXRight: slabParams.concreteOffsetXRight,
+        concreteOffsetXLeft: slabParams.concreteOffsetXLeft,
+        concreteOffsetZBack: slabParams.concreteOffsetZBack,
+        concreteOffsetZFront: slabParams.concreteOffsetZFront,
+        concreteThickness: slabParams.concreteThickness,
+      });
+
+      // Calculate post positions first
+      let halfConcreteDepth = concreteDepth / 2;
+      const slabCenterZ = halfConcreteDepth;
+      const postPositions = calculateYSurfacePostPositions(
+        slabParams.slabDepth,
+        slabParams.slabWidth,
+        slabParams.postCountX,
+        slabParams.postCountZ,
+        slabParams.postOffset,
+        slabCenterZ
+      );
+
+      if (!slabRef.current) {
+        disposePreviousStructure();
+
+        slabRef.current = createSlab(
+          scene,
+          postPositions,
+          slabParams.concreteThickness,
+          slabParams.slabWidth,
+          slabParams.slabDepth,
+          slabParams.postDiameter,
+          concreteWidth,
+          concreteDepth,
+          concretePosition,
+          slabParams.isFiniteConcrete
+        );
+      } else {
+        updateSlab(
+          slabRef.current,
+          postPositions,
+          slabParams.concreteThickness,
+          slabParams.slabWidth,
+          slabParams.slabDepth,
+          slabParams.postDiameter,
+          concreteWidth,
+          concreteDepth,
+          concretePosition,
+          slabParams.isFiniteConcrete
+        );
+      }
     }
   }, [
     model,
@@ -497,6 +571,18 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     rectangleColumnParams.concreteOffsetZBack,
     rectangleColumnParams.concreteOffsetZFront,
 
+    slabParams.isFiniteConcrete,
+    slabParams.concreteThickness,
+    slabParams.slabWidth,
+    slabParams.slabDepth,
+    slabParams.postCountX,
+    slabParams.postCountZ,
+    slabParams.postDiameter,
+    slabParams.postOffset,
+    slabParams.concreteOffsetXRight,
+    slabParams.concreteOffsetXLeft,
+    slabParams.concreteOffsetZBack,
+    slabParams.concreteOffsetZFront,
   ]);
 
   return (

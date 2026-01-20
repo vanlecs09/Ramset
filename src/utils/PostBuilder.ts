@@ -11,7 +11,7 @@ let postMaterial: BABYLON.StandardMaterial | null = null;
 const initializePostMaterial = (scene: BABYLON.Scene) => {
     if (!postMaterial) {
         postMaterial = new BABYLON.StandardMaterial('postMaterial', scene);
-        postMaterial.diffuseColor = new BABYLON.Color3(255, 103, 38).scale(1/255); // reddish
+        postMaterial.diffuseColor = new BABYLON.Color3(255, 103, 38).scale(1 / 255); // reddish
         postMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
     }
     return postMaterial;
@@ -22,6 +22,7 @@ export const createPost = (
     height: number = 1,
     diameter: number = 0.2,
     position?: BABYLON.Vector3,
+    rotation?: BABYLON.Vector3,
     parent?: BABYLON.TransformNode,
     name: string = 'post'
 ): PostGroup => {
@@ -35,6 +36,10 @@ export const createPost = (
 
     if (position) {
         post.position = position;
+    }
+
+    if (rotation) {
+        post.rotation = rotation;
     }
 
     post.material = material;
@@ -100,7 +105,7 @@ export const createPostBatch = (
     posts: Array<{ height: number; diameter: number; position?: BABYLON.Vector3; name: string }>,
     parent?: BABYLON.TransformNode
 ): PostGroup[] => {
-    return posts.map(post => 
-        createPost(scene, post.height, post.diameter, post.position, parent, post.name)
+    return posts.map(post =>
+        createPost(scene, post.height, post.diameter, post.position, undefined,  parent, post.name)
     );
 };

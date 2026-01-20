@@ -208,6 +208,7 @@ export const createComplexColumn = (
       postHeight,
       postRadius * 2, // diameter
       adjustedPostPosition,
+      undefined,
       columnGroup,
       `complexColumnPost_${postPos.index}`
     );
@@ -330,6 +331,7 @@ export const updateComplexColumn = (
       postHeight,
       postRadius * 2, // diameter
       adjustedPostPosition,
+      undefined,
       complexColumnGroup.group,
       `complexColumnPost_${postPos.index}`
     );

@@ -155,6 +155,7 @@ export const createCircularColumns = (
       postHeight,
       postRadius * 2,
       adjustedPostPosition,
+      undefined,
       towerGroup,
       `towerPost_${postPos.index}`
     );
@@ -295,6 +296,7 @@ export const updateCircularColumns = (
       postHeight,
       postRadius * 2,
       adjustedPostPosition,
+      undefined,
       circularColumnsGroup.group,
       `towerPost_${postPos.index}`
     );

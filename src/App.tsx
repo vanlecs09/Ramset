@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './App.css';
 import ConstructionViewer from './components/ConstructionViewer';
 import { ControlPanel } from './components/ControlPanel';
-import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS } from './constants/defaultParams';
+import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_SLAB_PARAMS } from './constants/defaultParams';
 
 export interface CircularColumnParams {
   isFiniteConcrete: boolean;
@@ -54,11 +54,27 @@ export interface RectangleColumnParams {
   concreteOffsetZFront: number;
 }
 
+export interface SlabParams {
+  isFiniteConcrete: boolean;
+  concreteThickness: number;
+  slabWidth: number;
+  slabDepth: number;
+  postCountX: number;
+  postCountZ: number;
+  postDiameter: number;
+  postOffset: number;
+  concreteOffsetXRight: number;
+  concreteOffsetXLeft: number;
+  concreteOffsetZBack: number;
+  concreteOffsetZFront: number;
+}
+
 function App() {
-  const [currentModel, setCurrentModel] = useState< 'circularColumns' | 'complexColumn' | 'rectangleColumn'>('rectangleColumn');
+  const [currentModel, setCurrentModel] = useState< 'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab'>('slab');
   const [towerParams, setTowerParams] = useState<CircularColumnParams>(DEFAULT_TOWER_PARAMS);
   const [complexColumnParams, setComplexColumnParams] = useState<ComplexColumnParams>(DEFAULT_COMPLEX_COLUMN_PARAMS);
   const [rectangleColumnParams, setRectangleColumnParams] = useState<RectangleColumnParams>(DEFAULT_RECTANGLE_COLUMN_PARAMS);
+  const [slabParams, setSlabParams] = useState<SlabParams>(DEFAULT_SLAB_PARAMS);
 
   return (
     <div className="app-container">
@@ -67,6 +83,7 @@ function App() {
         onTowerParamsChange={setTowerParams}
         onComplexColumnParamsChange={setComplexColumnParams}
         onRectangleColumnParamsChange={setRectangleColumnParams}
+        onSlabParamsChange={setSlabParams}
       />
       <div className="viewer-container">
         <ConstructionViewer
@@ -74,6 +91,7 @@ function App() {
           towerParams={towerParams}
           complexColumnParams={complexColumnParams}
           rectangleColumnParams={rectangleColumnParams}
+          slabParams={slabParams}
         />
       </div>
       <footer className="app-footer">

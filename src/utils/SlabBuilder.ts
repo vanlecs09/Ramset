@@ -5,15 +5,16 @@ import { createWaveBlock } from './WaveBuilder';
 import type { BaseStructureGroup } from './CircularColumnsBuilder';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 
-export class RectangleColumnNode implements BaseStructureGroup {
+export class SlabNode implements BaseStructureGroup {
     group: BABYLON.TransformNode;
     private concreteGroup?: ConcreteNode;
-    private column?: BABYLON.Mesh;
+    private waveBlocks?: BABYLON.Mesh[];
     private posts?: BABYLON.Mesh[];
 
     constructor(group: BABYLON.TransformNode) {
         this.group = group;
         this.posts = [];
+        this.waveBlocks = [];
     }
 
     // Expose methods for safe access
@@ -25,12 +26,26 @@ export class RectangleColumnNode implements BaseStructureGroup {
         this.concreteGroup = concreteGroup;
     }
 
-    getColumn(): BABYLON.Mesh | undefined {
-        return this.column;
+    getWaveBlocks(): BABYLON.Mesh[] {
+        return this.waveBlocks || [];
     }
 
-    setColumn(column: BABYLON.Mesh): void {
-        this.column = column;
+    setWaveBlocks(waveBlocks: BABYLON.Mesh[]): void {
+        this.waveBlocks = waveBlocks;
+    }
+
+    addWaveBlock(waveBlock: BABYLON.Mesh): void {
+        if (!this.waveBlocks) {
+            this.waveBlocks = [];
+        }
+        this.waveBlocks.push(waveBlock);
+    }
+
+    clearWaveBlocks(): void {
+        if (this.waveBlocks) {
+            this.waveBlocks.forEach(block => block.dispose());
+            this.waveBlocks = [];
+        }
     }
 
     getPosts(): BABYLON.Mesh[] {
@@ -56,7 +71,7 @@ export class RectangleColumnNode implements BaseStructureGroup {
         if (this.concreteGroup) {
             this.concreteGroup.dispose();
         }
-        this.column?.dispose();
+        this.clearWaveBlocks();
         if (this.posts) {
             this.posts.forEach(post => post.dispose());
         }
@@ -64,18 +79,16 @@ export class RectangleColumnNode implements BaseStructureGroup {
 }
 
 // Global materials - shared across create and update functions
-let columnMaterial: BABYLON.StandardMaterial | null = null;
+let slabMaterial: BABYLON.StandardMaterial | null = null;
 let waveBlockMaterial: BABYLON.StandardMaterial | null = null;
 
 const initializeMaterials = (scene: BABYLON.Scene) => {
-    if (!columnMaterial) {
-        var mat = new BABYLON.StandardMaterial('columnMaterial', scene);
-        mat.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8);   // light gray tint
+    if (!slabMaterial) {
+        var mat = new BABYLON.StandardMaterial('slabMaterial', scene);
+        mat.diffuseColor = new BABYLON.Color3(0.7, 0.7, 0.7);   // medium gray
         mat.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
-        // mat.alpha = 0.4;                                    // transparency (0 = invisible, 1 = opaque)
-        // mat.backFaceCulling = false;
         mat.alpha = 0.85;
-        columnMaterial = mat;
+        slabMaterial = mat;
     }
     if (!waveBlockMaterial) {
         var waveMat = new BABYLON.StandardMaterial('waveBlockMaterial', scene);
@@ -87,20 +100,20 @@ const initializeMaterials = (scene: BABYLON.Scene) => {
     }
 };
 
-export const createRectangleColumn = (
+export const createSlab = (
     scene: BABYLON.Scene,
     postPositions: RectanglePostPosition[],
     concreteThickness: number = 1,
-    columnWidth: number = 3,
-    columnDepth: number = 2,
+    slabWidth: number = 3,
+    slabDepth: number = 2,
     postDiameter: number = 0.2,
     concreteWidth: number = 3,
     concreteDepth: number = 3,
     concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
     isFiniteConcrete: boolean = true
-): RectangleColumnNode => {
-    const columnGroup = new BABYLON.TransformNode('rectangleColumn', scene);
-    const rectangleColumn = new RectangleColumnNode(columnGroup);
+): SlabNode => {
+    const slabGroup = new BABYLON.TransformNode('slab', scene);
+    const slab = new SlabNode(slabGroup);
 
     // Initialize materials
     initializeMaterials(scene);
@@ -111,23 +124,21 @@ export const createRectangleColumn = (
         concreteWidth,
         concreteDepth,
         concretePosition,
-        columnGroup,
+        slabGroup,
         isFiniteConcrete);
-    rectangleColumn.setConcreteGroup(concreteGroup);
+    slab.setConcreteGroup(concreteGroup);
 
-    // 2. Create rectangle column (box on top)
-    const concreteTopY = 1.5;
-    let columnHeight = 0.3;
-    addWaveBlocksOnTop(rectangleColumn, columnWidth, columnDepth, columnHeight + 0.2,
-        new BABYLON.Vector3(0, concreteTopY + columnHeight / 2, 0)
-    );
+    // 2. Create wave blocks extending from the right face of concrete
+    const slabHeigth = 0.3;
+    let slabPosition = new BABYLON.Vector3(concretePosition.x, concretePosition.y, concretePosition.z + (concreteDepth / 2 + slabHeigth / 2));
+    addWaveBlocksFromRightFace(slab, slabWidth, slabDepth, concreteWidth, slabPosition);
 
-    // 3. Create posts connecting concrete to column
-    const postHeight = columnHeight * 2;
+    // 3. Create posts connecting concrete to wave blocks
+    const postHeight = 0.3;
 
     postPositions.forEach((postPos) => {
         // Position post at concrete top surface with adjusted Y
-        const postPositionY = concreteTopY;
+        const postPositionY = 1.5;
         const adjustedPostPosition = new BABYLON.Vector3(
             postPos.position.x,
             postPositionY,
@@ -139,35 +150,36 @@ export const createRectangleColumn = (
             postHeight,
             postDiameter,
             adjustedPostPosition,
-            undefined,
-            columnGroup,
-            `rectangleColumnPost_${postPos.index}`
+            new BABYLON.Vector3(Math.PI / 2, 0, 0),
+            slabGroup,
+            `slabPost_${postPos.index}`
         );
-        rectangleColumn.addPost(postGroup.mesh!);
+        slab.addPost(postGroup.mesh!);
     });
 
-    return rectangleColumn;
+    return slab;
 };
 
-export const updateRectangleColumn = (
-    rectangleColumn: RectangleColumnNode,
+export const updateSlab = (
+    slabGroup: SlabNode,
     postPositions: RectanglePostPosition[],
     concreteThickness: number = 0.5,
-    columnWidth: number = 3,
-    columnDepth: number = 2,
+    slabWidth: number = 3,
+    slabDepth: number = 2,
     postDiameter: number = 0.2,
     concreteWidth: number = 3,
     concreteDepth: number = 3,
     concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
     isFiniteConcrete: boolean = true
 ) => {
-    const scene = rectangleColumn.group.getScene();
+    const scene = slabGroup.group.getScene();
 
     // Initialize materials
     initializeMaterials(scene);
-    rectangleColumn.dispose();
+    slabGroup.dispose();
+
     // Update concrete using ConcreteBuilder
-    let concreteGroup = rectangleColumn.getConcreteGroup();
+    let concreteGroup = slabGroup.getConcreteGroup();
     if (!concreteGroup) {
         concreteGroup = {} as ConcreteNode;
     }
@@ -177,26 +189,24 @@ export const updateRectangleColumn = (
         concreteWidth,
         concreteDepth,
         concretePosition,
-        rectangleColumn.group,
+        slabGroup.group,
         isFiniteConcrete);
-    rectangleColumn.setConcreteGroup(concreteGroup);
+    slabGroup.setConcreteGroup(concreteGroup);
 
-    const concreteTopY = 1.5;
-    let columnHeight = 0.3;
-
-    // Update column
-    addWaveBlocksOnTop(rectangleColumn, columnWidth, columnDepth, columnHeight + 0.2,
-        new BABYLON.Vector3(0, concreteTopY + columnHeight / 2, 0)); // Assuming columnHeight = 1
+    // Update wave blocks
+    const slabHeigth = 0.3;
+    let slabPosition = new BABYLON.Vector3(concretePosition.x, concretePosition.y, concretePosition.z + (concreteDepth / 2 + slabHeigth / 2));
+    addWaveBlocksFromRightFace(slabGroup, slabDepth, slabWidth, slabHeigth, slabPosition);
 
     // Recreate posts with pre-calculated positions
-    const postHeight = columnHeight * 2;
+    const postHeight = 0.3;
 
     postPositions.forEach((postPos) => {
         // Position post at concrete top surface with adjusted Y
-        const postPositionY = concreteTopY;
+        const postPositionY = 1.5;
         const adjustedPostPosition = new BABYLON.Vector3(
             postPos.position.x,
-            postPositionY,
+            postPos.position.y + postPositionY - slabWidth / 2,
             postPos.position.z
         );
 
@@ -205,65 +215,65 @@ export const updateRectangleColumn = (
             postHeight,
             postDiameter,
             adjustedPostPosition,
-            undefined,
-            rectangleColumn.group,
-            `rectangleColumnPost_${postPos.index}`
+            // new BABYLON.Vector3(0, 0, 0),
+            new BABYLON.Vector3(Math.PI / 2,0, 0), // local rotation
+            slabGroup.group,
+            `slabPost_${postPos.index}`
         );
-        rectangleColumn.addPost(postGroup.mesh!);
+        slabGroup.addPost(postGroup.mesh!);
     });
 };
 
 /**
- * Add wave blocks on top of the rectangle column extending upward along Y-axis
- * @param rectangleColumn - The rectangle column group to add blocks to
- * @param blockWidth - Width of the rectangle column
- * @param blockDepth - Depth of the rectangle column
- * @param columnHeight - Height of the rectangle column
- * @param blockHeight - Height of each wave block (default: 0.5)
- */
-export const addWaveBlocksOnTop = (
-    rectangleColumn: RectangleColumnNode,
+ * Add wave blocks extending from the right face of concrete
+ * @param slabGroup - The slab group to add blocks to
+ * @param slabWidth - Width of the slab extending from right face
+ * @param slabDepth - Depth of the slab (along Z-axis)
+ * @param slabPosition - position of the slab
+ * */
+export const addWaveBlocksFromRightFace = (
+    slabGroup: SlabNode,
     blockWidth: number = 3,
     blockDepth: number = 2,
     blockHeight: number = 0.5,
-    columnPostition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0 )
+    slabPosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0)
 ) => {
-
-    const scene = rectangleColumn.group.getScene();
+    const scene = slabGroup.group.getScene();
 
     // Initialize materials
     initializeMaterials(scene);
 
-    // Create stacked wave blocks on top of the column with wave on Y-axis
-    const waveBlocks: BABYLON.Mesh[] = [];
+    // Clear existing wave blocks
+    slabGroup.clearWaveBlocks();
+    const blockPosition = slabPosition;
 
-    // Create wave block with wave on Y-axis (wave goes up and down along width)
+    // Create wave block extending from right face (wave on Z-axis, extending along X)
     const blockMesh = createWaveBlock(
         scene,
-        `waveBlockTop_`,
-        columnPostition,
-        blockWidth,
-        blockHeight,
-        blockDepth,
-        'y',  // Wave on Y-axis
+        `waveBlockRightFace_`,
+        blockPosition,
+        blockWidth,      // Width along X-axis (extending from right)
+        blockHeight,    // Height along Y-axis
+        blockDepth,      // Depth along Z-axis
+        'z',            // Wave on Z-axis
         waveBlockMaterial!
     );
 
     blockMesh.receiveShadows = true;
-    blockMesh.parent = rectangleColumn.group;
+    blockMesh.parent = slabGroup.group;
 
-    waveBlocks.push(blockMesh);
+    slabGroup.addWaveBlock(blockMesh);
 
     // Add to concrete group's infinite blocks array if it doesn't exist
-    let concreteGroup = rectangleColumn.getConcreteGroup();
-    if (!concreteGroup) {
-        concreteGroup = new ConcreteNode(rectangleColumn.group);
-        rectangleColumn.setConcreteGroup(concreteGroup);
-    }
-    const infiniteBlocks = concreteGroup.getInfiniteBlocks();
-    if (!infiniteBlocks || infiniteBlocks.length === 0) {
-        concreteGroup.setInfiniteBlocks([]);
-    }
+    // let concreteGroup = slabGroup.getConcreteGroup();
+    // if (!concreteGroup) {
+    //     concreteGroup = new ConcreteGroup(slabGroup.group);
+    //     slabGroup.setConcreteGroup(concreteGroup);
+    // }
+    // const infiniteBlocks = concreteGroup.getInfiniteBlocks();
+    // if (!infiniteBlocks || infiniteBlocks.length === 0) {
+    //     concreteGroup.setInfiniteBlocks([]);
+    // }
 
-    concreteGroup.getInfiniteBlocks()?.push(...waveBlocks);
+    // concreteGroup.getInfiniteBlocks()?.push(blockMesh);
 };
