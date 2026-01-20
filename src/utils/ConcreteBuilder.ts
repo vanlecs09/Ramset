@@ -1,14 +1,14 @@
 import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
-import { createDimensionWithLabel, DimensionLineResult, type DimensionLabel } from './GeometryHelper';
-import type { BaseStructureGroup } from './CircularColumnsBuilder';
+import { createDimensionWithLabel, DimensionLineNode, type DimensionLabel } from './GeometryHelper';
+import type { BaseStructureGroup as BaseStructureNode } from './CircularColumnsBuilder';
 
-export class ConcreteGroup implements BaseStructureGroup {
+export class ConcreteNode implements BaseStructureNode {
     group: BABYLON.TransformNode;
     private mesh?: BABYLON.Mesh;
     private material?: BABYLON.StandardMaterial;
     private infiniteBlocks?: BABYLON.Mesh[];
-    private dimensionLines?: DimensionLineResult;
+    private dimensionLines?: DimensionLineNode;
 
     constructor(group: BABYLON.TransformNode) {
         this.group = group;
@@ -38,11 +38,11 @@ export class ConcreteGroup implements BaseStructureGroup {
         this.infiniteBlocks = blocks;
     }
 
-    getDimensionLines(): DimensionLineResult | undefined {
+    getDimensionLines(): DimensionLineNode | undefined {
         return this.dimensionLines;
     }
 
-    setDimensionLines(dimensionLines: DimensionLineResult | undefined): void {
+    setDimensionLines(dimensionLines: DimensionLineNode | undefined): void {
         this.dimensionLines = dimensionLines;
     }
 
@@ -81,7 +81,7 @@ const initializeSinBlockMaterial = (scene: BABYLON.Scene) => {
         sinBlockMaterial = new BABYLON.StandardMaterial('sinBlockMaterial', scene);
         sinBlockMaterial.diffuseColor = new BABYLON.Color3(214 / 255, 217 / 255, 200 / 255);   // tan/beige color
         sinBlockMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
-        sinBlockMaterial.alpha = 0.5;  // semi-transparent
+        sinBlockMaterial.alpha = 0.2;  // semi-transparent
         // sinBlockMaterial.backFaceCulling = false;
         sinBlockMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
     }
@@ -98,14 +98,14 @@ export const createConcrete = (
     parent?: BABYLON.TransformNode,
     isFiniteConcrete: boolean = true,
     showDimensions: boolean = true
-): ConcreteGroup => {
+): ConcreteNode => {
     // Create a transform node to group concrete elements
     const concreteTransformNode = new BABYLON.TransformNode('concreteGroup', scene);
     if (parent) {
         concreteTransformNode.parent = parent as BABYLON.Node;
     }
 
-    const concreteGroup = new ConcreteGroup(concreteTransformNode);
+    const concreteGroup = new ConcreteNode(concreteTransformNode);
     const material = initializeConcreteMaterial(scene);
 
     const concrete = BABYLON.MeshBuilder.CreateBox(
@@ -133,7 +133,7 @@ export const createConcrete = (
         : [];
 
     // Create dimension lines if requested
-    let dimensionLines: DimensionLineResult | undefined;
+    let dimensionLines: DimensionLineNode | undefined;
     if (showDimensions) {
         const dimensionMat = new BABYLON.StandardMaterial('dimensionMat_concrete', scene);
         dimensionMat.emissiveColor = new BABYLON.Color3(0, 0, 0); // black
@@ -222,7 +222,7 @@ export const createConcrete = (
         );
         if (heightLabel) labels.push(heightLabel);
 
-        const dimensionLineResult = new DimensionLineResult(
+        const dimensionLineResult = new DimensionLineNode(
             dimensionGroup,
             concreteWidth,
             concreteDepth,
@@ -249,7 +249,7 @@ export const createConcrete = (
 };
 
 export const updateConcrete = (
-    concreteGroup: ConcreteGroup,
+    concreteGroup: ConcreteNode,
     scene: BABYLON.Scene,
     concreteThickness: number = 1,
     concreteWidth: number = 3,
@@ -289,7 +289,7 @@ export const updateConcrete = (
         : [];
 
     // Create dimension lines if requested
-    let dimensionLines: DimensionLineResult | undefined;
+    let dimensionLines: DimensionLineNode | undefined;
     if (showDimensions) {
         const dimensionMat = new BABYLON.StandardMaterial('dimensionMat_concrete', scene);
         dimensionMat.emissiveColor = new BABYLON.Color3(0, 0, 0); // black
@@ -378,7 +378,7 @@ export const updateConcrete = (
         );
         if (heightLabel) labels.push(heightLabel);
 
-        const dimensionLineResult2 = new DimensionLineResult(
+        const dimensionLineResult2 = new DimensionLineNode(
             dimensionGroup,
             concreteWidth,
             concreteDepth,

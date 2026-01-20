@@ -56,6 +56,7 @@ export const updatePost = (
     height: number = 1,
     diameter: number = 0.2,
     position?: BABYLON.Vector3,
+    rotation?: BABYLON.Vector3,
     parent?: BABYLON.TransformNode,
     name: string = 'post'
 ) => {
@@ -73,6 +74,10 @@ export const updatePost = (
 
     if (position) {
         post.position = position;
+    }
+
+    if (rotation) {
+        post.rotation = rotation;
     }
 
     post.material = material;

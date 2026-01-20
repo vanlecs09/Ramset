@@ -1,7 +1,7 @@
 import * as BABYLON from '@babylonjs/core';
 import type { BaseStructureGroup } from './CircularColumnsBuilder';
 import { createConcrete, updateConcrete } from './ConcreteBuilder';
-import type { ConcreteGroup } from './ConcreteBuilder';
+import type { ConcreteNode } from './ConcreteBuilder';
 import { calculateCuboidPostPositions } from './CuboidPostPositionCalculator';
 import { createPost } from './PostBuilder';
 
@@ -34,9 +34,9 @@ export const createCross = (
   return crossGroup;
 };
 
-export class ComplexColumnGroup implements BaseStructureGroup {
+export class ComplexColumnNode implements BaseStructureGroup {
   group: BABYLON.TransformNode;
-  private concreteGroup?: ConcreteGroup;
+  private concreteGroup?: ConcreteNode;
   private cuboid1?: BABYLON.Mesh;
   private cuboid2?: BABYLON.Mesh;
   private posts?: BABYLON.Mesh[];
@@ -46,11 +46,11 @@ export class ComplexColumnGroup implements BaseStructureGroup {
     this.posts = [];
   }
 
-  getConcreteGroup(): ConcreteGroup | undefined {
+  getConcreteGroup(): ConcreteNode | undefined {
     return this.concreteGroup;
   }
 
-  setConcreteGroup(concreteGroup: ConcreteGroup): void {
+  setConcreteGroup(concreteGroup: ConcreteNode): void {
     this.concreteGroup = concreteGroup;
   }
 
@@ -125,9 +125,9 @@ export const createComplexColumn = (
   cuboid2PostCountTopEdge: number = 2,
   postRadius: number = 0.05,
   postOffset: number = 0.1
-): ComplexColumnGroup => {
+): ComplexColumnNode => {
   const columnGroup = new BABYLON.TransformNode('complexColumn', scene);
-  const complexColumn = new ComplexColumnGroup(columnGroup);
+  const complexColumn = new ComplexColumnNode(columnGroup);
 
   // 1. Create concrete base using ConcreteBuilder
   const concreteGroup = createConcrete(
@@ -218,7 +218,7 @@ export const createComplexColumn = (
 };
 
 export const updateComplexColumn = (
-  complexColumnGroup: ComplexColumnGroup,
+  complexColumnGroup: ComplexColumnNode,
   concreteThickness: number = 1,
   concreteWidth: number = 3,
   concreteDepth: number = 3,

@@ -28,7 +28,7 @@ export interface DimensionLabel {
   offsetY: number;
 }
 
-export class DimensionLineResult implements BaseStructureGroup {
+export class DimensionLineNode implements BaseStructureGroup {
   group: BABYLON.TransformNode;
   private meshes: BABYLON.Mesh[] = [];
   private labels: DimensionLabel[] = [];

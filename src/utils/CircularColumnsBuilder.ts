@@ -1,5 +1,5 @@
 import * as BABYLON from '@babylonjs/core';
-import { createConcrete, updateConcrete, ConcreteGroup } from './ConcreteBuilder';
+import { createConcrete, updateConcrete, ConcreteNode } from './ConcreteBuilder';
 import { createPost } from './PostBuilder';
 import { createTorqueVisualization } from './GeometryHelper';
 import type { PostPosition } from './CircularPostPositionCalculator';
@@ -9,9 +9,9 @@ export interface BaseStructureGroup {
   dispose(): void;
 }
 
-export class CircularColumnsGroup implements BaseStructureGroup {
+export class CircularColumnsNode implements BaseStructureGroup {
   group: BABYLON.TransformNode;
-  private concreteGroup?: ConcreteGroup;
+  private concreteGroup?: ConcreteNode;
   private circularColumn?: BABYLON.Mesh;
   private posts?: BABYLON.Mesh[];
   private torqueMeshes?: BABYLON.Mesh[];
@@ -22,11 +22,11 @@ export class CircularColumnsGroup implements BaseStructureGroup {
     this.torqueMeshes = [];
   }
 
-  getConcreteGroup(): ConcreteGroup | undefined {
+  getConcreteGroup(): ConcreteNode | undefined {
     return this.concreteGroup;
   }
 
-  setConcreteGroup(concreteGroup: ConcreteGroup): void {
+  setConcreteGroup(concreteGroup: ConcreteNode): void {
     this.concreteGroup = concreteGroup;
   }
 
@@ -100,9 +100,9 @@ export const createCircularColumns = (
   columnRadius: number = 1.5,
   postRadius: number = 0.05,
   postPositions: PostPosition[],
-): CircularColumnsGroup => {
+): CircularColumnsNode => {
   const towerGroup = new BABYLON.TransformNode('CircularColumns', scene);
-  const circularColumns = new CircularColumnsGroup(towerGroup);
+  const circularColumns = new CircularColumnsNode(towerGroup);
 
   // Create bottom concrete using ConcreteBuilder with offset parameters
   const concreteGroup = createConcrete(
@@ -172,7 +172,7 @@ export const createCircularColumns = (
  * @param torqueDirection - Direction of the torque (perpendicular to torus plane)
  */
 export const addTorqueVisualizationToRightFace = (
-  circularColumns: CircularColumnsGroup,
+  circularColumns: CircularColumnsNode,
   concreteWidth: number = 3,
   concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
   torqueDirection: BABYLON.Vector3 = new BABYLON.Vector3(1, 0, 0)
@@ -216,7 +216,7 @@ export const addTorqueVisualizationToRightFace = (
 };
 
 export const updateCircularColumns = (
-  circularColumnsGroup: CircularColumnsGroup,
+  circularColumnsGroup: CircularColumnsNode,
   concreteThickness: number = 1.5,
   concreteWidth: number = 3,
   concreteDepth: number = 3,

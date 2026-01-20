@@ -1,13 +1,13 @@
 import * as BABYLON from '@babylonjs/core';
-import { createConcrete, updateConcrete, ConcreteGroup } from './ConcreteBuilder';
+import { createConcrete, updateConcrete, ConcreteNode } from './ConcreteBuilder';
 import { createPost } from './PostBuilder';
 import { createWaveBlock } from './WaveBuilder';
 import type { BaseStructureGroup } from './CircularColumnsBuilder';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 
-export class RectangleColumnGroup implements BaseStructureGroup {
+export class RectangleColumnNode implements BaseStructureGroup {
     group: BABYLON.TransformNode;
-    private concreteGroup?: ConcreteGroup;
+    private concreteGroup?: ConcreteNode;
     private column?: BABYLON.Mesh;
     private posts?: BABYLON.Mesh[];
 
@@ -17,11 +17,11 @@ export class RectangleColumnGroup implements BaseStructureGroup {
     }
 
     // Expose methods for safe access
-    getConcreteGroup(): ConcreteGroup | undefined {
+    getConcreteGroup(): ConcreteNode | undefined {
         return this.concreteGroup;
     }
 
-    setConcreteGroup(concreteGroup: ConcreteGroup): void {
+    setConcreteGroup(concreteGroup: ConcreteNode): void {
         this.concreteGroup = concreteGroup;
     }
 
@@ -98,9 +98,9 @@ export const createRectangleColumn = (
     concreteDepth: number = 3,
     concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
     isFiniteConcrete: boolean = true
-): RectangleColumnGroup => {
+): RectangleColumnNode => {
     const columnGroup = new BABYLON.TransformNode('rectangleColumn', scene);
-    const rectangleColumn = new RectangleColumnGroup(columnGroup);
+    const rectangleColumn = new RectangleColumnNode(columnGroup);
 
     // Initialize materials
     initializeMaterials(scene);
@@ -118,18 +118,9 @@ export const createRectangleColumn = (
     // 2. Create rectangle column (box on top)
     const concreteTopY = 1.5;
     let columnHeight = 0.3;
-    // const column = BABYLON.MeshBuilder.CreateBox(
-    //     'rectangleColumn',
-    //     { width: columnWidth, height: columnHeight, depth: columnDepth },
-    //     scene
-    // );
-    // column.position.y = concreteTopY + columnHeight / 2; // Sit on top of concrete
-    // column.material = columnMaterial;
-
-    // // column.receiveShadows = true;
-    // column.parent = columnGroup;
-    // rectangleColumn.setColumn(column);
-     addWaveBlocksOnTop(rectangleColumn, columnWidth, columnDepth, columnHeight + 0.2);
+    addWaveBlocksOnTop(rectangleColumn, columnWidth, columnDepth, columnHeight + 0.2,
+        new BABYLON.Vector3(0, concreteTopY + columnHeight / 2, 0)
+    );
 
     // 3. Create posts connecting concrete to column
     const postHeight = columnHeight * 2;
@@ -158,7 +149,7 @@ export const createRectangleColumn = (
 };
 
 export const updateRectangleColumn = (
-    rectangleColumn: RectangleColumnGroup,
+    rectangleColumn: RectangleColumnNode,
     postPositions: RectanglePostPosition[],
     concreteThickness: number = 0.5,
     columnWidth: number = 3,
@@ -177,7 +168,7 @@ export const updateRectangleColumn = (
     // Update concrete using ConcreteBuilder
     let concreteGroup = rectangleColumn.getConcreteGroup();
     if (!concreteGroup) {
-        concreteGroup = {} as ConcreteGroup;
+        concreteGroup = {} as ConcreteNode;
     }
     updateConcrete(concreteGroup,
         scene,
@@ -192,23 +183,9 @@ export const updateRectangleColumn = (
     const concreteTopY = 1.5;
     let columnHeight = 0.3;
 
-    // const newColumn = BABYLON.MeshBuilder.CreateBox(
-    //     'rectangleColumn',
-    //     { width: columnWidth, height: columnHeight, depth: columnDepth },
-    //     scene
-    // );
-    // newColumn.position.y = concreteTopY + columnHeight / 2; // Sit on top of concrete
-    // newColumn.material = columnMaterial;
-
-    // // column.receiveShadows = true;
-    // newColumn.parent = rectangleColumn.group;
-    // rectangleColumn.setColumn(newColumn);
-
     // Update column
-    addWaveBlocksOnTop(rectangleColumn, columnWidth, columnDepth, columnHeight + 0.2); // Assuming columnHeight = 1
-
-    // Remove and recreate posts
-    // rectangleColumn.clearPosts();
+    addWaveBlocksOnTop(rectangleColumn, columnWidth, columnDepth, columnHeight + 0.2,
+        new BABYLON.Vector3(0, concreteTopY + columnHeight / 2, 0)); // Assuming columnHeight = 1
 
     // Recreate posts with pre-calculated positions
     const postHeight = columnHeight * 2;
@@ -243,19 +220,14 @@ export const updateRectangleColumn = (
  * @param blockHeight - Height of each wave block (default: 0.5)
  */
 export const addWaveBlocksOnTop = (
-    rectangleColumn: RectangleColumnGroup,
+    rectangleColumn: RectangleColumnNode,
     blockWidth: number = 3,
     blockDepth: number = 2,
     blockHeight: number = 0.5,
+    columnPostition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0 )
 ) => {
-    const column = rectangleColumn.getColumn();
-    if (!column) {
-        console.warn('Rectangle column not found, cannot add wave blocks');
-        return;
-    }
 
     const scene = rectangleColumn.group.getScene();
-    const columnTopY = column.position.y;
 
     // Initialize materials
     initializeMaterials(scene);
@@ -263,18 +235,11 @@ export const addWaveBlocksOnTop = (
     // Create stacked wave blocks on top of the column with wave on Y-axis
     const waveBlocks: BABYLON.Mesh[] = [];
 
-    // Position each block above the column
-    const blockPosition = new BABYLON.Vector3(
-        0,
-        columnTopY,
-        0
-    );
-
     // Create wave block with wave on Y-axis (wave goes up and down along width)
     const blockMesh = createWaveBlock(
         scene,
         `waveBlockTop_`,
-        blockPosition,
+        columnPostition,
         blockWidth,
         blockHeight,
         blockDepth,
@@ -290,7 +255,7 @@ export const addWaveBlocksOnTop = (
     // Add to concrete group's infinite blocks array if it doesn't exist
     let concreteGroup = rectangleColumn.getConcreteGroup();
     if (!concreteGroup) {
-        concreteGroup = new ConcreteGroup(rectangleColumn.group);
+        concreteGroup = new ConcreteNode(rectangleColumn.group);
         rectangleColumn.setConcreteGroup(concreteGroup);
     }
     const infiniteBlocks = concreteGroup.getInfiniteBlocks();
