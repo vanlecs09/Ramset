@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react';
 import * as BABYLON from '@babylonjs/core';
+import * as GUI from '@babylonjs/gui';
 import { createComplexColumn, updateComplexColumn } from '../utils/ComplexColumnsBuilder';
 import { createCircularColumns, updateCircularColumns } from '../utils/CircularColumnsBuilder';
 import { createRectangleColumn, updateRectangleColumn } from '../utils/RectangleColumnBuilder';
 import { createSlab, updateSlab } from '../utils/SlabBuilder';
+import { createArrow } from '../utils/GeometryHelper';
 import { calculateCircularPostPositions } from '../utils/CircularPostPositionCalculator';
 import { calculateRectanglePostPositions, calculateYSurfacePostPositions } from '../utils/RectanglePostPositionCalculator';
 import type { CircularColumnsNode } from '../utils/CircularColumnsBuilder';
@@ -217,8 +219,57 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
     // Axes helper (visual representation)
     const createAxesHelper = () => {
-      const axisLength = 0.5;
+      const axisLength = 0.2;
       const lines = [];
+      const axisRaidus = 0.005;
+      const arrowSize = 0.03;
+
+      // Create advancedTexture for axis labels
+      const axisTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('AxisLabelsUI');
+
+      // Helper function to create arrow head at the end of axis
+      const createArrowHead = (position: BABYLON.Vector3, direction: BABYLON.Vector3, color: BABYLON.Color3) => {
+        const arrowMaterial = new BABYLON.StandardMaterial('arrowMaterial', scene);
+        arrowMaterial.emissiveColor = color;
+
+        // Rotate arrow to point along direction
+        const yAxis = new BABYLON.Vector3(0, 1, 0);
+        const normalizedDirection = BABYLON.Vector3.Normalize(direction);
+        const quaternion = new BABYLON.Quaternion();
+        BABYLON.Quaternion.FromUnitVectorsToRef(yAxis, normalizedDirection, quaternion);
+
+        // Use createArrow helper from GeometryHelper
+        const arrowMesh = createArrow(
+          'axisArrow',
+          arrowSize,
+          arrowSize * 1.5,
+          scene,
+          position,
+          quaternion,
+          arrowMaterial
+        );
+
+        return arrowMesh;
+      };
+
+      // Helper function to create axis label using GUI.TextBlock and advancedTexture
+      const createAxisLabel = (arrowMesh: BABYLON.Mesh, labelText: string, color: BABYLON.Color3) => {
+        const label = new GUI.TextBlock();
+        label.text = labelText;
+        label.fontSize = 24;
+        label.fontWeight = 'bold';
+        label.color = `rgb(${Math.round(color.r * 255)}, ${Math.round(color.g * 255)}, ${Math.round(color.b * 255)})`;
+        
+        // Add label to advancedTexture
+        axisTexture.addControl(label);
+        
+        // Link label to arrow mesh with offset
+        label.linkWithMesh(arrowMesh);
+        label.linkOffsetX = 20;
+        label.linkOffsetY = 0;
+        
+        return label;
+      };
 
       // X axis (red)
       const redLine = BABYLON.MeshBuilder.CreateTube('xAxis', {
@@ -226,12 +277,26 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           new BABYLON.Vector3(0, 0, 0),
           new BABYLON.Vector3(axisLength, 0, 0),
         ],
-        radius: 0.02,
+        radius: axisRaidus,
       }, scene);
       const redMaterial = new BABYLON.StandardMaterial('redMaterial', scene);
       redMaterial.emissiveColor = new BABYLON.Color3(1, 0, 0);
       redLine.material = redMaterial;
       lines.push(redLine);
+
+      // X axis arrow and label
+      const xArrow = createArrowHead(
+        new BABYLON.Vector3(axisLength + arrowSize, 0, 0),
+        new BABYLON.Vector3(1, 0, 0),
+        new BABYLON.Color3(1, 0, 0)
+      );
+      lines.push(xArrow);
+      
+      createAxisLabel(
+        xArrow,
+        'X',
+        new BABYLON.Color3(1, 0, 0)
+      );
 
       // Y axis (green)
       const greenLine = BABYLON.MeshBuilder.CreateTube('yAxis', {
@@ -239,12 +304,26 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           new BABYLON.Vector3(0, 0, 0),
           new BABYLON.Vector3(0, axisLength, 0),
         ],
-        radius: 0.02,
+        radius: axisRaidus,
       }, scene);
       const greenMaterial = new BABYLON.StandardMaterial('greenMaterial', scene);
       greenMaterial.emissiveColor = new BABYLON.Color3(0, 1, 0);
       greenLine.material = greenMaterial;
       lines.push(greenLine);
+
+      // Y axis arrow and label
+      const yArrow = createArrowHead(
+        new BABYLON.Vector3(0, axisLength + arrowSize, 0),
+        new BABYLON.Vector3(0, 1, 0),
+        new BABYLON.Color3(0, 1, 0)
+      );
+      lines.push(yArrow);
+      
+      createAxisLabel(
+        yArrow,
+        'Y',
+        new BABYLON.Color3(0, 1, 0)
+      );
 
       // Z axis (blue)
       const blueLine = BABYLON.MeshBuilder.CreateTube('zAxis', {
@@ -252,12 +331,26 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           new BABYLON.Vector3(0, 0, 0),
           new BABYLON.Vector3(0, 0, axisLength),
         ],
-        radius: 0.02,
+        radius: axisRaidus,
       }, scene);
       const blueMaterial = new BABYLON.StandardMaterial('blueMaterial', scene);
       blueMaterial.emissiveColor = new BABYLON.Color3(0, 0, 1);
       blueLine.material = blueMaterial;
       lines.push(blueLine);
+
+      // Z axis arrow and label
+      const zArrow = createArrowHead(
+        new BABYLON.Vector3(0, 0, axisLength + arrowSize),
+        new BABYLON.Vector3(0, 0, 1),
+        new BABYLON.Color3(0, 0, 1)
+      );
+      lines.push(zArrow);
+      
+      createAxisLabel(
+        zArrow,
+        'Z',
+        new BABYLON.Color3(0, 0, 1)
+      );
 
       return lines;
     };

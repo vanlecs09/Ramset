@@ -137,25 +137,11 @@ export const createDimensionLine = (
   );
 
   // Create arrow 1
-  const arrow1 = BABYLON.MeshBuilder.CreateCylinder(name + 'Arrow1', {
-    diameterTop: 0,
-    diameterBottom: arrowDiameter,
-    height: arrowSize,
-  }, scene);
-  arrow1.position = corner1Position;
-  arrow1.rotationQuaternion = arrow1RotationQuaternion;
-  arrow1.material = lineMat;
+  const arrow1 = createArrow(name, arrowDiameter, arrowSize, scene, corner1Position, arrow1RotationQuaternion, lineMat);
   meshes.push(arrow1);
 
   // Create arrow 2
-  const arrow2 = BABYLON.MeshBuilder.CreateCylinder(name + 'Arrow2', {
-    diameterTop: 0,
-    diameterBottom: arrowDiameter,
-    height: arrowSize,
-  }, scene);
-  arrow2.position = corner2Position;
-  arrow2.rotationQuaternion = arrow2RotationQuaternion;
-  arrow2.material = lineMat;
+  const arrow2 = createArrow(name, arrowDiameter, arrowSize, scene, corner2Position, arrow2RotationQuaternion, lineMat);
   meshes.push(arrow2);
 
   // Create connector 1
@@ -440,3 +426,23 @@ export const createTorqueVisualization = (
     label: torqueLabel
   };
 };
+
+
+export const createArrow = (name: string,
+  arrowDiameter: number,
+  arrowSize: number,
+  scene: BABYLON.Scene,
+  corner1Position: BABYLON.Vector3,
+  arrow1RotationQuaternion: BABYLON.Quaternion,
+  material: BABYLON.Material) => {
+  const arrow1 = BABYLON.MeshBuilder.CreateCylinder(name + 'Arrow1', {
+    diameterTop: 0,
+    diameterBottom: arrowDiameter,
+    height: arrowSize,
+  }, scene);
+  arrow1.position = corner1Position;
+  arrow1.rotationQuaternion = arrow1RotationQuaternion;
+  arrow1.material = material;
+  return arrow1;
+}
+
