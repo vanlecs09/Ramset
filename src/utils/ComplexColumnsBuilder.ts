@@ -1,5 +1,5 @@
 import * as BABYLON from '@babylonjs/core';
-import type { BaseStructureGroup } from './CircularColumnsBuilder';
+import { BaseStructNodeImpl } from './BaseNode';
 import { createConcrete, updateConcrete } from './ConcreteBuilder';
 import type { ConcreteNode } from './ConcreteBuilder';
 import { calculateCuboidPostPositions } from './CuboidPostPositionCalculator';
@@ -34,15 +34,14 @@ export const createCross = (
   return crossGroup;
 };
 
-export class ComplexColumnNode implements BaseStructureGroup {
-  group: BABYLON.TransformNode;
+export class ComplexColumnNode extends BaseStructNodeImpl {
   private concreteGroup?: ConcreteNode;
   private cuboid1?: BABYLON.Mesh;
   private cuboid2?: BABYLON.Mesh;
   private posts?: BABYLON.Mesh[];
 
   constructor(group: BABYLON.TransformNode) {
-    this.group = group;
+    super(group);
     this.posts = [];
   }
 
@@ -102,6 +101,9 @@ export class ComplexColumnNode implements BaseStructureGroup {
     if (this.posts) {
       this.posts.forEach(post => post.dispose());
     }
+    
+    // Call parent to dispose axis meshes
+    super.dispose();
   }
 }
 
@@ -147,7 +149,7 @@ export const createComplexColumn = (
   cuboidMaterial.alpha = 0.4;
 
   // Calculate cuboid position: concrete top (2) + gap (0.5) + height/2 (0.3) = 2.8
-  const concreteTopY = 1.5;
+  const concreteTopY = 0;
   const cuboidGap = 0;
   const cuboidHeight = 0.6;
   const cuboidCenterY = concreteTopY + cuboidGap + cuboidHeight / 2;
@@ -262,7 +264,7 @@ export const updateComplexColumn = (
   cuboidMaterial.alpha = 0.5;
 
   // Calculate cuboid position: concrete top (2) + gap (0.5) + height/2 (0.3) = 2.8
-  const concreteTopY = 1.5;
+  const concreteTopY = 0;
   const cuboidGap = 0;
   const cuboidHeight = 0.6;
   const cuboidCenterY = concreteTopY + cuboidGap + cuboidHeight / 2;

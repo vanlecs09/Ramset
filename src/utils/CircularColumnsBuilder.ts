@@ -2,22 +2,25 @@ import * as BABYLON from '@babylonjs/core';
 import { createConcrete, updateConcrete, ConcreteNode } from './ConcreteBuilder';
 import { createPost } from './PostBuilder';
 import { createTorqueVisualization } from './GeometryHelper';
+import { BaseStructNodeImpl } from './BaseNode';
 import type { PostPosition } from './CircularPostPositionCalculator';
 
 export interface BaseStructureGroup {
   group: BABYLON.TransformNode;
+  getAxisMeshes(): BABYLON.Mesh[];
+  setAxisMeshes(meshes: BABYLON.Mesh[]): void;
+  clearAxisMeshes(): void;
   dispose(): void;
 }
 
-export class CircularColumnsNode implements BaseStructureGroup {
-  group: BABYLON.TransformNode;
+export class CircularColumnsNode extends BaseStructNodeImpl {
   private concreteGroup?: ConcreteNode;
   private circularColumn?: BABYLON.Mesh;
   private posts?: BABYLON.Mesh[];
   private torqueMeshes?: BABYLON.Mesh[];
 
   constructor(group: BABYLON.TransformNode) {
-    this.group = group;
+    super(group);
     this.posts = [];
     this.torqueMeshes = [];
   }
@@ -85,19 +88,22 @@ export class CircularColumnsNode implements BaseStructureGroup {
     if (this.torqueMeshes) {
       this.torqueMeshes.forEach(mesh => mesh.dispose());
     }
+    
+    // Call parent to dispose axis meshes
+    super.dispose();
   }
 }
 
 export const createCircularColumns = (
   scene: BABYLON.Scene,
-  concreteThickness: number = 1.5,
+  concreteThickness: number = 0,
   concreteWidth: number = 3,
   concreteDepth: number = 3,
   concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
   _infiniteBlockPositions: BABYLON.Vector3[] = [],
   isFiniteConcrete: boolean = true,
   columnHeight: number = 1,
-  columnRadius: number = 1.5,
+  columnRadius: number = 0,
   postRadius: number = 0.05,
   postPositions: PostPosition[],
 ): CircularColumnsNode => {
@@ -117,7 +123,7 @@ export const createCircularColumns = (
   circularColumns.setConcreteGroup(concreteGroup);
 
   // Calculate concrete top position
-  const concreteTopY = 1.5;
+  const concreteTopY = 0;
 
   // Create top cylinder on top of concrete
   const gapDistance = 0;
@@ -254,7 +260,7 @@ export const updateCircularColumns = (
   );
 
   // Calculate concrete top position
-  const concreteTopY = 1.5;
+  const concreteTopY = 0;
 
   const currentColumn = circularColumnsGroup.getCircularColumn();
   if (currentColumn) {

@@ -1,17 +1,16 @@
 import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
 import { createDimensionWithLabel, DimensionLineNode, type DimensionLabelNode } from './GeometryHelper';
-import type { BaseStructureGroup as BaseStructureNode } from './CircularColumnsBuilder';
+import { BaseStructNodeImpl } from './BaseNode';
 
-export class ConcreteNode implements BaseStructureNode {
-    group: BABYLON.TransformNode;
+export class ConcreteNode extends BaseStructNodeImpl {
     private mesh?: BABYLON.Mesh;
     private material?: BABYLON.StandardMaterial;
     private infiniteBlocks?: BABYLON.Mesh[];
     private dimensionLines?: DimensionLineNode;
 
     constructor(group: BABYLON.TransformNode) {
-        this.group = group;
+        super(group);
     }
 
     getMesh(): BABYLON.Mesh | undefined {
@@ -50,6 +49,8 @@ export class ConcreteNode implements BaseStructureNode {
         this.dimensionLines?.dispose?.();
         this.mesh?.dispose();
         this.infiniteBlocks?.forEach(block => block.dispose());
+        // Call parent to dispose axis meshes
+        super.dispose();
     }
 }
 
@@ -74,6 +75,17 @@ export const initializeDimensionLabelTexture = () => {
         dimensionLabelTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('DimensionLabelUI');
     }
     return dimensionLabelTexture;
+};
+
+export const getDimensionLabelTexture = () => {
+    return initializeDimensionLabelTexture();
+};
+
+export const disposeDimensionLabelTexture = () => {
+    if (dimensionLabelTexture) {
+        dimensionLabelTexture.dispose();
+        dimensionLabelTexture = null;
+    }
 };
 
 const initializeSinBlockMaterial = (scene: BABYLON.Scene) => {
@@ -153,7 +165,7 @@ export const createConcrete = (
 
         const offset = 0.4;
         const dimensionGroup = new BABYLON.TransformNode('dimensionGroup_concrete', scene);
-        const labels: DimensionLabelNode[] = [];
+        const labels: GUI.TextBlock[] = [];
         
         // Use global AdvancedDynamicTexture for dimension labels
         const advancedTexture = initializeDimensionLabelTexture();
@@ -174,7 +186,7 @@ export const createConcrete = (
             0,
             30
         );
-        if (widthLabel) labels.push(widthLabel);
+        if (widthLabel) labels.push(widthLabel.label);
 
         // Depth dimension (Z axis) - offset from X max edge
         const depthLabel = createDimensionWithLabel(
@@ -192,7 +204,7 @@ export const createConcrete = (
             -30,
             0
         );
-        if (depthLabel) labels.push(depthLabel);
+        if (depthLabel) labels.push(depthLabel.label);
 
         // Height dimension (Y axis) - offset from X min, Z min corner
         const heightLabel = createDimensionWithLabel(
@@ -210,20 +222,20 @@ export const createConcrete = (
             -30,
             0
         );
-        if (heightLabel) labels.push(heightLabel);
+        if (heightLabel) labels.push(heightLabel.label);
 
-        const dimensionLineResult = new DimensionLineNode(
+        const dimensionLineNode = new DimensionLineNode(
             dimensionGroup,
             concreteWidth,
             concreteDepth,
             concreteThickness
         );
-        dimensionLineResult.setLabels(labels);
+        dimensionLineNode.setLabels(labels);
         // Add meshes from dimension group
         (dimensionGroup.getChildren() as BABYLON.Mesh[]).forEach(mesh => {
-            dimensionLineResult.addMesh(mesh);
+            dimensionLineNode.addMesh(mesh);
         });
-        dimensionLines = dimensionLineResult;
+        dimensionLines = dimensionLineNode;
 
         if (parent) {
             dimensionGroup.parent = parent as BABYLON.Node;
@@ -299,7 +311,7 @@ export const updateConcrete = (
 
         const offset = 0.1;
         const dimensionGroup = new BABYLON.TransformNode('dimensionGroup_concrete', scene);
-        const labels: DimensionLabelNode[] = [];
+        const labels: GUI.TextBlock[] = [];
         
         // Use global AdvancedDynamicTexture for dimension labels
         const advancedTexture = initializeDimensionLabelTexture();
@@ -320,7 +332,7 @@ export const updateConcrete = (
             0,
             30
         );
-        if (widthLabel) labels.push(widthLabel);
+        if (widthLabel) labels.push(widthLabel.label);
 
         // Depth dimension (Z axis) - offset from X max edge
         const depthLabel = createDimensionWithLabel(
@@ -338,7 +350,7 @@ export const updateConcrete = (
             -30,
             0
         );
-        if (depthLabel) labels.push(depthLabel);
+        if (depthLabel) labels.push(depthLabel.label);
 
         // Height dimension (Y axis) - offset from X min, Z min corner
         const heightLabel = createDimensionWithLabel(
@@ -356,7 +368,7 @@ export const updateConcrete = (
             -30,
             0
         );
-        if (heightLabel) labels.push(heightLabel);
+        if (heightLabel) labels.push(heightLabel.label);
 
         const dimensionLineResult2 = new DimensionLineNode(
             dimensionGroup,

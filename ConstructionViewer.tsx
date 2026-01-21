@@ -248,7 +248,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       // Calculate post positions first
       const gapDistance = 0.5;
-      const baseY = 1.5 + gapDistance / 2;
+      const baseY = 0 + gapDistance / 2;
       const postPositions = calculateCircularPostPositions(
         towerParams.cylinderRadius,
         towerParams.circumferenceToPostOffset,

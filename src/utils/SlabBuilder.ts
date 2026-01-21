@@ -2,19 +2,19 @@ import * as BABYLON from '@babylonjs/core';
 import { createConcrete, updateConcrete, ConcreteNode, initializeDimensionLabelTexture } from './ConcreteBuilder';
 import { createPost } from './PostBuilder';
 import { createWaveBlock } from './WaveBuilder';
-import { createDimensionWithLabel, DimensionLineNode } from './GeometryHelper';
-import type { BaseStructureGroup } from './CircularColumnsBuilder';
+import { createAxesBasic, createDimensionWithLabel, DimensionLineNode } from './GeometryHelper';
+import { BaseStructNodeImpl } from './BaseNode';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 
-export class SlabNode implements BaseStructureGroup {
-    group: BABYLON.TransformNode;
+export class SlabNode extends BaseStructNodeImpl {
     private concreteGroup?: ConcreteNode;
     private waveBlocks?: BABYLON.Mesh[];
     private posts?: BABYLON.Mesh[];
+    private secondaryPosts?: BABYLON.Mesh[];
     private dimensionLines?: DimensionLineNode[];
 
     constructor(group: BABYLON.TransformNode) {
-        this.group = group;
+        super(group);
         this.posts = [];
         this.waveBlocks = [];
         this.dimensionLines = [];
@@ -69,6 +69,24 @@ export class SlabNode implements BaseStructureGroup {
         }
     }
 
+    getSecondaryPosts(): BABYLON.Mesh[] {
+        return this.secondaryPosts || [];
+    }
+
+    addSecondaryPost(post: BABYLON.Mesh): void {
+        if (!this.secondaryPosts) {
+            this.secondaryPosts = [];
+        }
+        this.secondaryPosts.push(post);
+    }
+
+    clearSecondaryPosts(): void {
+        if (this.secondaryPosts) {
+            this.secondaryPosts.forEach(post => post.dispose());
+            this.secondaryPosts = [];
+        }
+    }
+
     getDimensionLines(): DimensionLineNode[] {
         return this.dimensionLines || [];
     }
@@ -96,9 +114,12 @@ export class SlabNode implements BaseStructureGroup {
         }
         this.clearWaveBlocks();
         this.clearDimensionLines();
+        this.clearSecondaryPosts();
         if (this.posts) {
             this.posts.forEach(post => post.dispose());
         }
+        // Call parent to dispose axis meshes
+        super.dispose();
     }
 }
 
@@ -106,6 +127,7 @@ export class SlabNode implements BaseStructureGroup {
 let slabMaterial: BABYLON.StandardMaterial | null = null;
 let waveBlockMaterial: BABYLON.StandardMaterial | null = null;
 let dimensionMaterial: BABYLON.StandardMaterial | null = null;
+let secondaryPostMaterial: BABYLON.StandardMaterial | null = null;
 
 const initializeMaterials = (scene: BABYLON.Scene) => {
     if (!slabMaterial) {
@@ -127,6 +149,12 @@ const initializeMaterials = (scene: BABYLON.Scene) => {
         var dimMat = new BABYLON.StandardMaterial('dimensionMaterial', scene);
         dimMat.diffuseColor = new BABYLON.Color3(0, 0, 0); // red for visibility
         dimensionMaterial = dimMat;
+    }
+    if (!secondaryPostMaterial) {
+        var blackMat = new BABYLON.StandardMaterial('secondaryPostMaterial', scene);
+        blackMat.diffuseColor = new BABYLON.Color3(0, 0, 0);   // black
+        blackMat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+        secondaryPostMaterial = blackMat;
     }
 };
 
@@ -168,7 +196,7 @@ export const createSlab = (
 
     postPositions.forEach((postPos) => {
         // Position post at concrete top surface with adjusted Y
-        const postPositionY = 1.5;
+        const postPositionY = 0;
         const adjustedPostPosition = new BABYLON.Vector3(
             postPos.position.x,
             postPositionY,
@@ -186,6 +214,27 @@ export const createSlab = (
         );
         slab.addPost(postGroup.mesh!);
     });
+
+    // 4. Create secondary posts inside concrete (black color, high density)
+    addSecondaryPostsInsideConcrete(
+        slab,
+        concretePosition,
+        concreteWidth,
+        concreteDepth,
+        concreteThickness,
+        postDiameter * 0.7  // Slightly smaller diameter
+    );
+
+    // 5. Create and cache axis meshes and labels for visualization
+    const axesResult = createAxesBasic(
+        scene,
+        new BABYLON.Vector3(0, -concreteThickness / 2, concreteDepth / 2),
+        new BABYLON.Vector3(1, 0, 0),
+        new BABYLON.Vector3(0, -1, 0),
+        new BABYLON.Vector3(0, 0, 1)
+    );
+    slab.setAxisMeshes(axesResult.meshes);
+    slab.setLabels(axesResult.labels);
 
     return slab;
 };
@@ -227,12 +276,12 @@ export const updateSlab = (
     let slabPosition = new BABYLON.Vector3(concretePosition.x, concretePosition.y, concretePosition.z + (concreteDepth / 2 + slabDepth / 2));
     addWaveBlocksFromRightFace(slabGroup, slabWidth, slabDepth, concreteThickness, slabPosition);
 
-    // Recreate posts with pre-calculated positions
+    // Update posts with pre-calculated positions
     const postHeight = 0.3;
 
     postPositions.forEach((postPos) => {
         // Position post at concrete top surface with adjusted Y
-        const postPositionY = 1.5;
+        const postPositionY = 0;
         const adjustedPostPosition = new BABYLON.Vector3(
             postPos.position.x,
             postPos.position.y + postPositionY - slabDepth / 2,
@@ -251,6 +300,27 @@ export const updateSlab = (
         );
         slabGroup.addPost(postGroup.mesh!);
     });
+
+    // Update secondary posts inside concrete
+    addSecondaryPostsInsideConcrete(
+        slabGroup,
+        concretePosition,
+        concreteWidth,
+        concreteDepth,
+        concreteThickness,
+        postDiameter * 0.7  // Slightly smaller diameter
+    );
+
+    // Update and cache axis meshes and labels
+    const axesResult = createAxesBasic(
+        scene,
+        new BABYLON.Vector3(0, -concreteThickness / 2, concreteDepth / 2),
+        new BABYLON.Vector3(1, 0, 0),
+        new BABYLON.Vector3(0, -1, 0),
+        new BABYLON.Vector3(0, 0, 1)
+    );
+    slabGroup.setAxisMeshes(axesResult.meshes);
+    slabGroup.setLabels(axesResult.labels);
 };
 
 /**
@@ -335,7 +405,7 @@ export const addWaveBlocksFromRightFace = (
     // Create DimensionLineNode to manage depth dimension
     const depthDimensionNode = new DimensionLineNode(dimensionGroup, blockWidth, blockDepth, blockHeight);
     if (depthDimLabel) {
-        depthDimensionNode.addLabel(depthDimLabel);
+        depthDimensionNode.addLabel(depthDimLabel.label);
     }
     // Add all child meshes from dimension group
     (dimensionGroup.getChildren() as BABYLON.Mesh[]).forEach(mesh => {
@@ -350,7 +420,7 @@ export const addWaveBlocksFromRightFace = (
         blockPosition.z + blockDepth
     );
     const heightLineRotation = new BABYLON.Vector3(0, 0, 0); // Vertical line for Y-axis measurement
-    const heightArrow1Position = new BABYLON.Vector3(heightLinePosition.x + blockWidth / 2 + 0.1, heightLinePosition.y - blockHeight / 2, blockPosition.z + blockDepth / 2  + zOffset);
+    const heightArrow1Position = new BABYLON.Vector3(heightLinePosition.x + blockWidth / 2 + 0.1, heightLinePosition.y - blockHeight / 2, blockPosition.z + blockDepth / 2 + zOffset);
     const heightArrow2Position = new BABYLON.Vector3(heightLinePosition.x + blockWidth / 2 + 0.1, heightLinePosition.y + blockHeight / 2, blockPosition.z + blockDepth / 2 + zOffset);
     const heightCorner1 = new BABYLON.Vector3(heightLinePosition.x + blockWidth / 2, heightLinePosition.y - blockHeight / 2, blockPosition.z + blockDepth / 2);
     const heightCorner2 = new BABYLON.Vector3(heightLinePosition.x + blockWidth / 2, heightLinePosition.y + blockHeight / 2, blockPosition.z + blockDepth / 2);
@@ -373,7 +443,75 @@ export const addWaveBlocksFromRightFace = (
 
     // Add height dimension label to the node
     if (heightDimLabel) {
-        depthDimensionNode.addLabel(heightDimLabel);
+        depthDimensionNode.addLabel(heightDimLabel.label);
     }
 
+};
+
+/**
+ * Creates secondary posts inside concrete with black color and high density.
+ * X density: 5 posts per 1 unit
+ * Y density: 2 posts per 0.2 unit (= 10 posts per 1 unit)
+ * Posts run along the Z-axis (depth direction)
+ * 
+ * @param slabGroup - The slab group to add posts to
+ * @param concretePosition - Position of concrete base
+ * @param concreteWidth - Width of concrete (X-axis)
+ * @param concreteDepth - Depth of concrete (Z-axis)
+ * @param concreteThickness - Height/thickness of concrete (Y-axis)
+ * @param postDiameter - Diameter of secondary posts
+ */
+export const addSecondaryPostsInsideConcrete = (
+    slabGroup: SlabNode,
+    concretePosition: BABYLON.Vector3,
+    concreteWidth: number,
+    concreteDepth: number,
+    concreteThickness: number,
+    postDiameter: number = 0.14
+) => {
+    const scene = slabGroup.group.getScene();
+
+    // Initialize materials
+    initializeMaterials(scene);
+
+    // Clear existing secondary posts
+    slabGroup.clearSecondaryPosts();
+
+    // Calculate spacing
+    const xSpacing = 1 / 7;           // 5 posts per 1 unit = 0.2 unit spacing
+    const ySpacing = 0.2 / 2;         // 2 posts per 0.2 unit = 0.1 unit spacing
+
+    // Calculate start positions to center the posts within the concrete
+    const concreteMinX = concretePosition.x - concreteWidth / 2;
+    const concreteMaxX = concretePosition.x + concreteWidth / 2;
+    const concreteMinY = concretePosition.y - concreteThickness / 2;
+    const concreteMaxY = concretePosition.y + concreteThickness / 2;
+
+    // Post depth extends through concrete (along Z-axis)
+    const postDepth = concreteDepth;
+    const postCenterZ = concretePosition.z;
+
+    // Generate grid of secondary posts (X-Y grid, extending along Z)
+    for (let x = concreteMinX + xSpacing / 2; x < concreteMaxX; x += xSpacing) {
+        for (let y = concreteMinY + ySpacing / 2; y < concreteMaxY; y += ySpacing) {
+            const postPosition = new BABYLON.Vector3(x, y, postCenterZ);
+
+            // Create secondary post using createPost with rotation for Z-axis alignment
+            const postGroup = createPost(
+                scene,
+                postDepth,
+                postDiameter,
+                postPosition,
+                new BABYLON.Vector3(Math.PI / 2, 0, 0),  // Same direction as main posts
+                slabGroup.group,
+                `secondaryPost_${Math.floor((x - concreteMinX) / xSpacing)}_${Math.floor((y - concreteMinY) / ySpacing)}`
+            );
+
+            // Apply black material
+            if (postGroup.mesh) {
+                postGroup.mesh.material = secondaryPostMaterial!;
+                slabGroup.addSecondaryPost(postGroup.mesh);
+            }
+        }
+    }
 };

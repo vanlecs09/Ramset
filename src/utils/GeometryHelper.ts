@@ -1,7 +1,7 @@
 import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
-import { initializeDimensionLabelTexture } from './ConcreteBuilder';
-import type { BaseStructureGroup } from './CircularColumnsBuilder';
+import { getDimensionLabelTexture } from './ConcreteBuilder';
+import { BaseNodeImpl, BaseStructNodeImpl } from './BaseNode';
 
 /**
  * Configuration options for creating dimension lines with various styling and layout options.
@@ -56,6 +56,20 @@ export interface DimensionLabelNode {
 }
 
 /**
+ * Data structure representing an axis label in 3D space.
+ * Tracks the relationship between a GUI label and its associated axis arrow mesh.
+ * @interface AxisLabelNode
+ * @property {GUI.TextBlock} label - The GUI text block displaying the axis name (X, Y, or Z)
+ * @property {BABYLON.Mesh} arrowMesh - The 3D arrow mesh the label is associated with
+ * @property {string} axisName - The axis identifier ('X', 'Y', or 'Z')
+ */
+export interface AxisLabelNode {
+  label: GUI.TextBlock;
+  arrowMesh: BABYLON.Mesh;
+  axisName: string;
+}
+
+/**
  * Container class for managing all dimension visualization elements.
  * Implements BaseStructureGroup to integrate with the structure hierarchy system.
  * Manages dimension lines, arrows, connectors, and associated GUI labels.
@@ -77,10 +91,9 @@ export interface DimensionLabelNode {
  * // Later, dispose all resources
  * dimensionNode.dispose();
  */
-export class DimensionLineNode implements BaseStructureGroup {
-  group: BABYLON.TransformNode;
+export class DimensionLineNode extends BaseNodeImpl {
   private meshes: BABYLON.Mesh[] = [];
-  private labels: DimensionLabelNode[] = [];
+  private labels: GUI.TextBlock[] = [];
   width: number;
   depth: number;
   height: number;
@@ -98,7 +111,7 @@ export class DimensionLineNode implements BaseStructureGroup {
     depth: number = 0,
     height: number = 0
   ) {
-    this.group = group;
+    super(group);
     this.width = width;
     this.depth = depth;
     this.height = height;
@@ -129,27 +142,30 @@ export class DimensionLineNode implements BaseStructureGroup {
   }
 
   /**
-   * Returns all dimension labels in this dimension line.
-   * @returns {DimensionLabelNode[]} Array of label nodes
-   */
-  getLabels(): DimensionLabelNode[] {
+ * Returns all dimension labels in this dimension line.
+ * @returns {GUI.TextBlock[]} Array of label nodes
+ */
+  getLabels(): GUI.TextBlock[] {
     return this.labels;
   }
 
   /**
    * Sets all labels for this dimension line, replacing any existing labels.
-   * @param {DimensionLabelNode[]} labels - Array of label nodes to manage
+   * @param {GUI.TextBlock[]} labels - Array of label nodes to manage
    */
-  setLabels(labels: DimensionLabelNode[]): void {
+  setLabels(labels: GUI.TextBlock[]): void {
     this.labels = labels;
   }
 
   /**
    * Adds a single label to this dimension line's label collection.
-   * @param {DimensionLabelNode} label - Label node to add
+   * Convenience method that wraps setLabels for adding individual labels.
+   * @param {GUI.TextBlock} label - Label node to add
    */
-  addLabel(label: DimensionLabelNode): void {
+  addLabel(label: GUI.TextBlock): void {
+    // const currentLabels = this.getLabels();
     this.labels.push(label);
+    // this.setLabels(currentLabels);
   }
 
   /**
@@ -164,12 +180,53 @@ export class DimensionLineNode implements BaseStructureGroup {
       mesh.dispose();
     });
 
-    // Dispose all labels
     this.labels.forEach(labelData => {
-      labelData.label.dispose();
+      labelData.dispose();
     });
 
-    // Dispose the transform node
+    // Call parent to dispose axis meshes and labels
+    super.dispose();
+    this.group.dispose();
+  }
+}
+
+/**
+ * Container class for managing axis visualization elements.
+ * Manages X, Y, Z axis lines, arrows, and associated GUI labels.
+ * Extends BaseNodeImpl to integrate with the structure hierarchy system.
+ * Provides unified caching and disposal of all axis resources.
+ * 
+ * @class AxisLineNode
+ * @extends {BaseStructNodeImpl}
+ * @property {BABYLON.TransformNode} group - The parent transform node containing all axis meshes
+ * 
+ * @example
+ * // Create an axis line node
+ * const axisNode = new AxisLineNode(transformGroup);
+ * axisNode.setAxisMeshes(axisMeshes);
+ * axisNode.setLabels(axisLabels);
+ * 
+ * // Later, dispose all resources
+ * axisNode.dispose();
+ */
+export class AxisLineNode extends BaseNodeImpl {
+  /**
+   * Creates a new AxisLineNode.
+   * @param {BABYLON.TransformNode} group - Parent transform node for all axis meshes
+   */
+  constructor(group: BABYLON.TransformNode) {
+    super(group);
+  }
+
+  /**
+   * Disposes all resources managed by this axis line node.
+   * Cleans up all axis meshes, arrows, and GUI labels.
+   * Also disposes the parent transform node.
+   * Should be called when the axes are no longer needed to free GPU memory.
+   */
+  dispose(): void {
+    // Call parent to dispose axis meshes and labels
+    super.dispose();
     this.group.dispose();
   }
 }
@@ -191,6 +248,7 @@ export class DimensionLineNode implements BaseStructureGroup {
  * @param {BABYLON.Material} lineMat - Material for dimension line and arrows
  * @param {boolean} [showLabel=true] - Whether to show dimension label text
  * @param {number} [labelValue] - Numerical value to display in label
+ * @param {GUI.AdvancedDynamicTexture} [advancedTexture] - Optional shared GUI texture for labels. If not provided, uses shared global texture
  * 
  * @returns {Object} Object containing generated meshes and label
  * @returns {BABYLON.Mesh[]} .meshes - Array of all created meshes (line, arrows, connectors)
@@ -224,8 +282,11 @@ export const createDimensionLine = (
   corner2Position: BABYLON.Vector3,
   lineMat: BABYLON.Material,
   showLabel: boolean = true,
-  labelValue?: number
+  labelValue?: number,
+  advancedTexture?: GUI.AdvancedDynamicTexture
 ): { meshes: BABYLON.Mesh[]; lineMesh: BABYLON.Mesh; label?: GUI.TextBlock } => {
+  // Use provided texture or get shared texture
+  const texture = advancedTexture || getDimensionLabelTexture();
   const lineThickness = 0.005;
   const arrowSize = 0.02;
   const arrowDiameter = 0.02;
@@ -307,6 +368,7 @@ export const createDimensionLine = (
     label.color = 'black';
     label.fontSize = 20;
     // label.fontWeight = 'bold';
+    texture.addControl(label);
   }
 
   return { meshes, lineMesh: line, label };
@@ -328,9 +390,10 @@ export const createDimensionLine = (
  * @param {BABYLON.Material} material - Material for dimension line and arrows
  * @param {number} dimensionValue - Numerical value to display in label
  * @param {BABYLON.TransformNode} parentGroup - Transform node to parent all dimension meshes to
- * @param {GUI.AdvancedDynamicTexture} advancedTexture - GUI texture for label rendering
+ * @param {GUI.AdvancedDynamicTexture} [advancedTexture] - Optional shared GUI texture for label rendering. If not provided, uses shared global texture
  * @param {number} [labelOffsetX=0] - Horizontal offset for label positioning (pixels)
  * @param {number} [labelOffsetY=0] - Vertical offset for label positioning (pixels)
+ * @param {boolean} [showLabel=true] - Whether to show the dimension label
  * 
  * @returns {DimensionLabelNode|null} Complete dimension label data with positioning info, or null if label creation fails
  * @returns {GUI.TextBlock} .label - The GUI text block displaying dimension value
@@ -351,9 +414,10 @@ export const createDimensionLine = (
  *   dimensionMaterial,
  *   10.5,
  *   dimensionGroup,
- *   guiTexture,
+ *   undefined,  // uses shared texture
  *   0,
- *   30
+ *   30,
+ *   true        // show label
  * );
  * if (labelData) {
  *   dimensions.push(labelData);
@@ -370,11 +434,13 @@ export const createDimensionWithLabel = (
   material: BABYLON.Material,
   dimensionValue: number,
   parentGroup: BABYLON.TransformNode,
-  advancedTexture: GUI.AdvancedDynamicTexture,
+  advancedTexture?: GUI.AdvancedDynamicTexture,
   labelOffsetX: number = 0,
-  labelOffsetY: number = 0
+  labelOffsetY: number = 0,
+  showLabel: boolean = true
 ): DimensionLabelNode | null => {
   let linePosition = BABYLON.Vector3.Lerp(arrow1Position, arrow2Position, 0.5);
+  const texture = advancedTexture || getDimensionLabelTexture();
   const result = createDimensionLine(
     dimensionName,
     scene,
@@ -384,8 +450,9 @@ export const createDimensionWithLabel = (
     corner1Position,
     corner2Position,
     material,
-    true,
-    dimensionValue
+    showLabel,
+    dimensionValue,
+    texture
   );
 
   // Parent all meshes to the group
@@ -395,7 +462,6 @@ export const createDimensionWithLabel = (
 
   // Add label if created and link it to the dimension line mesh using AdvancedDynamicTexture
   if (result.label) {
-    advancedTexture.addControl(result.label);
     result.label.linkWithMesh(result.lineMesh);
 
     // Apply offsets
@@ -591,8 +657,8 @@ export const createTorqueVisualization = (
   lineArrowHead.material = torusMaterial;
   meshes.push(lineArrowHead);
 
-  // Add label to the torus using singleton texture
-  const advancedTexture = initializeDimensionLabelTexture();
+  // Add label to the torus using shared texture
+  const advancedTexture = getDimensionLabelTexture();
 
   const torqueLabel = new GUI.TextBlock();
   torqueLabel.text = '100';
@@ -669,175 +735,208 @@ export const createArrow = (name: string,
 }
 
 
-
-
 /**
- * Creates a width dimension (X-axis) dimension line with label positioned above the object.
- * Specialized helper function for ConcreteBuilder and SlabBuilder structures.
- * Dimension line runs horizontally (minX to maxX) positioned above the top face.
+ * Creates a visual helper displaying X, Y, Z coordinate axes with arrows and labels.
+ * Each axis is rendered as a colored line with an arrow head and text label.
+ * Allows custom direction vectors to orient the axes in any direction and custom origin position.
+ * Uses shared global texture for all labels to avoid multiple UI textures.
+ * Returns both meshes and label data for proper caching and disposal.
  * 
- * @function createWidthDimensionLabel
- * @param {BABYLON.Scene} scene - The Babylon.js scene
- * @param {number} concreteWidth - Width value to display in dimension label
- * @param {number} centerX - Center X position of the measured object
- * @param {number} maxY - Top Y position (dimension positioned above this)
- * @param {number} offset - Distance offset from measured surface in scene units
- * @param {number} minZ - Front Z position of the measured object
- * @param {number} minX - Minimum X position of the measured object
- * @param {number} maxX - Maximum X position of the measured object
- * @param {BABYLON.StandardMaterial} dimensionMat - Material for dimension line
- * @param {BABYLON.TransformNode} dimensionGroup - Parent transform node
- * @param {GUI.AdvancedDynamicTexture} advancedTexture - GUI texture for label
- * 
- * @returns {DimensionLabelNode|null} Complete dimension label data with mesh and positioning info
+ * @function createAxesBasic
+ * @param {BABYLON.Scene} scene - The Babylon.js scene to add axes to
+ * @param {BABYLON.Vector3} [origin=Vector3(0, 0, 0)] - Origin point where axes start
+ * @param {BABYLON.Vector3} [xDirection=Vector3(1, 0, 0)] - Direction vector for X axis (red)
+ * @param {BABYLON.Vector3} [yDirection=Vector3(0, 1, 0)] - Direction vector for Y axis (green)
+ * @param {BABYLON.Vector3} [zDirection=Vector3(0, 0, 1)] - Direction vector for Z axis (blue)
+ * @param {number} [axisLength=0.2] - Length of each axis in scene units
+ * @param {boolean} [showLabels=true] - Whether to display X, Y, Z axis labels
+ * @param {GUI.AdvancedDynamicTexture} [advancedTexture] - Optional shared GUI texture for labels. If not provided, uses shared global texture
+ * @returns {Object} Object containing axis meshes and labels
+ * @returns {BABYLON.Mesh[]} .meshes - Array of all axis meshes (lines and arrows)
+ * @returns {AxisLabelNode[]} .labels - Array of axis label data
  * 
  * @example
- * const widthDim = createWidthDimensionLabel(
- *   scene,
- *   10.5,  // width value
- *   0,     // center X
- *   5,     // top Y
- *   0.5,   // offset
- *   -5,    // min Z
- *   -5.25, // min X
- *   5.25,  // max X
- *   dimensionMat,
- *   dimensionGroup,
- *   guiTexture
- * );
- */
-export const createWidthDimensionLabel = (scene: BABYLON.Scene,
-    concreteWidth: number,
-    centerX: number, maxY: number,
-    offset: number, minZ: number,
-    minX: number, maxX: number,
-    dimensionMat: BABYLON.StandardMaterial,
-    dimensionGroup: BABYLON.TransformNode,
-    advancedTexture: GUI.AdvancedDynamicTexture) => {
-    return createDimensionWithLabel(
-        'width',
-        scene,
-        new BABYLON.Vector3(centerX, maxY + offset, minZ - offset),
-        new BABYLON.Vector3(0, 0, Math.PI / 2),
-        new BABYLON.Vector3(minX, maxY + offset, minZ - offset),
-        new BABYLON.Vector3(maxX, maxY + offset, minZ - offset),
-        new BABYLON.Vector3(minX, maxY, minZ),
-        new BABYLON.Vector3(maxX, maxY, minZ),
-        dimensionMat,
-        concreteWidth,
-        dimensionGroup,
-        advancedTexture,
-        0,
-        30
-    );
-}
-
-/**
- * Creates a depth dimension (Z-axis) dimension line with label positioned left of the object.
- * Specialized helper function for ConcreteBuilder and SlabBuilder structures.
- * Dimension line runs front-to-back (minZ to maxZ) positioned to the left and above.
- * 
- * @function createDepthDimensionLabel
- * @param {BABYLON.Scene} scene - The Babylon.js scene
- * @param {number} concreteDepth - Depth value to display in dimension label
- * @param {number} minX - Minimum X position (dimension positioned left of this)
- * @param {number} offset - Distance offset from measured surface in scene units
- * @param {number} maxY - Top Y position (dimension positioned above this)
- * @param {number} centerZ - Center Z position of the measured object
- * @param {number} minZ - Minimum Z position of the measured object
- * @param {number} maxZ - Maximum Z position of the measured object
- * @param {BABYLON.StandardMaterial} dimensionMat - Material for dimension line
- * @param {BABYLON.TransformNode} dimensionGroup - Parent transform node
- * @param {GUI.AdvancedDynamicTexture} advancedTexture - GUI texture for label
- * 
- * @returns {DimensionLabelNode|null} Complete dimension label data with mesh and positioning info
+ * // Standard axes at origin (default)
+ * const result = createAxesBasic(scene);
+ * const axisMeshes = result.meshes;
+ * const axisLabels = result.labels;
  * 
  * @example
- * const depthDim = createDepthDimensionLabel(
+ * // Axes at custom position with custom directions
+ * const result = createAxesBasic(
  *   scene,
- *   8.5,   // depth value
- *   -5.25, // min X
- *   0.5,   // offset
- *   5,     // max Y
- *   0,     // center Z
- *   -4.25, // min Z
- *   4.25,  // max Z
- *   dimensionMat,
- *   dimensionGroup,
- *   guiTexture
+ *   new BABYLON.Vector3(5, 0, 0),   // Origin at (5, 0, 0)
+ *   new BABYLON.Vector3(0, 1, 0),   // X axis pointing up
+ *   new BABYLON.Vector3(1, 0, 0),   // Y axis pointing right
+ *   new BABYLON.Vector3(0, 0, 1),   // Z axis pointing forward
+ *   0.2,                             // axis length
+ *   true                             // show labels
  * );
  */
-export const createDepthDimensionLabel = (scene: BABYLON.Scene, concreteDepth: number, minX: number, offset: number, maxY: number, centerZ: number, minZ: number, maxZ: number, dimensionMat: BABYLON.StandardMaterial, dimensionGroup: BABYLON.TransformNode, advancedTexture: GUI.AdvancedDynamicTexture) => {
-    return createDimensionWithLabel(
-        'depth',
-        scene,
-        new BABYLON.Vector3(minX - offset, maxY + offset, centerZ),
-        new BABYLON.Vector3(Math.PI / 2, 0, 0),
-        new BABYLON.Vector3(minX - offset, maxY + offset, minZ),
-        new BABYLON.Vector3(minX - offset, maxY + offset, maxZ),
-        new BABYLON.Vector3(minX, maxY, minZ),
-        new BABYLON.Vector3(minX, maxY, maxZ),
-        dimensionMat,
-        concreteDepth,
-        dimensionGroup,
-        advancedTexture,
-        -30,
-        0
+export const createAxesBasic = (
+  scene: BABYLON.Scene,
+  origin: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
+  xDirection: BABYLON.Vector3 = new BABYLON.Vector3(1, 0, 0),
+  yDirection: BABYLON.Vector3 = new BABYLON.Vector3(0, 1, 0),
+  zDirection: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 1),
+  axisLength: number = 0.2,
+  showLabels: boolean = true,
+  advancedTexture?: GUI.AdvancedDynamicTexture
+): { meshes: BABYLON.Mesh[]; labels: AxisLabelNode[] } => {
+  const lines = [];
+  const axisLabels: AxisLabelNode[] = [];
+  const axisRadius = 0.005;
+  const arrowSize = 0.03;
+
+  // Normalize direction vectors
+  const xDir = BABYLON.Vector3.Normalize(xDirection);
+  const yDir = BABYLON.Vector3.Normalize(yDirection);
+  const zDir = BABYLON.Vector3.Normalize(zDirection);
+
+  // Use provided texture or get shared texture
+  const axisTexture = advancedTexture || getDimensionLabelTexture();
+
+  // Helper function to create arrow head at the end of axis
+  const createArrowHead = (position: BABYLON.Vector3, direction: BABYLON.Vector3, color: BABYLON.Color3) => {
+    const arrowMaterial = new BABYLON.StandardMaterial('arrowMaterial', scene);
+    arrowMaterial.emissiveColor = color;
+
+    // Rotate arrow to point along direction
+    const yAxis = new BABYLON.Vector3(0, 1, 0);
+    const normalizedDirection = BABYLON.Vector3.Normalize(direction);
+    const quaternion = new BABYLON.Quaternion();
+    BABYLON.Quaternion.FromUnitVectorsToRef(yAxis, normalizedDirection, quaternion);
+
+    // Use createArrow helper from GeometryHelper
+    const arrowMesh = createArrow(
+      'axisArrow',
+      arrowSize,
+      arrowSize * 1.5,
+      scene,
+      position,
+      quaternion,
+      arrowMaterial
     );
-}
 
-/**
- * Creates a height dimension (Y-axis) dimension line with label positioned left of the object.
- * Specialized helper function for ConcreteBuilder and SlabBuilder structures.
- * Dimension line runs vertically (minY to maxY) positioned to the left and front.
- * 
- * @function createHeightDemensionLabel
- * @param {BABYLON.Scene} scene - The Babylon.js scene
- * @param {number} concreteThickness - Height/thickness value to display in dimension label
- * @param {number} minX - Minimum X position (dimension positioned left of this)
- * @param {number} offset - Distance offset from measured surface in scene units
- * @param {number} centerY - Center Y position of the measured object
- * @param {number} minZ - Front Z position (dimension positioned in front of this)
- * @param {number} minY - Minimum Y position of the measured object
- * @param {number} maxY - Maximum Y position of the measured object
- * @param {BABYLON.StandardMaterial} dimensionMat - Material for dimension line
- * @param {BABYLON.TransformNode} dimensionGroup - Parent transform node
- * @param {GUI.AdvancedDynamicTexture} advancedTexture - GUI texture for label
- * 
- * @returns {DimensionLabelNode|null} Complete dimension label data with mesh and positioning info
- * 
- * @example
- * const heightDim = createHeightDemensionLabel(
- *   scene,
- *   2.5,    // height/thickness value
- *   -5.25,  // min X
- *   0.5,    // offset
- *   1.25,   // center Y
- *   -4.25,  // min Z
- *   0,      // min Y
- *   2.5,    // max Y
- *   dimensionMat,
- *   dimensionGroup,
- *   guiTexture
- * );
- */
-export const createHeightDemensionLabel = (scene: BABYLON.Scene, concreteThickness: number, minX: number, offset: number, centerY: number, minZ: number, minY: number, maxY: number, dimensionMat: BABYLON.StandardMaterial, dimensionGroup: BABYLON.TransformNode, advancedTexture: GUI.AdvancedDynamicTexture) => {
-    return createDimensionWithLabel(
-        'height',
-        scene,
-        new BABYLON.Vector3(minX - offset, centerY, minZ - offset),
-        new BABYLON.Vector3(0, 0, 0),
-        new BABYLON.Vector3(minX - offset, minY, minZ - offset),
-        new BABYLON.Vector3(minX - offset, maxY, minZ - offset),
-        new BABYLON.Vector3(minX, minY, minZ),
-        new BABYLON.Vector3(minX, maxY, minZ),
-        dimensionMat,
-        concreteThickness,
-        dimensionGroup,
-        advancedTexture,
-        -30,
-        0
-    );
-}
+    return arrowMesh;
+  };
 
+  // Helper function to create axis label using GUI.TextBlock and advancedTexture
+  const createAxisLabel = (arrowMesh: BABYLON.Mesh, labelText: string, color: BABYLON.Color3): AxisLabelNode | null => {
+    if (!showLabels) {
+      return null;
+    }
 
+    const label = new GUI.TextBlock();
+    label.text = labelText;
+    label.fontSize = 24;
+    // label.fontWeight = 'bold';
+    label.color = `rgb(${Math.round(color.r * 255)}, ${Math.round(color.g * 255)}, ${Math.round(color.b * 255)})`;
+
+    // Add label to advancedTexture
+    axisTexture.addControl(label);
+
+    // Link label to arrow mesh with offset
+    label.linkWithMesh(arrowMesh);
+    label.linkOffsetX = 20;
+    label.linkOffsetY = 0;
+
+    return {
+      label: label,
+      arrowMesh: arrowMesh,
+      axisName: labelText
+    };
+  };
+
+  // X axis (red)
+  const xEnd = origin.add(xDir.scale(axisLength));
+  const redLine = BABYLON.MeshBuilder.CreateTube('xAxis', {
+    path: [
+      origin,
+      xEnd,
+    ],
+    radius: axisRadius,
+  }, scene);
+  const redMaterial = new BABYLON.StandardMaterial('redMaterial', scene);
+  redMaterial.emissiveColor = new BABYLON.Color3(1, 0, 0);
+  redLine.material = redMaterial;
+  lines.push(redLine);
+
+  // X axis arrow and label
+  const xArrowPos = origin.add(xDir.scale(axisLength + arrowSize));
+  const xArrow = createArrowHead(
+    xArrowPos,
+    xDir,
+    new BABYLON.Color3(1, 0, 0)
+  );
+  lines.push(xArrow);
+
+  const xLabel = createAxisLabel(
+    xArrow,
+    'X',
+    new BABYLON.Color3(1, 0, 0)
+  );
+  if (xLabel) axisLabels.push(xLabel);
+
+  // Y axis (green)
+  const yEnd = origin.add(yDir.scale(axisLength));
+  const greenLine = BABYLON.MeshBuilder.CreateTube('yAxis', {
+    path: [
+      origin,
+      yEnd,
+    ],
+    radius: axisRadius,
+  }, scene);
+  const greenMaterial = new BABYLON.StandardMaterial('greenMaterial', scene);
+  greenMaterial.emissiveColor = new BABYLON.Color3(0, 1, 0);
+  greenLine.material = greenMaterial;
+  lines.push(greenLine);
+
+  // Y axis arrow and label
+  const yArrowPos = origin.add(yDir.scale(axisLength + arrowSize));
+  const yArrow = createArrowHead(
+    yArrowPos,
+    yDir,
+    new BABYLON.Color3(0, 1, 0)
+  );
+  lines.push(yArrow);
+
+  const yLabel = createAxisLabel(
+    yArrow,
+    'Y',
+    new BABYLON.Color3(0, 1, 0)
+  );
+  if (yLabel) axisLabels.push(yLabel);
+
+  // Z axis (blue)
+  const zEnd = origin.add(zDir.scale(axisLength));
+  const blueLine = BABYLON.MeshBuilder.CreateTube('zAxis', {
+    path: [
+      origin,
+      zEnd,
+    ],
+    radius: axisRadius,
+  }, scene);
+  const blueMaterial = new BABYLON.StandardMaterial('blueMaterial', scene);
+  blueMaterial.emissiveColor = new BABYLON.Color3(0, 0, 1);
+  blueLine.material = blueMaterial;
+  lines.push(blueLine);
+
+  // Z axis arrow and label
+  const zArrowPos = origin.add(zDir.scale(axisLength + arrowSize));
+  const zArrow = createArrowHead(
+    zArrowPos,
+    zDir,
+    new BABYLON.Color3(0, 0, 1)
+  );
+  lines.push(zArrow);
+
+  const zLabel = createAxisLabel(
+    zArrow,
+    'Z',
+    new BABYLON.Color3(0, 0, 1)
+  );
+  if (zLabel) axisLabels.push(zLabel);
+
+  return { meshes: lines, labels: axisLabels };
+};

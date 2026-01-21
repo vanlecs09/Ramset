@@ -2,17 +2,16 @@ import * as BABYLON from '@babylonjs/core';
 import { createConcrete, updateConcrete, ConcreteNode } from './ConcreteBuilder';
 import { createPost } from './PostBuilder';
 import { createWaveBlock } from './WaveBuilder';
-import type { BaseStructureGroup } from './CircularColumnsBuilder';
+import { BaseStructNodeImpl } from './BaseNode';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 
-export class RectangleColumnNode implements BaseStructureGroup {
-    group: BABYLON.TransformNode;
+export class RectangleColumnNode extends BaseStructNodeImpl {
     private concreteGroup?: ConcreteNode;
     private column?: BABYLON.Mesh;
     private posts?: BABYLON.Mesh[];
 
     constructor(group: BABYLON.TransformNode) {
-        this.group = group;
+        super(group);
         this.posts = [];
     }
 
@@ -60,6 +59,8 @@ export class RectangleColumnNode implements BaseStructureGroup {
         if (this.posts) {
             this.posts.forEach(post => post.dispose());
         }
+        // Call parent to dispose axis meshes
+        super.dispose();
     }
 }
 
@@ -116,7 +117,7 @@ export const createRectangleColumn = (
     rectangleColumn.setConcreteGroup(concreteGroup);
 
     // 2. Create rectangle column (box on top)
-    const concreteTopY = 1.5;
+    const concreteTopY = 0;
     let columnHeight = 0.3;
     addWaveBlocksOnTop(rectangleColumn, columnWidth, columnDepth, columnHeight + 0.2,
         new BABYLON.Vector3(0, concreteTopY + columnHeight / 2, 0)
@@ -181,7 +182,7 @@ export const updateRectangleColumn = (
         isFiniteConcrete);
     rectangleColumn.setConcreteGroup(concreteGroup);
 
-    const concreteTopY = 1.5;
+    const concreteTopY = 0;
     let columnHeight = 0.3;
 
     // Update column

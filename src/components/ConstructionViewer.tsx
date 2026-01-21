@@ -1,11 +1,9 @@
 import { useEffect, useRef } from 'react';
 import * as BABYLON from '@babylonjs/core';
-import * as GUI from '@babylonjs/gui';
 import { createComplexColumn, updateComplexColumn } from '../utils/ComplexColumnsBuilder';
 import { createCircularColumns, updateCircularColumns } from '../utils/CircularColumnsBuilder';
 import { createRectangleColumn, updateRectangleColumn } from '../utils/RectangleColumnBuilder';
 import { createSlab, updateSlab } from '../utils/SlabBuilder';
-import { createArrow } from '../utils/GeometryHelper';
 import { calculateCircularPostPositions } from '../utils/CircularPostPositionCalculator';
 import { calculateRectanglePostPositions, calculateYSurfacePostPositions } from '../utils/RectanglePostPositionCalculator';
 import type { CircularColumnsNode } from '../utils/CircularColumnsBuilder';
@@ -81,7 +79,7 @@ const calculateConcreteLayout = (offsets: ConcreteOffsets): ConcreteLayout => {
   const centerXPos = (offsets.concreteOffsetXRight - offsets.concreteOffsetXLeft) / 2;
   const centerZPos = (offsets.concreteOffsetZBack - offsets.concreteOffsetZFront) / 2;
   // Top face of concrete is at Y = 2, so center position is 2 - (thickness/2)
-  const concreteTopY = 1.5;
+  const concreteTopY = 0;
   const concreteCenterY = concreteTopY - (offsets.concreteThickness / 2);
   const concretePosition = new BABYLON.Vector3(centerXPos, concreteCenterY, centerZPos);
 
@@ -217,144 +215,144 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     );
     light.intensity = 0.9;
 
-    // Axes helper (visual representation)
-    const createAxesHelper = () => {
-      const axisLength = 0.2;
-      const lines = [];
-      const axisRaidus = 0.005;
-      const arrowSize = 0.03;
+    // // Axes helper (visual representation)
+    // const createAxesHelper = () => {
+    //   const axisLength = 0.2;
+    //   const lines = [];
+    //   const axisRaidus = 0.005;
+    //   const arrowSize = 0.03;
 
-      // Create advancedTexture for axis labels
-      const axisTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('AxisLabelsUI');
+    //   // Create advancedTexture for axis labels
+    //   const axisTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('AxisLabelsUI');
 
-      // Helper function to create arrow head at the end of axis
-      const createArrowHead = (position: BABYLON.Vector3, direction: BABYLON.Vector3, color: BABYLON.Color3) => {
-        const arrowMaterial = new BABYLON.StandardMaterial('arrowMaterial', scene);
-        arrowMaterial.emissiveColor = color;
+    //   // Helper function to create arrow head at the end of axis
+    //   const createArrowHead = (position: BABYLON.Vector3, direction: BABYLON.Vector3, color: BABYLON.Color3) => {
+    //     const arrowMaterial = new BABYLON.StandardMaterial('arrowMaterial', scene);
+    //     arrowMaterial.emissiveColor = color;
 
-        // Rotate arrow to point along direction
-        const yAxis = new BABYLON.Vector3(0, 1, 0);
-        const normalizedDirection = BABYLON.Vector3.Normalize(direction);
-        const quaternion = new BABYLON.Quaternion();
-        BABYLON.Quaternion.FromUnitVectorsToRef(yAxis, normalizedDirection, quaternion);
+    //     // Rotate arrow to point along direction
+    //     const yAxis = new BABYLON.Vector3(0, 1, 0);
+    //     const normalizedDirection = BABYLON.Vector3.Normalize(direction);
+    //     const quaternion = new BABYLON.Quaternion();
+    //     BABYLON.Quaternion.FromUnitVectorsToRef(yAxis, normalizedDirection, quaternion);
 
-        // Use createArrow helper from GeometryHelper
-        const arrowMesh = createArrow(
-          'axisArrow',
-          arrowSize,
-          arrowSize * 1.5,
-          scene,
-          position,
-          quaternion,
-          arrowMaterial
-        );
+    //     // Use createArrow helper from GeometryHelper
+    //     const arrowMesh = createArrow(
+    //       'axisArrow',
+    //       arrowSize,
+    //       arrowSize * 1.5,
+    //       scene,
+    //       position,
+    //       quaternion,
+    //       arrowMaterial
+    //     );
 
-        return arrowMesh;
-      };
+    //     return arrowMesh;
+    //   };
 
-      // Helper function to create axis label using GUI.TextBlock and advancedTexture
-      const createAxisLabel = (arrowMesh: BABYLON.Mesh, labelText: string, color: BABYLON.Color3) => {
-        const label = new GUI.TextBlock();
-        label.text = labelText;
-        label.fontSize = 24;
-        label.fontWeight = 'bold';
-        label.color = `rgb(${Math.round(color.r * 255)}, ${Math.round(color.g * 255)}, ${Math.round(color.b * 255)})`;
+    //   // Helper function to create axis label using GUI.TextBlock and advancedTexture
+    //   const createAxisLabel = (arrowMesh: BABYLON.Mesh, labelText: string, color: BABYLON.Color3) => {
+    //     const label = new GUI.TextBlock();
+    //     label.text = labelText;
+    //     label.fontSize = 24;
+    //     label.fontWeight = 'bold';
+    //     label.color = `rgb(${Math.round(color.r * 255)}, ${Math.round(color.g * 255)}, ${Math.round(color.b * 255)})`;
         
-        // Add label to advancedTexture
-        axisTexture.addControl(label);
+    //     // Add label to advancedTexture
+    //     axisTexture.addControl(label);
         
-        // Link label to arrow mesh with offset
-        label.linkWithMesh(arrowMesh);
-        label.linkOffsetX = 20;
-        label.linkOffsetY = 0;
+    //     // Link label to arrow mesh with offset
+    //     label.linkWithMesh(arrowMesh);
+    //     label.linkOffsetX = 20;
+    //     label.linkOffsetY = 0;
         
-        return label;
-      };
+    //     return label;
+    //   };
 
-      // X axis (red)
-      const redLine = BABYLON.MeshBuilder.CreateTube('xAxis', {
-        path: [
-          new BABYLON.Vector3(0, 0, 0),
-          new BABYLON.Vector3(axisLength, 0, 0),
-        ],
-        radius: axisRaidus,
-      }, scene);
-      const redMaterial = new BABYLON.StandardMaterial('redMaterial', scene);
-      redMaterial.emissiveColor = new BABYLON.Color3(1, 0, 0);
-      redLine.material = redMaterial;
-      lines.push(redLine);
+    //   // X axis (red)
+    //   const redLine = BABYLON.MeshBuilder.CreateTube('xAxis', {
+    //     path: [
+    //       new BABYLON.Vector3(0, 0, 0),
+    //       new BABYLON.Vector3(axisLength, 0, 0),
+    //     ],
+    //     radius: axisRaidus,
+    //   }, scene);
+    //   const redMaterial = new BABYLON.StandardMaterial('redMaterial', scene);
+    //   redMaterial.emissiveColor = new BABYLON.Color3(1, 0, 0);
+    //   redLine.material = redMaterial;
+    //   lines.push(redLine);
 
-      // X axis arrow and label
-      const xArrow = createArrowHead(
-        new BABYLON.Vector3(axisLength + arrowSize, 0, 0),
-        new BABYLON.Vector3(1, 0, 0),
-        new BABYLON.Color3(1, 0, 0)
-      );
-      lines.push(xArrow);
+    //   // X axis arrow and label
+    //   const xArrow = createArrowHead(
+    //     new BABYLON.Vector3(axisLength + arrowSize, 0, 0),
+    //     new BABYLON.Vector3(1, 0, 0),
+    //     new BABYLON.Color3(1, 0, 0)
+    //   );
+    //   lines.push(xArrow);
       
-      createAxisLabel(
-        xArrow,
-        'X',
-        new BABYLON.Color3(1, 0, 0)
-      );
+    //   createAxisLabel(
+    //     xArrow,
+    //     'X',
+    //     new BABYLON.Color3(1, 0, 0)
+    //   );
 
-      // Y axis (green)
-      const greenLine = BABYLON.MeshBuilder.CreateTube('yAxis', {
-        path: [
-          new BABYLON.Vector3(0, 0, 0),
-          new BABYLON.Vector3(0, axisLength, 0),
-        ],
-        radius: axisRaidus,
-      }, scene);
-      const greenMaterial = new BABYLON.StandardMaterial('greenMaterial', scene);
-      greenMaterial.emissiveColor = new BABYLON.Color3(0, 1, 0);
-      greenLine.material = greenMaterial;
-      lines.push(greenLine);
+    //   // Y axis (green)
+    //   const greenLine = BABYLON.MeshBuilder.CreateTube('yAxis', {
+    //     path: [
+    //       new BABYLON.Vector3(0, 0, 0),
+    //       new BABYLON.Vector3(0, axisLength, 0),
+    //     ],
+    //     radius: axisRaidus,
+    //   }, scene);
+    //   const greenMaterial = new BABYLON.StandardMaterial('greenMaterial', scene);
+    //   greenMaterial.emissiveColor = new BABYLON.Color3(0, 1, 0);
+    //   greenLine.material = greenMaterial;
+    //   lines.push(greenLine);
 
-      // Y axis arrow and label
-      const yArrow = createArrowHead(
-        new BABYLON.Vector3(0, axisLength + arrowSize, 0),
-        new BABYLON.Vector3(0, 1, 0),
-        new BABYLON.Color3(0, 1, 0)
-      );
-      lines.push(yArrow);
+    //   // Y axis arrow and label
+    //   const yArrow = createArrowHead(
+    //     new BABYLON.Vector3(0, axisLength + arrowSize, 0),
+    //     new BABYLON.Vector3(0, 1, 0),
+    //     new BABYLON.Color3(0, 1, 0)
+    //   );
+    //   lines.push(yArrow);
       
-      createAxisLabel(
-        yArrow,
-        'Y',
-        new BABYLON.Color3(0, 1, 0)
-      );
+    //   createAxisLabel(
+    //     yArrow,
+    //     'Y',
+    //     new BABYLON.Color3(0, 1, 0)
+    //   );
 
-      // Z axis (blue)
-      const blueLine = BABYLON.MeshBuilder.CreateTube('zAxis', {
-        path: [
-          new BABYLON.Vector3(0, 0, 0),
-          new BABYLON.Vector3(0, 0, axisLength),
-        ],
-        radius: axisRaidus,
-      }, scene);
-      const blueMaterial = new BABYLON.StandardMaterial('blueMaterial', scene);
-      blueMaterial.emissiveColor = new BABYLON.Color3(0, 0, 1);
-      blueLine.material = blueMaterial;
-      lines.push(blueLine);
+    //   // Z axis (blue)
+    //   const blueLine = BABYLON.MeshBuilder.CreateTube('zAxis', {
+    //     path: [
+    //       new BABYLON.Vector3(0, 0, 0),
+    //       new BABYLON.Vector3(0, 0, axisLength),
+    //     ],
+    //     radius: axisRaidus,
+    //   }, scene);
+    //   const blueMaterial = new BABYLON.StandardMaterial('blueMaterial', scene);
+    //   blueMaterial.emissiveColor = new BABYLON.Color3(0, 0, 1);
+    //   blueLine.material = blueMaterial;
+    //   lines.push(blueLine);
 
-      // Z axis arrow and label
-      const zArrow = createArrowHead(
-        new BABYLON.Vector3(0, 0, axisLength + arrowSize),
-        new BABYLON.Vector3(0, 0, 1),
-        new BABYLON.Color3(0, 0, 1)
-      );
-      lines.push(zArrow);
+    //   // Z axis arrow and label
+    //   const zArrow = createArrowHead(
+    //     new BABYLON.Vector3(0, 0, axisLength + arrowSize),
+    //     new BABYLON.Vector3(0, 0, 1),
+    //     new BABYLON.Color3(0, 0, 1)
+    //   );
+    //   lines.push(zArrow);
       
-      createAxisLabel(
-        zArrow,
-        'Z',
-        new BABYLON.Color3(0, 0, 1)
-      );
+    //   createAxisLabel(
+    //     zArrow,
+    //     'Z',
+    //     new BABYLON.Color3(0, 0, 1)
+    //   );
 
-      return lines;
-    };
-    createAxesHelper();
+    //   return lines;
+    // };
+    // createAxesHelper();
 
     // Render loop
     engine.runRenderLoop(() => {
@@ -413,7 +411,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       // Calculate post positions first
       const gapDistance = 0.5;
-      const baseY = 1.5 + gapDistance / 2;
+      const baseY = 0 + gapDistance / 2;
       const postPositions = calculateCircularPostPositions(
         circleColumns.cylinderRadius,
         circleColumns.circumferenceToPostOffset,
