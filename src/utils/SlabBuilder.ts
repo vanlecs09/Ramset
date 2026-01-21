@@ -5,6 +5,7 @@ import { createWaveBlock } from './WaveBuilder';
 import { createAxesBasic, createDimensionWithLabel, DimensionLineNode } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
+import { createBendingMomenNode } from './BendingMomenNode';
 
 export class SlabNode extends BaseStructNodeImpl {
     private concreteGroup?: ConcreteNode;
@@ -321,6 +322,20 @@ export const updateSlab = (
     );
     slabGroup.setAxisMeshes(axesResult.meshes);
     slabGroup.setLabels(axesResult.labels);
+
+    createBendingMomenNode(
+        scene,
+        new BABYLON.Vector3(0, - concreteThickness / 2, concreteDepth / 2),
+        1
+    );
+
+
+    createBendingMomenNode(
+        scene,
+        new BABYLON.Vector3(0, - concreteThickness / 2, concreteDepth / 2),
+        1,
+        new BABYLON.Vector3(0, 0, 1)
+    );
 };
 
 /**

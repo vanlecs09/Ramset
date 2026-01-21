@@ -762,11 +762,11 @@ export const createLine = (
 };
 
 
-function createLineArrow(beginPoint01: BABYLON.Vector3,
+export const createLineArrow = (beginPoint01: BABYLON.Vector3,
   endPoint01: BABYLON.Vector3,
   name: string, scene: BABYLON.Scene,
   lineMat: BABYLON.Material,
-  ) {
+) => {
   const line = createLine(
     beginPoint01,
     endPoint01,

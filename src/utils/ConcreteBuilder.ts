@@ -117,7 +117,7 @@ export const createConcrete = (
         concreteTransformNode.parent = parent as BABYLON.Node;
     }
 
-    const concreteGroup = new ConcreteNode(concreteTransformNode);
+    const concreteNode = new ConcreteNode(concreteTransformNode);
     const material = initializeConcreteMaterial(scene);
 
     const concrete = BABYLON.MeshBuilder.CreateBox(
@@ -239,12 +239,12 @@ export const createConcrete = (
         }
     }
 
-    concreteGroup.setMesh(concrete);
-    concreteGroup.setMaterial(material);
-    concreteGroup.setInfiniteBlocks(sinBlocks);
-    concreteGroup.setDimensionLines(dimensionLines);
+    concreteNode.setMesh(concrete);
+    concreteNode.setMaterial(material);
+    concreteNode.setInfiniteBlocks(sinBlocks);
+    concreteNode.setDimensionLines(dimensionLines);
 
-    return concreteGroup;
+    return concreteNode;
 };
 
 export const updateConcrete = (
