@@ -151,10 +151,6 @@ export const createConcrete = (
         const minZ = min.z + concretePosition.z;
         const maxZ = max.z + concretePosition.z;
 
-        const centerX = (minX + maxX) / 2;
-        const centerY = (minY + maxY) / 2;
-        const centerZ = (minZ + maxZ) / 2;
-
         const offset = 0.4;
         const dimensionGroup = new BABYLON.TransformNode('dimensionGroup_concrete', scene);
         const labels: DimensionLabelNode[] = [];
@@ -166,8 +162,6 @@ export const createConcrete = (
         const widthLabel = createDimensionWithLabel(
             'width',
             scene,
-            concreteWidth,
-            new BABYLON.Vector3(centerX, maxY + offset, minZ - offset),
             new BABYLON.Vector3(0, 0, Math.PI / 2),
             new BABYLON.Vector3(minX, maxY + offset, minZ - offset),
             new BABYLON.Vector3(maxX, maxY + offset, minZ - offset),
@@ -186,8 +180,6 @@ export const createConcrete = (
         const depthLabel = createDimensionWithLabel(
             'depth',
             scene,
-            concreteDepth,
-            new BABYLON.Vector3(minX - offset, maxY + offset, centerZ),
             new BABYLON.Vector3(Math.PI / 2, 0, 0),
             new BABYLON.Vector3(minX - offset, maxY + offset, minZ),
             new BABYLON.Vector3(minX - offset, maxY + offset, maxZ),
@@ -206,8 +198,6 @@ export const createConcrete = (
         const heightLabel = createDimensionWithLabel(
             'height',
             scene,
-            concreteThickness,
-            new BABYLON.Vector3(minX - offset, centerY, minZ - offset),
             new BABYLON.Vector3(0, 0, 0),
             new BABYLON.Vector3(minX - offset, minY, minZ - offset),
             new BABYLON.Vector3(minX - offset, maxY, minZ - offset),
@@ -307,10 +297,6 @@ export const updateConcrete = (
         const minZ = min.z + concretePosition.z;
         const maxZ = max.z + concretePosition.z;
 
-        const centerX = (minX + maxX) / 2;
-        const centerY = (minY + maxY) / 2;
-        const centerZ = (minZ + maxZ) / 2;
-
         const offset = 0.1;
         const dimensionGroup = new BABYLON.TransformNode('dimensionGroup_concrete', scene);
         const labels: DimensionLabelNode[] = [];
@@ -322,8 +308,6 @@ export const updateConcrete = (
         const widthLabel = createDimensionWithLabel(
             'width',
             scene,
-            concreteWidth,
-            new BABYLON.Vector3(centerX, maxY + offset, minZ - offset),
             new BABYLON.Vector3(0, 0, Math.PI / 2),
             new BABYLON.Vector3(minX, maxY + offset, minZ - offset),
             new BABYLON.Vector3(maxX, maxY + offset, minZ - offset),
@@ -342,8 +326,6 @@ export const updateConcrete = (
         const depthLabel = createDimensionWithLabel(
             'depth',
             scene,
-            concreteDepth,
-            new BABYLON.Vector3(minX - offset, maxY + offset, centerZ),
             new BABYLON.Vector3(Math.PI / 2, 0, 0),
             new BABYLON.Vector3(minX - offset, maxY + offset, minZ),
             new BABYLON.Vector3(minX - offset, maxY + offset, maxZ),
@@ -362,8 +344,6 @@ export const updateConcrete = (
         const heightLabel = createDimensionWithLabel(
             'height',
             scene,
-            concreteThickness,
-            new BABYLON.Vector3(minX - offset, centerY, minZ - offset),
             new BABYLON.Vector3(0, 0, 0),
             new BABYLON.Vector3(minX - offset, minY, minZ - offset),
             new BABYLON.Vector3(minX - offset, maxY, minZ - offset),

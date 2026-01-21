@@ -584,8 +584,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       let halfConcreteDepth = concreteDepth / 2;
       const slabCenterZ = halfConcreteDepth;
       const postPositions = calculateYSurfacePostPositions(
-        slabParams.slabDepth,
         slabParams.slabWidth,
+        slabParams.slabDepth,
         slabParams.postCountX,
         slabParams.postCountZ,
         slabParams.postOffset,

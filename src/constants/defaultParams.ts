@@ -67,8 +67,8 @@ export const DEFAULT_RECTANGLE_COLUMN_PARAMS: RectangleColumnParams = {
 export const DEFAULT_SLAB_PARAMS: SlabParams = {
   isFiniteConcrete: true,
   concreteThickness: 0.2,
-  slabWidth: 0.2,
-  slabDepth: 1,
+  slabWidth: 1,
+  slabDepth: 0.2,
   postCountX: 3,
   postCountZ: 2,
   postDiameter: 0.02,

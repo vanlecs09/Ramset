@@ -1,7 +1,8 @@
 import * as BABYLON from '@babylonjs/core';
-import { createConcrete, updateConcrete, ConcreteNode } from './ConcreteBuilder';
+import { createConcrete, updateConcrete, ConcreteNode, initializeDimensionLabelTexture } from './ConcreteBuilder';
 import { createPost } from './PostBuilder';
 import { createWaveBlock } from './WaveBuilder';
+import { createDimensionWithLabel, DimensionLineNode } from './GeometryHelper';
 import type { BaseStructureGroup } from './CircularColumnsBuilder';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 
@@ -10,11 +11,13 @@ export class SlabNode implements BaseStructureGroup {
     private concreteGroup?: ConcreteNode;
     private waveBlocks?: BABYLON.Mesh[];
     private posts?: BABYLON.Mesh[];
+    private dimensionLines?: DimensionLineNode[];
 
     constructor(group: BABYLON.TransformNode) {
         this.group = group;
         this.posts = [];
         this.waveBlocks = [];
+        this.dimensionLines = [];
     }
 
     // Expose methods for safe access
@@ -66,12 +69,33 @@ export class SlabNode implements BaseStructureGroup {
         }
     }
 
+    getDimensionLines(): DimensionLineNode[] {
+        return this.dimensionLines || [];
+    }
+
+    addDimensionLine(line: DimensionLineNode): void {
+        if (!this.dimensionLines) {
+            this.dimensionLines = [];
+        }
+        this.dimensionLines.push(line);
+    }
+
+    clearDimensionLines(): void {
+        if (this.dimensionLines) {
+            this.dimensionLines.forEach(line => {
+                line.dispose();
+            });
+            this.dimensionLines = [];
+        }
+    }
+
     dispose(): void {
         // Dispose concrete group and its dimension lines
         if (this.concreteGroup) {
             this.concreteGroup.dispose();
         }
         this.clearWaveBlocks();
+        this.clearDimensionLines();
         if (this.posts) {
             this.posts.forEach(post => post.dispose());
         }
@@ -81,6 +105,7 @@ export class SlabNode implements BaseStructureGroup {
 // Global materials - shared across create and update functions
 let slabMaterial: BABYLON.StandardMaterial | null = null;
 let waveBlockMaterial: BABYLON.StandardMaterial | null = null;
+let dimensionMaterial: BABYLON.StandardMaterial | null = null;
 
 const initializeMaterials = (scene: BABYLON.Scene) => {
     if (!slabMaterial) {
@@ -97,6 +122,11 @@ const initializeMaterials = (scene: BABYLON.Scene) => {
         waveMat.alpha = 0.7;
         waveMat.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
         waveBlockMaterial = waveMat;
+    }
+    if (!dimensionMaterial) {
+        var dimMat = new BABYLON.StandardMaterial('dimensionMaterial', scene);
+        dimMat.diffuseColor = new BABYLON.Color3(0, 0, 0); // red for visibility
+        dimensionMaterial = dimMat;
     }
 };
 
@@ -194,9 +224,8 @@ export const updateSlab = (
     slabGroup.setConcreteGroup(concreteGroup);
 
     // Update wave blocks
-    const slabHeigth = 0.3;
-    let slabPosition = new BABYLON.Vector3(concretePosition.x, concretePosition.y, concretePosition.z + (concreteDepth / 2 + slabHeigth / 2));
-    addWaveBlocksFromRightFace(slabGroup, slabDepth, slabWidth, slabHeigth, slabPosition);
+    let slabPosition = new BABYLON.Vector3(concretePosition.x, concretePosition.y, concretePosition.z + (concreteDepth / 2 + slabDepth / 2));
+    addWaveBlocksFromRightFace(slabGroup, slabWidth, slabDepth, concreteThickness, slabPosition);
 
     // Recreate posts with pre-calculated positions
     const postHeight = 0.3;
@@ -206,7 +235,7 @@ export const updateSlab = (
         const postPositionY = 1.5;
         const adjustedPostPosition = new BABYLON.Vector3(
             postPos.position.x,
-            postPos.position.y + postPositionY - slabWidth / 2,
+            postPos.position.y + postPositionY - slabDepth / 2,
             postPos.position.z
         );
 
@@ -216,7 +245,7 @@ export const updateSlab = (
             postDiameter,
             adjustedPostPosition,
             // new BABYLON.Vector3(0, 0, 0),
-            new BABYLON.Vector3(Math.PI / 2,0, 0), // local rotation
+            new BABYLON.Vector3(Math.PI / 2, 0, 0), // local rotation
             slabGroup.group,
             `slabPost_${postPos.index}`
         );
@@ -264,16 +293,87 @@ export const addWaveBlocksFromRightFace = (
 
     slabGroup.addWaveBlock(blockMesh);
 
-    // Add to concrete group's infinite blocks array if it doesn't exist
-    // let concreteGroup = slabGroup.getConcreteGroup();
-    // if (!concreteGroup) {
-    //     concreteGroup = new ConcreteGroup(slabGroup.group);
-    //     slabGroup.setConcreteGroup(concreteGroup);
-    // }
-    // const infiniteBlocks = concreteGroup.getInfiniteBlocks();
-    // if (!infiniteBlocks || infiniteBlocks.length === 0) {
-    //     concreteGroup.setInfiniteBlocks([]);
-    // }
+    // Clear existing dimension lines
+    slabGroup.clearDimensionLines();
 
-    // concreteGroup.getInfiniteBlocks()?.push(blockMesh);
+    // Add dimension lines for wave block
+    const advancedTexture = initializeDimensionLabelTexture();
+
+    // Create a dimension line node group to hold all dimension elements
+    const dimensionGroup = new BABYLON.TransformNode('waveBlockDimensions', scene);
+    dimensionGroup.parent = slabGroup.group;
+
+    // Dimension line for block depth (X-axis)
+    const depthLinePosition = new BABYLON.Vector3(
+        blockPosition.x,
+        blockPosition.y,
+        blockPosition.z + blockDepth
+    );
+    const zOffset = 0.1;
+    const depthLineRotation = new BABYLON.Vector3(0, 0, Math.PI / 2); // Rotate for X-axis measurement
+    const depthArrow1Position = new BABYLON.Vector3(blockPosition.x - blockWidth / 2, depthLinePosition.y + blockHeight / 2, blockPosition.z + blockDepth / 2 + zOffset);
+    const depthArrow2Position = new BABYLON.Vector3(blockPosition.x + blockWidth / 2, depthLinePosition.y + blockHeight / 2, blockPosition.z + blockDepth / 2 + zOffset);
+    const depthCorner1 = new BABYLON.Vector3(blockPosition.x - blockWidth / 2, depthLinePosition.y + blockHeight / 2, blockPosition.z + blockDepth / 2);
+    const depthCorner2 = new BABYLON.Vector3(blockPosition.x + blockWidth / 2, depthLinePosition.y + blockHeight / 2, blockPosition.z + blockDepth / 2);
+
+    const depthDimLabel = createDimensionWithLabel(
+        'waveBlockDepthDim',
+        scene,
+        depthLineRotation,
+        depthArrow1Position,
+        depthArrow2Position,
+        depthCorner1,
+        depthCorner2,
+        dimensionMaterial!,
+        blockWidth,
+        dimensionGroup,
+        advancedTexture,
+        25,
+        0
+    );
+
+    // Create DimensionLineNode to manage depth dimension
+    const depthDimensionNode = new DimensionLineNode(dimensionGroup, blockWidth, blockDepth, blockHeight);
+    if (depthDimLabel) {
+        depthDimensionNode.addLabel(depthDimLabel);
+    }
+    // Add all child meshes from dimension group
+    (dimensionGroup.getChildren() as BABYLON.Mesh[]).forEach(mesh => {
+        depthDimensionNode.addMesh(mesh);
+    });
+    slabGroup.addDimensionLine(depthDimensionNode);
+
+    // Dimension line for block height (Y-axis)
+    const heightLinePosition = new BABYLON.Vector3(
+        blockPosition.x,
+        blockPosition.y,
+        blockPosition.z + blockDepth
+    );
+    const heightLineRotation = new BABYLON.Vector3(0, 0, 0); // Vertical line for Y-axis measurement
+    const heightArrow1Position = new BABYLON.Vector3(heightLinePosition.x + blockWidth / 2 + 0.1, heightLinePosition.y - blockHeight / 2, blockPosition.z + blockDepth / 2  + zOffset);
+    const heightArrow2Position = new BABYLON.Vector3(heightLinePosition.x + blockWidth / 2 + 0.1, heightLinePosition.y + blockHeight / 2, blockPosition.z + blockDepth / 2 + zOffset);
+    const heightCorner1 = new BABYLON.Vector3(heightLinePosition.x + blockWidth / 2, heightLinePosition.y - blockHeight / 2, blockPosition.z + blockDepth / 2);
+    const heightCorner2 = new BABYLON.Vector3(heightLinePosition.x + blockWidth / 2, heightLinePosition.y + blockHeight / 2, blockPosition.z + blockDepth / 2);
+
+    const heightDimLabel = createDimensionWithLabel(
+        'waveBlockHeightDim',
+        scene,
+        heightLineRotation,
+        heightArrow1Position,
+        heightArrow2Position,
+        heightCorner1,
+        heightCorner2,
+        dimensionMaterial!,
+        blockHeight,
+        dimensionGroup,
+        advancedTexture,
+        -40,
+        0
+    );
+
+    // Add height dimension label to the node
+    if (heightDimLabel) {
+        depthDimensionNode.addLabel(heightDimLabel);
+    }
+
 };
