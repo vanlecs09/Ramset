@@ -380,7 +380,6 @@ export const addWaveBlocksFromRightFace = (
         blockPosition.z + blockDepth
     );
     const zOffset = 0.1;
-    const depthLineRotation = new BABYLON.Vector3(0, 0, Math.PI / 2); // Rotate for X-axis measurement
     const depthArrow1Position = new BABYLON.Vector3(blockPosition.x - blockWidth / 2, depthLinePosition.y + blockHeight / 2, blockPosition.z + blockDepth / 2 + zOffset);
     const depthArrow2Position = new BABYLON.Vector3(blockPosition.x + blockWidth / 2, depthLinePosition.y + blockHeight / 2, blockPosition.z + blockDepth / 2 + zOffset);
     const depthCorner1 = new BABYLON.Vector3(blockPosition.x - blockWidth / 2, depthLinePosition.y + blockHeight / 2, blockPosition.z + blockDepth / 2);
@@ -389,7 +388,6 @@ export const addWaveBlocksFromRightFace = (
     const depthDimLabel = createDimensionWithLabel(
         'waveBlockDepthDim',
         scene,
-        depthLineRotation,
         depthArrow1Position,
         depthArrow2Position,
         depthCorner1,
@@ -419,7 +417,6 @@ export const addWaveBlocksFromRightFace = (
         blockPosition.y,
         blockPosition.z + blockDepth
     );
-    const heightLineRotation = new BABYLON.Vector3(0, 0, 0); // Vertical line for Y-axis measurement
     const heightArrow1Position = new BABYLON.Vector3(heightLinePosition.x + blockWidth / 2 + 0.1, heightLinePosition.y - blockHeight / 2, blockPosition.z + blockDepth / 2 + zOffset);
     const heightArrow2Position = new BABYLON.Vector3(heightLinePosition.x + blockWidth / 2 + 0.1, heightLinePosition.y + blockHeight / 2, blockPosition.z + blockDepth / 2 + zOffset);
     const heightCorner1 = new BABYLON.Vector3(heightLinePosition.x + blockWidth / 2, heightLinePosition.y - blockHeight / 2, blockPosition.z + blockDepth / 2);
@@ -428,7 +425,6 @@ export const addWaveBlocksFromRightFace = (
     const heightDimLabel = createDimensionWithLabel(
         'waveBlockHeightDim',
         scene,
-        heightLineRotation,
         heightArrow1Position,
         heightArrow2Position,
         heightCorner1,

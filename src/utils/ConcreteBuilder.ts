@@ -174,7 +174,6 @@ export const createConcrete = (
         const widthLabel = createDimensionWithLabel(
             'width',
             scene,
-            new BABYLON.Vector3(0, 0, Math.PI / 2),
             new BABYLON.Vector3(minX, maxY + offset, minZ - offset),
             new BABYLON.Vector3(maxX, maxY + offset, minZ - offset),
             new BABYLON.Vector3(minX, maxY, minZ),
@@ -192,7 +191,6 @@ export const createConcrete = (
         const depthLabel = createDimensionWithLabel(
             'depth',
             scene,
-            new BABYLON.Vector3(Math.PI / 2, 0, 0),
             new BABYLON.Vector3(minX - offset, maxY + offset, minZ),
             new BABYLON.Vector3(minX - offset, maxY + offset, maxZ),
             new BABYLON.Vector3(minX, maxY, minZ),
@@ -210,7 +208,6 @@ export const createConcrete = (
         const heightLabel = createDimensionWithLabel(
             'height',
             scene,
-            new BABYLON.Vector3(0, 0, 0),
             new BABYLON.Vector3(minX - offset, minY, minZ - offset),
             new BABYLON.Vector3(minX - offset, maxY, minZ - offset),
             new BABYLON.Vector3(minX, minY, minZ),
@@ -320,7 +317,6 @@ export const updateConcrete = (
         const widthLabel = createDimensionWithLabel(
             'width',
             scene,
-            new BABYLON.Vector3(0, 0, Math.PI / 2),
             new BABYLON.Vector3(minX, maxY + offset, minZ - offset),
             new BABYLON.Vector3(maxX, maxY + offset, minZ - offset),
             new BABYLON.Vector3(minX, maxY, minZ),
@@ -338,7 +334,6 @@ export const updateConcrete = (
         const depthLabel = createDimensionWithLabel(
             'depth',
             scene,
-            new BABYLON.Vector3(Math.PI / 2, 0, 0),
             new BABYLON.Vector3(minX - offset, maxY + offset, minZ),
             new BABYLON.Vector3(minX - offset, maxY + offset, maxZ),
             new BABYLON.Vector3(minX, maxY, minZ),
@@ -356,7 +351,6 @@ export const updateConcrete = (
         const heightLabel = createDimensionWithLabel(
             'height',
             scene,
-            new BABYLON.Vector3(0, 0, 0),
             new BABYLON.Vector3(minX - offset, minY, minZ - offset),
             new BABYLON.Vector3(minX - offset, maxY, minZ - offset),
             new BABYLON.Vector3(minX, minY, minZ),
