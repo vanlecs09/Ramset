@@ -8,7 +8,7 @@ import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 import { createBendingMomenNode, BendingMomentNode } from './BendingMomenNode';
 import { ArcDirection, TorsionMomentNode, createTorsionMoment as createTorsionMomentNode } from './TorsionMomentNode';
 
-export class SlabToSlabNode extends BaseStructNodeImpl {
+export class SlabNode extends BaseStructNodeImpl {
     private concreteGroup?: ConcreteNode;
     private waveBlocks?: BABYLON.Mesh[];
     private posts?: BABYLON.Mesh[];
@@ -166,7 +166,7 @@ export class SlabToSlabNode extends BaseStructNodeImpl {
         // Dispose moment nodes
         this.clearBendingMomentNodes();
         this.clearTorsionMomentNodes();
-
+        
         // Dispose concrete group and its dimension lines
         if (this.concreteGroup) {
             this.concreteGroup.dispose();
@@ -228,9 +228,9 @@ export const createSlab = (
     concreteDepth: number = 3,
     concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
     isFiniteConcrete: boolean = true
-): SlabToSlabNode => {
+): SlabNode => {
     const slabGroup = new BABYLON.TransformNode('slab', scene);
-    const slab = new SlabToSlabNode(slabGroup);
+    const slab = new SlabNode(slabGroup);
 
     // Initialize materials
     initializeMaterials(scene);
@@ -299,7 +299,7 @@ export const createSlab = (
 };
 
 export const updateSlab = (
-    slabGroup: SlabToSlabNode,
+    slabGroup: SlabNode,
     postPositions: RectanglePostPosition[],
     concreteThickness: number = 0.5,
     slabWidth: number = 3,
@@ -408,8 +408,8 @@ export const updateSlab = (
         'torque1',
         scene,
         new BABYLON.Vector3(1, - concreteThickness / 2, concreteDepth / 2),
-        new BABYLON.Vector3(0, 0, 1),    // Direction along X
-        new BABYLON.Vector3(0, -1, 0),    // Direction along XF
+        new BABYLON.Vector3(1, 0, 0),    // Right vector
+        new BABYLON.Vector3(0, 1, 0),    // Up vector
         undefined,                        // arcAngle (use default)
         ArcDirection.FORWARD,             // Forward pointing
         torsionMat,
@@ -426,7 +426,7 @@ export const updateSlab = (
  * @param slabPosition - position of the slab
  * */
 export const addWaveBlocksFromRightFace = (
-    slabGroup: SlabToSlabNode,
+    slabGroup: SlabNode,
     blockWidth: number = 3,
     blockDepth: number = 2,
     blockHeight: number = 0.5,
@@ -553,7 +553,7 @@ export const addWaveBlocksFromRightFace = (
  * @param postDiameter - Diameter of secondary posts
  */
 export const addSecondaryPostsInsideConcrete = (
-    slabGroup: SlabToSlabNode,
+    slabGroup: SlabNode,
     concretePosition: BABYLON.Vector3,
     concreteWidth: number,
     concreteDepth: number,

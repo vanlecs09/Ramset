@@ -1,5 +1,5 @@
 import * as BABYLON from '@babylonjs/core';
-import { createConcrete, updateConcrete, ConcreteNode } from './ConcreteBuilder';
+import { createConcrete, updateConcrete, ConcreteNode } from './ConcreteNode';
 import { createPost } from './PostNode';
 import { BaseStructNodeImpl } from './BaseNode';
 import type { PostPosition } from './CircularPostPositionCalculator';

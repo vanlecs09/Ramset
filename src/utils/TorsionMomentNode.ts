@@ -1,6 +1,7 @@
 import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
-import { getDimensionLabelTexture } from './ConcreteBuilder';
+import { getDimensionLabelTexture } from './ConcreteNode';
+import { createArrow } from './GeometryHelper';
 
 /**
  * Arc direction enumeration for torsion moment visualization.
@@ -82,6 +83,8 @@ export class TorsionMomentNode {
     }
 }
 
+
+
 /**
  * Default values for torsion moment visualization
  */
@@ -89,8 +92,8 @@ export const TORSION_MOMENT_CONSTANTS = {
     ARC_RADIUS: 0.06,
     ARC_THICKNESS: 0.003,
     ARC_ANGLE: 270,
-    ARROW_SIZE: 0.05,
-    ARROW_DIAMETER: 0.05,
+    ARROW_SIZE: 0.02,
+    ARROW_DIAMETER: 0.02,
     ARC_SEGMENTS: 60,
     ARC_TESSELLATION: 16,
     LABEL_FONT_SIZE: 18,
@@ -119,7 +122,8 @@ export const createTorsionMoment = (
     name: string,
     scene: BABYLON.Scene,
     centerPosition: BABYLON.Vector3,
-    direction: BABYLON.Vector3,
+    rightVec: BABYLON.Vector3,
+    upVec: BABYLON.Vector3,
     arcAngle: number = TORSION_MOMENT_CONSTANTS.ARC_ANGLE,
     arcDir: ArcDirection = ArcDirection.FORWARD,
     material: BABYLON.Material,
@@ -132,10 +136,12 @@ export const createTorsionMoment = (
     const meshes: BABYLON.Mesh[] = [];
     const labels: GUI.TextBlock[] = [];
 
-    const normalizedDirection = BABYLON.Vector3.Normalize(direction);
-
+    // const normalizedDirection = BABYLON.Vector3.Normalize(direction);
+    
     // Calculate perpendicular vectors for the arc plane
-    const { perp1, perp2 } = calculatePerpendiculars(normalizedDirection);
+    const perp1 = rightVec.normalize();
+    const perp2 = upVec.normalize();
+    // const direction = BABYLON.Vector3.Cross(perp1, perp2).normalize();
 
     // Create the arc
     const arc = createArc(
@@ -147,7 +153,6 @@ export const createTorsionMoment = (
         arcRadius,
         arcThickness,
         arcAngle,
-        arcDir,
         material
     );
     arc.parent = group;
@@ -178,27 +183,6 @@ export const createTorsionMoment = (
     return new TorsionMomentNode(group, arc, arrow, meshes, label, labels);
 };
 
-/**
- * Calculates two perpendicular vectors to a given direction.
- * Used to define the plane for the arc visualization.
- * @private
- */
-const calculatePerpendiculars = (direction: BABYLON.Vector3) => {
-    let perp1: BABYLON.Vector3;
-    let perp2: BABYLON.Vector3;
-
-    // Choose first perpendicular based on direction to avoid parallel vectors
-    if (Math.abs(direction.x) < 0.9) {
-        perp1 = BABYLON.Vector3.Cross(direction, new BABYLON.Vector3(1, 0, 0)).normalize();
-    } else {
-        perp1 = BABYLON.Vector3.Cross(direction, new BABYLON.Vector3(0, 1, 0)).normalize();
-    }
-
-    // Calculate second perpendicular as cross product
-    perp2 = BABYLON.Vector3.Cross(direction, perp1).normalize();
-
-    return { perp1, perp2 };
-};
 
 /**
  * Creates an arc in the plane defined by two perpendicular vectors.
@@ -214,16 +198,16 @@ const createArc = (
     arcRadius: number,
     arcThickness: number,
     arcAngle: number,
-    arcDirection: ArcDirection,
     material: BABYLON.Material
 ): BABYLON.Mesh => {
     const arcRadians = (arcAngle / 180) * Math.PI;
+    const begineAngle = -45 * Math.PI / 180;
     const path: BABYLON.Vector3[] = [];
 
     // Generate arc path points
     for (let i = 0; i <= TORSION_MOMENT_CONSTANTS.ARC_SEGMENTS; i++) {
         const t = i / TORSION_MOMENT_CONSTANTS.ARC_SEGMENTS;
-        const angle = t * arcRadians * arcDirection;
+        const angle = begineAngle + t * arcRadians;
 
         const x = arcRadius * Math.cos(angle);
         const y = arcRadius * Math.sin(angle);
@@ -264,40 +248,36 @@ const createArcArrow = (
     arcDirection: ArcDirection,
     material: BABYLON.Material
 ): BABYLON.Mesh => {
-    const yAxis = new BABYLON.Vector3(0, 1, 0);
+    arcAngle += 45 * arcDirection;// Adjust for starting angle
     const arcRadians = (arcAngle / 180) * Math.PI;
 
     // Calculate end angle accounting for direction
-    const endAngle = arcRadians * arcDirection;
+    const endAngle = arcRadians;
     const endX = arcRadius * Math.cos(endAngle);
     const endY = arcRadius * Math.sin(endAngle);
 
     // Calculate tangent direction for arrow orientation
-    const tangentAngle = endAngle + (Math.PI / 2) * arcDirection;
+    const tangentAngle = endAngle + (Math.PI / 2);
     const tangentDirection = perp1
         .scale(Math.cos(tangentAngle))
-        .add(perp2.scale(Math.sin(tangentAngle)));
-
-    // Create arrow head
-    const arrow = BABYLON.MeshBuilder.CreateCylinder(name + '_Arrow', {
-        diameterTop: 0,
-        diameterBottom: TORSION_MOMENT_CONSTANTS.ARROW_DIAMETER,
-        height: TORSION_MOMENT_CONSTANTS.ARROW_SIZE
-    }, scene);
+        .add(perp2.scale(Math.sin(tangentAngle)))
+        .normalize().scale(-arcDirection);
 
     // Position at arc end
-    arrow.position = centerPosition
+    const arrowPosition = centerPosition
         .add(perp1.scale(endX))
         .add(perp2.scale(endY));
 
-    // Rotate to point along tangent direction
-    const rotation = BABYLON.Quaternion.FromUnitVectorsToRef(
-        yAxis,
+    // Create arrow using GeometryHelper function
+    const arrow = createArrow(
+        name + '_Arrow',
+        TORSION_MOMENT_CONSTANTS.ARROW_DIAMETER,
+        TORSION_MOMENT_CONSTANTS.ARROW_SIZE,
+        scene,
+        arrowPosition,
         tangentDirection,
-        new BABYLON.Quaternion()
+        material
     );
-    arrow.rotationQuaternion = rotation;
-    arrow.material = material;
 
     return arrow;
 };
