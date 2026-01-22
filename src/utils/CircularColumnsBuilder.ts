@@ -1,7 +1,6 @@
 import * as BABYLON from '@babylonjs/core';
 import { createConcrete, updateConcrete, ConcreteNode } from './ConcreteBuilder';
 import { createPost } from './PostBuilder';
-import { createTorqueVisualization } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
 import type { PostPosition } from './CircularPostPositionCalculator';
 
@@ -171,57 +170,6 @@ export const createCircularColumns = (
   return circularColumns;
 };
 
-/**
- * Add torque visualization on the right face of concrete
- * @param circularColumns - The circular columns group to add torque to
- * @param concreteWidth - Width of the concrete (for positioning)
- * @param concretePosition - Position of the concrete
- * @param torqueDirection - Direction of the torque (perpendicular to torus plane)
- */
-export const addTorqueVisualizationToRightFace = (
-  circularColumns: CircularColumnsNode,
-  concreteWidth: number = 3,
-  concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
-  torqueDirection: BABYLON.Vector3 = new BABYLON.Vector3(1, 0, 0)
-) => {
-  const scene = circularColumns.group.getScene();
-
-  // Torque material (distinctive color)
-  const torqueMaterial = new BABYLON.StandardMaterial('torqueMaterial', scene);
-  torqueMaterial.emissiveColor = new BABYLON.Color3(0, 0, 0); // Orange-red
-  torqueMaterial.disableLighting = true;
-
-  // Position torque on the right face (max X) of the concrete
-  // Right face center: at max X, middle Y, middle Z
-  const torqueX = concretePosition.x + concreteWidth / 2 + 0.2;
-  const torqueY = concretePosition.y + 0.75; // Middle of concrete height
-  const torqueZ = concretePosition.z; // Center depth
-
-  const torusPosition = new BABYLON.Vector3(torqueX, torqueY, torqueZ);
-
-  // Create torque visualization
-  const torque = createTorqueVisualization(
-    'concreteTorque',
-    scene,
-    torusPosition,
-    torqueDirection,
-    0.3,           // torusRadius
-    0.015,          // tubeRadius
-    270,            // arcAngle in degrees
-    0.2,            // lineOffset
-    0.5,
-    torqueMaterial
-  );
-
-  // Add meshes to the group
-  torque.meshes.forEach(mesh => {
-    mesh.parent = circularColumns.group;
-    circularColumns.addTorqueMesh(mesh);
-  });
-
-  return torque;
-};
-
 export const updateCircularColumns = (
   circularColumnsGroup: CircularColumnsNode,
   concreteThickness: number = 1.5,
@@ -251,13 +199,6 @@ export const updateCircularColumns = (
       circularColumnsGroup.group,
       isFiniteConcrete);
   }
-
-  addTorqueVisualizationToRightFace(
-    circularColumnsGroup,
-    concreteWidth,
-    concretePosition,
-    new BABYLON.Vector3(1, 0, 0) // X-axis torque direction
-  );
 
   // Calculate concrete top position
   const concreteTopY = 0;

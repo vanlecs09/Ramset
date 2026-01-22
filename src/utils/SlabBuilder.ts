@@ -1,11 +1,12 @@
 import * as BABYLON from '@babylonjs/core';
-import { createConcrete, updateConcrete, ConcreteNode, initializeDimensionLabelTexture } from './ConcreteBuilder';
+import { createConcrete, updateConcrete, ConcreteNode, getDimensionLabelTexture } from './ConcreteBuilder';
 import { createPost } from './PostBuilder';
 import { createWaveBlock } from './WaveBuilder';
 import { createAxesBasic, createDimensionWithLabel, DimensionLineNode } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
-import { createBendingMomenNode } from './BendingMomenNode';
+import { createBendingMomenNode, type BendingMomentNode } from './BendingMomenNode';
+import { ArcDirection, TorsionMomentNode, createTorsionMoment as createTorsionMomentNode } from './TorsionMomentNode';
 
 export class SlabNode extends BaseStructNodeImpl {
     private concreteGroup?: ConcreteNode;
@@ -13,12 +14,16 @@ export class SlabNode extends BaseStructNodeImpl {
     private posts?: BABYLON.Mesh[];
     private secondaryPosts?: BABYLON.Mesh[];
     private dimensionLines?: DimensionLineNode[];
+    private bendingMomentNodes?: BendingMomentNode[];
+    private torsionMomentNodes?: TorsionMomentNode[];
 
     constructor(group: BABYLON.TransformNode) {
         super(group);
         this.posts = [];
         this.waveBlocks = [];
         this.dimensionLines = [];
+        this.bendingMomentNodes = [];
+        this.torsionMomentNodes = [];
     }
 
     // Expose methods for safe access
@@ -108,7 +113,60 @@ export class SlabNode extends BaseStructNodeImpl {
         }
     }
 
+    addBendingMomentNode(node: BendingMomentNode): void {
+        if (!this.bendingMomentNodes) {
+            this.bendingMomentNodes = [];
+        }
+        this.bendingMomentNodes.push(node);
+    }
+
+    getBendingMomentNodes(): BendingMomentNode[] {
+        return this.bendingMomentNodes || [];
+    }
+
+    clearBendingMomentNodes(): void {
+        if (this.bendingMomentNodes) {
+            this.bendingMomentNodes.forEach(node => {
+                // Dispose meshes from bending moment node
+                node.meshes.forEach(mesh => {
+                    if (mesh && !mesh.isDisposed()) {
+                        mesh.dispose();
+                    }
+                });
+                // Dispose group
+                if (node.group && !node.group.isDisposed()) {
+                    node.group.dispose();
+                }
+            });
+            this.bendingMomentNodes = [];
+        }
+    }
+
+    addTorsionMomentNode(node: TorsionMomentNode): void {
+        if (!this.torsionMomentNodes) {
+            this.torsionMomentNodes = [];
+        }
+        this.torsionMomentNodes.push(node);
+    }
+
+    getTorsionMomentNodes(): TorsionMomentNode[] {
+        return this.torsionMomentNodes || [];
+    }
+
+    clearTorsionMomentNodes(): void {
+        if (this.torsionMomentNodes) {
+            this.torsionMomentNodes.forEach(node => {
+                node.dispose();
+            });
+            this.torsionMomentNodes = [];
+        }
+    }
+
     dispose(): void {
+        // Dispose moment nodes
+        this.clearBendingMomentNodes();
+        this.clearTorsionMomentNodes();
+        
         // Dispose concrete group and its dimension lines
         if (this.concreteGroup) {
             this.concreteGroup.dispose();
@@ -329,13 +387,27 @@ export const updateSlab = (
         1
     );
 
-
     createBendingMomenNode(
         scene,
         new BABYLON.Vector3(0, - concreteThickness / 2, concreteDepth / 2),
         1,
         new BABYLON.Vector3(0, 0, 1)
     );
+
+    const torsionMat = new BABYLON.StandardMaterial('torsionMat', scene);
+    torsionMat.diffuseColor = BABYLON.Color3.Black();
+
+    const torsion = createTorsionMomentNode(
+        'torque1',
+        scene,
+        new BABYLON.Vector3(1, - concreteThickness / 2, concreteDepth / 2),
+        new BABYLON.Vector3(1, 0, 0),    // Direction along X
+        undefined,                        // arcAngle (use default)
+        ArcDirection.FORWARD,             // Forward pointing
+        torsionMat,
+        '200'                               // Label text
+    );
+    slabGroup.addTorsionMomentNode(torsion);
 };
 
 /**
@@ -382,7 +454,7 @@ export const addWaveBlocksFromRightFace = (
     slabGroup.clearDimensionLines();
 
     // Add dimension lines for wave block
-    const advancedTexture = initializeDimensionLabelTexture();
+    const advancedTexture = getDimensionLabelTexture();
 
     // Create a dimension line node group to hold all dimension elements
     const dimensionGroup = new BABYLON.TransformNode('waveBlockDimensions', scene);
