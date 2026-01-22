@@ -1,15 +1,15 @@
 import { useEffect, useRef } from 'react';
 import * as BABYLON from '@babylonjs/core';
-import { createComplexColumn, updateComplexColumn } from '../utils/ComplexColumnsBuilder';
-import { createCircularColumns, updateCircularColumns } from '../utils/CircularColumnsBuilder';
-import { createRectangleColumn, updateRectangleColumn } from '../utils/RectangleColumnBuilder';
-import { createSlab, updateSlab } from '../utils/SlabBuilder';
+import { createComplexColumn, updateComplexColumn } from '../utils/ComplexColumnNode';
+import { createCircularColumns, updateCircularColumns } from '../utils/CircularColumnsNode';
+import { createRectangleColumn, updateRectangleColumn } from '../utils/RectangleColumnNode';
+import { createSlab, updateSlab } from '../utils/SlabNode';
 import { calculateCircularPostPositions } from '../utils/CircularPostPositionCalculator';
 import { calculateRectanglePostPositions, calculateYSurfacePostPositions } from '../utils/RectanglePostPositionCalculator';
-import type { CircularColumnsNode } from '../utils/CircularColumnsBuilder';
-import type { ComplexColumnNode } from '../utils/ComplexColumnsBuilder';
-import type { RectangleColumnNode } from '../utils/RectangleColumnBuilder';
-import type { SlabNode } from '../utils/SlabBuilder';
+import type { CircularColumnsNode } from '../utils/CircularColumnsNode';
+import type { ComplexColumnNode } from '../utils/ComplexColumnNode';
+import type { RectangleColumnNode } from '../utils/RectangleColumnNode';
+import type { SlabNode } from '../utils/SlabNode';
 import type { RectangleColumnParams, SlabParams } from '../App';
 
 interface TowerParams {

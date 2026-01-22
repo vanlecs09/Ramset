@@ -1,6 +1,6 @@
 import * as BABYLON from '@babylonjs/core';
 import { createConcrete, updateConcrete, ConcreteNode } from './ConcreteBuilder';
-import { createPost } from './PostBuilder';
+import { createPost } from './PostNode';
 import { createWaveBlock } from './WaveBuilder';
 import { BaseStructNodeImpl } from './BaseNode';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';

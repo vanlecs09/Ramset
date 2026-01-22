@@ -1,27 +1,73 @@
 import * as BABYLON from '@babylonjs/core';
-import { createLine, createArrow, DIMENSION_LINE_CONSTANTS, createLineArrow } from './GeometryHelper';
+import { createLine, createLineArrow } from './GeometryHelper';
 
 /**
- * Data structure representing a bending moment visualization node.
+ * Class representing a bending moment visualization node.
  * Combines dotted line and arrow head for moment representation.
+ * Manages resources and lifecycle.
  */
-export interface BendingMomentNode {
-    group: BABYLON.TransformNode;
-    meshes: BABYLON.Mesh[];
-    dottedLine: BABYLON.Mesh[];
-    arrow: BABYLON.Mesh;
+export class BendingMomentNode {
+    readonly group: BABYLON.TransformNode;
+    readonly meshes: BABYLON.Mesh[];
+    readonly dottedLine: BABYLON.Mesh[];
+    readonly arrow: BABYLON.Mesh;
+    private isDisposed: boolean = false;
+
+    /**
+     * Creates a new BendingMomentNode instance.
+     */
+    constructor(
+        group: BABYLON.TransformNode,
+        meshes: BABYLON.Mesh[],
+        dottedLine: BABYLON.Mesh[],
+        arrow: BABYLON.Mesh
+    ) {
+        this.group = group;
+        this.meshes = meshes;
+        this.dottedLine = dottedLine;
+        this.arrow = arrow;
+    }
+
+    /**
+     * Disposes of all resources (meshes and transform node).
+     * Should be called before discarding the instance to prevent memory leaks.
+     */
+    dispose(): void {
+        if (this.isDisposed) return;
+
+        // Dispose all meshes
+        this.meshes.forEach(mesh => {
+            if (mesh && !mesh.isDisposed()) {
+                mesh.dispose();
+            }
+        });
+
+        // Dispose transform group
+        if (this.group && !this.group.isDisposed()) {
+            this.group.dispose();
+        }
+
+        this.isDisposed = true;
+    }
+
+    /**
+     * Checks if the node has been disposed.
+     */
+    getIsDisposed(): boolean {
+        return this.isDisposed;
+    }
 }
 
 /**
  * Constants for bending moment visualization
  */
-const BENDING_MOMENT_CONSTANTS = {
+export const BENDING_MOMENT_CONSTANTS = {
     DOT_SPACING: 0.1,        // Distance between dots
     DOT_RADIUS: 0.003,       // Radius of dot lines
     LINE_THICKNESS: 0.003,   // Thickness of connecting lines between dots
     ARROW_SIZE: 0.03,        // Size of arrow head
     ARROW_DIAMETER: 0.02,    // Diameter of arrow cone
-    MATERIAL_COLOR: new BABYLON.Color3(0, 0, 0), // Orange color
+    MATERIAL_COLOR: new BABYLON.Color3(0, 0, 0), // Black color
 } as const;
 
 /**
@@ -33,7 +79,7 @@ const BENDING_MOMENT_CONSTANTS = {
  * @param position - Starting position of the bending moment line
  * @param length - Total length of the bending moment visualization
  * @param direction - Direction vector for the line (defaults to X-axis)
- * @param color - Color for the visualization (defaults to orange)
+ * @param color - Color for the visualization (defaults to black)
  * @returns BendingMomentNode containing all meshes and group
  */
 export const createBendingMomenNode = (
@@ -85,18 +131,14 @@ export const createBendingMomenNode = (
     const arrowLine = createLineArrow(
         arrowPosition,
         arrowPosition.add(normalizedDirection.scale(0.1)),
-        "bendingMoment_arrow",
+        'bendingMoment_arrow',
         scene,
         material
     );
-    // arrowLine.lparent = group;
+    arrowLine.line.parent = group;
+    arrowLine.arrow.parent = group;
     meshes.push(arrowLine.line);
     meshes.push(arrowLine.arrow);
 
-    return {
-        group,
-        meshes,
-        dottedLine: dottedLineMeshes,
-        arrow: arrowLine.arrow
-    };
+    return new BendingMomentNode(group, meshes, dottedLineMeshes, arrowLine.arrow);
 };

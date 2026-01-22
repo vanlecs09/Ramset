@@ -3,7 +3,7 @@ import { BaseStructNodeImpl } from './BaseNode';
 import { createConcrete, updateConcrete } from './ConcreteBuilder';
 import type { ConcreteNode } from './ConcreteBuilder';
 import { calculateCuboidPostPositions } from './CuboidPostPositionCalculator';
-import { createPost } from './PostBuilder';
+import { createPost } from './PostNode';
 
 
 export const createCross = (

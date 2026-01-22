@@ -1,6 +1,6 @@
 import * as BABYLON from '@babylonjs/core';
 
-export interface PostGroup {
+export interface PostNode {
     mesh?: BABYLON.Mesh;
     material?: BABYLON.StandardMaterial;
 }
@@ -25,7 +25,7 @@ export const createPost = (
     rotation?: BABYLON.Vector3,
     parent?: BABYLON.TransformNode,
     name: string = 'post'
-): PostGroup => {
+): PostNode => {
     const material = initializePostMaterial(scene);
 
     const post = BABYLON.MeshBuilder.CreateCylinder(
@@ -56,7 +56,7 @@ export const createPost = (
 };
 
 export const updatePost = (
-    postGroup: PostGroup,
+    postGroup: PostNode,
     scene: BABYLON.Scene,
     height: number = 1,
     diameter: number = 0.2,
@@ -104,7 +104,7 @@ export const createPostBatch = (
     scene: BABYLON.Scene,
     posts: Array<{ height: number; diameter: number; position?: BABYLON.Vector3; name: string }>,
     parent?: BABYLON.TransformNode
-): PostGroup[] => {
+): PostNode[] => {
     return posts.map(post =>
         createPost(scene, post.height, post.diameter, post.position, undefined,  parent, post.name)
     );

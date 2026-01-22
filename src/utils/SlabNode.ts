@@ -1,11 +1,11 @@
 import * as BABYLON from '@babylonjs/core';
 import { createConcrete, updateConcrete, ConcreteNode, getDimensionLabelTexture } from './ConcreteBuilder';
-import { createPost } from './PostBuilder';
+import { createPost } from './PostNode';
 import { createWaveBlock } from './WaveBuilder';
 import { createAxesBasic, createDimensionWithLabel, DimensionLineNode } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
-import { createBendingMomenNode, type BendingMomentNode } from './BendingMomenNode';
+import { createBendingMomenNode, BendingMomentNode } from './BendingMomenNode';
 import { ArcDirection, TorsionMomentNode, createTorsionMoment as createTorsionMomentNode } from './TorsionMomentNode';
 
 export class SlabNode extends BaseStructNodeImpl {
@@ -381,18 +381,20 @@ export const updateSlab = (
     slabGroup.setAxisMeshes(axesResult.meshes);
     slabGroup.setLabels(axesResult.labels);
 
-    createBendingMomenNode(
+    const bendingMoment1 = createBendingMomenNode(
         scene,
         new BABYLON.Vector3(0, - concreteThickness / 2, concreteDepth / 2),
         1
     );
+    slabGroup.addBendingMomentNode(bendingMoment1);
 
-    createBendingMomenNode(
+    const bendingMoment2 = createBendingMomenNode(
         scene,
         new BABYLON.Vector3(0, - concreteThickness / 2, concreteDepth / 2),
         1,
         new BABYLON.Vector3(0, 0, 1)
     );
+    slabGroup.addBendingMomentNode(bendingMoment2);
 
     const torsionMat = new BABYLON.StandardMaterial('torsionMat', scene);
     torsionMat.diffuseColor = BABYLON.Color3.Black();
