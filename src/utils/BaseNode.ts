@@ -39,11 +39,13 @@ export abstract class BaseStructNodeImpl implements BaseNode {
   group: BABYLON.TransformNode;
   protected axisMeshes?: BABYLON.Mesh[];
   protected labels?: LabelNode[];
+  protected posts?: BABYLON.Mesh[];
 
   constructor(group: BABYLON.TransformNode) {
     this.group = group;
     this.axisMeshes = [];
     this.labels = [];
+    this.posts = [];
   }
 
   getAxisMeshes(): BABYLON.Mesh[] {
@@ -78,12 +80,31 @@ export abstract class BaseStructNodeImpl implements BaseNode {
     }
   }
 
+  getPosts(): BABYLON.Mesh[] {
+    return this.posts || [];
+  }
+
+  addPost(post: BABYLON.Mesh): void {
+    if (!this.posts) {
+      this.posts = [];
+    }
+    this.posts.push(post);
+  }
+
+  clearPosts(): void {
+    if (this.posts) {
+      this.posts.forEach(post => post.dispose());
+      this.posts = [];
+    }
+  }
+
   /**
-   * Base dispose method that cleans up axis meshes and labels.
+   * Base dispose method that cleans up axis meshes, labels, and posts.
    * Subclasses should override this and call super.dispose() at the end.
    */
   dispose(): void {
     this.clearAxisMeshes();
     this.clearLabels();
+    this.clearPosts();
   }
 }

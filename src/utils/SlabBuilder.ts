@@ -11,7 +11,6 @@ import { ArcDirection, TorsionMomentNode, createTorsionMoment as createTorsionMo
 export class SlabNode extends BaseStructNodeImpl {
     private concreteGroup?: ConcreteNode;
     private waveBlocks?: BABYLON.Mesh[];
-    private posts?: BABYLON.Mesh[];
     private secondaryPosts?: BABYLON.Mesh[];
     private dimensionLines?: DimensionLineNode[];
     private bendingMomentNodes?: BendingMomentNode[];
@@ -19,7 +18,6 @@ export class SlabNode extends BaseStructNodeImpl {
 
     constructor(group: BABYLON.TransformNode) {
         super(group);
-        this.posts = [];
         this.waveBlocks = [];
         this.dimensionLines = [];
         this.bendingMomentNodes = [];
@@ -54,24 +52,6 @@ export class SlabNode extends BaseStructNodeImpl {
         if (this.waveBlocks) {
             this.waveBlocks.forEach(block => block.dispose());
             this.waveBlocks = [];
-        }
-    }
-
-    getPosts(): BABYLON.Mesh[] {
-        return this.posts || [];
-    }
-
-    addPost(post: BABYLON.Mesh): void {
-        if (!this.posts) {
-            this.posts = [];
-        }
-        this.posts.push(post);
-    }
-
-    clearPosts(): void {
-        if (this.posts) {
-            this.posts.forEach(post => post.dispose());
-            this.posts = [];
         }
     }
 

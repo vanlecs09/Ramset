@@ -8,10 +8,9 @@ import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 import { createBendingMomenNode, BendingMomentNode } from './BendingMomenNode';
 import { ArcDirection, TorsionMomentNode, createTorsionMoment as createTorsionMomentNode } from './TorsionMomentNode';
 
-export class SlabToSlabNode extends BaseStructNodeImpl {
+export class SlabNode extends BaseStructNodeImpl {
     private concreteGroup?: ConcreteNode;
     private waveBlocks?: BABYLON.Mesh[];
-    private posts?: BABYLON.Mesh[];
     private secondaryPosts?: BABYLON.Mesh[];
     private dimensionLines?: DimensionLineNode[];
     private bendingMomentNodes?: BendingMomentNode[];
@@ -19,7 +18,6 @@ export class SlabToSlabNode extends BaseStructNodeImpl {
 
     constructor(group: BABYLON.TransformNode) {
         super(group);
-        this.posts = [];
         this.waveBlocks = [];
         this.dimensionLines = [];
         this.bendingMomentNodes = [];
@@ -54,24 +52,6 @@ export class SlabToSlabNode extends BaseStructNodeImpl {
         if (this.waveBlocks) {
             this.waveBlocks.forEach(block => block.dispose());
             this.waveBlocks = [];
-        }
-    }
-
-    getPosts(): BABYLON.Mesh[] {
-        return this.posts || [];
-    }
-
-    addPost(post: BABYLON.Mesh): void {
-        if (!this.posts) {
-            this.posts = [];
-        }
-        this.posts.push(post);
-    }
-
-    clearPosts(): void {
-        if (this.posts) {
-            this.posts.forEach(post => post.dispose());
-            this.posts = [];
         }
     }
 
@@ -228,9 +208,9 @@ export const createSlab = (
     concreteDepth: number = 3,
     concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
     isFiniteConcrete: boolean = true
-): SlabToSlabNode => {
+): SlabNode => {
     const slabGroup = new BABYLON.TransformNode('slab', scene);
-    const slab = new SlabToSlabNode(slabGroup);
+    const slab = new SlabNode(slabGroup);
 
     // Initialize materials
     initializeMaterials(scene);
@@ -299,7 +279,7 @@ export const createSlab = (
 };
 
 export const updateSlab = (
-    slabGroup: SlabToSlabNode,
+    slabGroup: SlabNode,
     postPositions: RectanglePostPosition[],
     concreteThickness: number = 0.5,
     slabWidth: number = 3,
@@ -426,7 +406,7 @@ export const updateSlab = (
  * @param slabPosition - position of the slab
  * */
 export const addWaveBlocksFromRightFace = (
-    slabGroup: SlabToSlabNode,
+    slabGroup: SlabNode,
     blockWidth: number = 3,
     blockDepth: number = 2,
     blockHeight: number = 0.5,
@@ -553,7 +533,7 @@ export const addWaveBlocksFromRightFace = (
  * @param postDiameter - Diameter of secondary posts
  */
 export const addSecondaryPostsInsideConcrete = (
-    slabGroup: SlabToSlabNode,
+    slabGroup: SlabNode,
     concretePosition: BABYLON.Vector3,
     concreteWidth: number,
     concreteDepth: number,

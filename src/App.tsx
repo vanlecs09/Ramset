@@ -2,7 +2,8 @@ import { useState } from 'react';
 import './App.css';
 import ConstructionViewer from './components/ConstructionViewer';
 import { ControlPanel } from './components/ControlPanel';
-import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_SLAB_PARAMS } from './constants/defaultParams';
+import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS } from './constants/defaultParams';
+import type { EndAnchorageParams } from './utils/EndAnchorageBeamNode';
 
 export interface CircularColumnParams {
   isFiniteConcrete: boolean;
@@ -70,11 +71,12 @@ export interface SlabParams {
 }
 
 function App() {
-  const [currentModel, setCurrentModel] = useState< 'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab'>('slab');
+  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'endAnchorage'>('endAnchorage');
   const [towerParams, setTowerParams] = useState<CircularColumnParams>(DEFAULT_TOWER_PARAMS);
   const [complexColumnParams, setComplexColumnParams] = useState<ComplexColumnParams>(DEFAULT_COMPLEX_COLUMN_PARAMS);
   const [rectangleColumnParams, setRectangleColumnParams] = useState<RectangleColumnParams>(DEFAULT_RECTANGLE_COLUMN_PARAMS);
   const [slabParams, setSlabParams] = useState<SlabParams>(DEFAULT_SLAB_PARAMS);
+  const [endAnchorageParams, setEndAnchorageParams] = useState<EndAnchorageParams>(DEFAULT_END_ANCHORAGE_PARAMS);
 
   return (
     <div className="app-container">
@@ -84,6 +86,7 @@ function App() {
         onComplexColumnParamsChange={setComplexColumnParams}
         onRectangleColumnParamsChange={setRectangleColumnParams}
         onSlabParamsChange={setSlabParams}
+        onEndAnchorageParamsChange={setEndAnchorageParams}
       />
       <div className="viewer-container">
         <ConstructionViewer
@@ -92,6 +95,7 @@ function App() {
           complexColumnParams={complexColumnParams}
           rectangleColumnParams={rectangleColumnParams}
           slabParams={slabParams}
+          endAnchorageParams={endAnchorageParams}
         />
       </div>
       <footer className="app-footer">

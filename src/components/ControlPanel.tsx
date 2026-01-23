@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import '../styles/ControlPanel.css';
 import type { RectangleColumnParams, SlabParams } from '../App';
-import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_SLAB_PARAMS } from '../constants/defaultParams';
+import type { EndAnchorageParams } from '../utils/EndAnchorageBeamNode';
+import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS } from '../constants/defaultParams';
 
 interface ComplexColumnParams {
   isFiniteConcrete: boolean;
@@ -25,7 +26,7 @@ interface ComplexColumnParams {
 }
 
 interface ControlPanelProps {
-  onModelChange: (model:  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab') => void;
+  onModelChange: (model:  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'endAnchorage') => void;
   onTowerParamsChange: (params: {
     isFiniteConcrete: boolean;
     concreteThickness: number;
@@ -42,6 +43,7 @@ interface ControlPanelProps {
   onComplexColumnParamsChange: (params: ComplexColumnParams) => void;
   onRectangleColumnParamsChange: (params: RectangleColumnParams) => void;
   onSlabParamsChange: (params: SlabParams) => void;
+  onEndAnchorageParamsChange: (params: EndAnchorageParams) => void;
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -50,8 +52,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onComplexColumnParamsChange,
   onRectangleColumnParamsChange,
   onSlabParamsChange,
+  onEndAnchorageParamsChange,
 }) => {
-  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab'>('slab');
+  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'endAnchorage'>('endAnchorage');
 
   // Tower parameters
   const [towerIsFiniteConcrete, setTowerIsFiniteConcrete] = useState(DEFAULT_TOWER_PARAMS.isFiniteConcrete);
@@ -115,6 +118,22 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [slabConcreteOffsetXLeft, setSlabConcreteOffsetXLeft] = useState(DEFAULT_SLAB_PARAMS.concreteOffsetXLeft);
   const [slabConcreteOffsetZBack, setSlabConcreteOffsetZBack] = useState(DEFAULT_SLAB_PARAMS.concreteOffsetZBack);
   const [slabConcreteOffsetZFront, setSlabConcreteOffsetZFront] = useState(DEFAULT_SLAB_PARAMS.concreteOffsetZFront);
+
+  // End Anchorage parameters
+  const [anchorageBeamWidth, setAnchorageBeamWidth] = useState(DEFAULT_END_ANCHORAGE_PARAMS.beamWidth);
+  const [anchorageBeamDepth, setAnchorageBeamDepth] = useState(DEFAULT_END_ANCHORAGE_PARAMS.beamDepth);
+  const [anchorageBeamHeight, setAnchorageBeamHeight] = useState(DEFAULT_END_ANCHORAGE_PARAMS.beamHeight);
+  const [anchorageBeamOffsetX, setAnchorageBeamOffsetX] = useState(DEFAULT_END_ANCHORAGE_PARAMS.beamOffsetX);
+  const [anchoragePinDiameter, setAnchoragePinDiameterState] = useState(DEFAULT_END_ANCHORAGE_PARAMS.pinDiameter);
+  const [anchoragePinRows, setAnchoragePinRows] = useState(DEFAULT_END_ANCHORAGE_PARAMS.pinRows);
+  const [anchoragePinColumns, setAnchoragePinColumns] = useState(DEFAULT_END_ANCHORAGE_PARAMS.pinColumns);
+  const [anchoragePinSpacingX, setAnchoragePinSpacingX] = useState(DEFAULT_END_ANCHORAGE_PARAMS.pinSpacingX);
+  const [anchoragePinSpacingY, setAnchoragePinSpacingY] = useState(DEFAULT_END_ANCHORAGE_PARAMS.pinSpacingY);
+  const [anchorageConcreteOffsetXRight, setAnchorageConcreteOffsetXRight] = useState(DEFAULT_END_ANCHORAGE_PARAMS.concreteOffsetXRight);
+  const [anchorageConcreteOffsetXLeft, setAnchorageConcreteOffsetXLeft] = useState(DEFAULT_END_ANCHORAGE_PARAMS.concreteOffsetXLeft);
+  const [anchorageConcreteOffsetZBack, setAnchorageConcreteOffsetZBack] = useState(DEFAULT_END_ANCHORAGE_PARAMS.concreteOffsetZBack);
+  const [anchorageConcreteOffsetZFront, setAnchorageConcreteOffsetZFront] = useState(DEFAULT_END_ANCHORAGE_PARAMS.concreteOffsetZFront);
+  const [anchorageConcreteThickness, setAnchorageConcreteThickness] = useState(DEFAULT_END_ANCHORAGE_PARAMS.concreteThickness);
 
   // Helper function to build complete complex column params
   const getComplexColumnParams = (overrides?: Partial<ComplexColumnParams>): ComplexColumnParams => ({
@@ -876,8 +895,110 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     });
   };
 
+  // End Anchorage parameter handlers
+  const getEndAnchorageParams = (overrides?: Partial<EndAnchorageParams>): EndAnchorageParams => ({
+    beamWidth: overrides?.beamWidth ?? anchorageBeamWidth,
+    beamDepth: overrides?.beamDepth ?? anchorageBeamDepth,
+    beamHeight: overrides?.beamHeight ?? anchorageBeamHeight,
+    beamOffsetX: overrides?.beamOffsetX ?? anchorageBeamOffsetX,
+    pinDiameter: overrides?.pinDiameter ?? anchoragePinDiameter,
+    pinRows: overrides?.pinRows ?? anchoragePinRows,
+    pinColumns: overrides?.pinColumns ?? anchoragePinColumns,
+    pinSpacingX: overrides?.pinSpacingX ?? anchoragePinSpacingX,
+    pinSpacingY: overrides?.pinSpacingY ?? anchoragePinSpacingY,
+    concreteOffsetXRight: overrides?.concreteOffsetXRight ?? anchorageConcreteOffsetXRight,
+    concreteOffsetXLeft: overrides?.concreteOffsetXLeft ?? anchorageConcreteOffsetXLeft,
+    concreteOffsetZBack: overrides?.concreteOffsetZBack ?? anchorageConcreteOffsetZBack,
+    concreteOffsetZFront: overrides?.concreteOffsetZFront ?? anchorageConcreteOffsetZFront,
+    concreteThickness: overrides?.concreteThickness ?? anchorageConcreteThickness,
+  });
+
+  const handleAnchorageBeamWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setAnchorageBeamWidth(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ beamWidth: value }));
+  };
+
+  const handleAnchorageBeamDepthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setAnchorageBeamDepth(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ beamDepth: value }));
+  };
+
+  const handleAnchorageBeamHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setAnchorageBeamHeight(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ beamHeight: value }));
+  };
+
+  const handleAnchorageBeamOffsetXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setAnchorageBeamOffsetX(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ beamOffsetX: value }));
+  };
+
+  const handleAnchoragePinDiameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setAnchoragePinDiameterState(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ pinDiameter: value }));
+  };
+
+  const handleAnchoragePinRowsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 1;
+    setAnchoragePinRows(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ pinRows: value }));
+  };
+
+  const handleAnchoragePinColumnsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 1;
+    setAnchoragePinColumns(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ pinColumns: value }));
+  };
+
+  const handleAnchoragePinSpacingXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setAnchoragePinSpacingX(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ pinSpacingX: value }));
+  };
+
+  const handleAnchoragePinSpacingYChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setAnchoragePinSpacingY(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ pinSpacingY: value }));
+  };
+
+  const handleAnchorageConcreteOffsetXRightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setAnchorageConcreteOffsetXRight(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ concreteOffsetXRight: value }));
+  };
+
+  const handleAnchorageConcreteOffsetXLeftChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setAnchorageConcreteOffsetXLeft(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ concreteOffsetXLeft: value }));
+  };
+
+  const handleAnchorageConcreteOffsetZBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setAnchorageConcreteOffsetZBack(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ concreteOffsetZBack: value }));
+  };
+
+  const handleAnchorageConcreteOffsetZFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setAnchorageConcreteOffsetZFront(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ concreteOffsetZFront: value }));
+  };
+
+  const handleAnchorageConcreteThicknessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setAnchorageConcreteThickness(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ concreteThickness: value }));
+  };
+
   const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const model = e.target.value as  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab';
+    const model = e.target.value as  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'endAnchorage';
     setCurrentModel(model);
     onModelChange(model);
   };
@@ -893,6 +1014,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           <option value="complexColumn">Complex Column</option>
           <option value="rectangleColumn">Rectangle Column</option>
           <option value="slab">Slab</option>
+          <option value="endAnchorage">End Anchorage</option>
         </select>
       </div>
       {currentModel === 'circularColumns' && (
@@ -1562,6 +1684,177 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               step="0.1"
               min="0.1"
               placeholder="Enter Concrete Offset Z-"
+            />
+          </div>
+        </>
+      )}
+
+      {currentModel === 'endAnchorage' && (
+        <>
+          <div className="control-group">
+            <label>Beam Width (X)</label>
+            <input
+              type="number"
+              value={anchorageBeamWidth}
+              onChange={handleAnchorageBeamWidthChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter beam width"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Beam Depth (Z)</label>
+            <input
+              type="number"
+              value={anchorageBeamDepth}
+              onChange={handleAnchorageBeamDepthChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter beam depth"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Beam Height (Y)</label>
+            <input
+              type="number"
+              value={anchorageBeamHeight}
+              onChange={handleAnchorageBeamHeightChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter beam height"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Beam Offset X</label>
+            <input
+              type="number"
+              value={anchorageBeamOffsetX}
+              onChange={handleAnchorageBeamOffsetXChange}
+              step="0.1"
+              placeholder="Enter beam offset X"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Pin Diameter</label>
+            <input
+              type="number"
+              value={anchoragePinDiameter}
+              onChange={handleAnchoragePinDiameterChange}
+              step="0.01"
+              min="0.01"
+              placeholder="Enter pin diameter"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Pin Rows</label>
+            <input
+              type="number"
+              value={anchoragePinRows}
+              onChange={handleAnchoragePinRowsChange}
+              step="1"
+              min="1"
+              placeholder="Enter number of pin rows"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Pin Columns</label>
+            <input
+              type="number"
+              value={anchoragePinColumns}
+              onChange={handleAnchoragePinColumnsChange}
+              step="1"
+              min="1"
+              placeholder="Enter number of pin columns"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Pin Spacing X</label>
+            <input
+              type="number"
+              value={anchoragePinSpacingX}
+              onChange={handleAnchoragePinSpacingXChange}
+              step="0.05"
+              min="0.05"
+              placeholder="Enter X spacing between pins"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Pin Spacing Z</label>
+            <input
+              type="number"
+              value={anchoragePinSpacingY}
+              onChange={handleAnchoragePinSpacingYChange}
+              step="0.05"
+              min="0.05"
+              placeholder="Enter Z spacing between pins"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset X Right</label>
+            <input
+              type="number"
+              value={anchorageConcreteOffsetXRight}
+              onChange={handleAnchorageConcreteOffsetXRightChange}
+              step="0.05"
+              min="0"
+              placeholder="Enter concrete offset X right"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset X Left</label>
+            <input
+              type="number"
+              value={anchorageConcreteOffsetXLeft}
+              onChange={handleAnchorageConcreteOffsetXLeftChange}
+              step="0.05"
+              min="0"
+              placeholder="Enter concrete offset X left"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset Z Back</label>
+            <input
+              type="number"
+              value={anchorageConcreteOffsetZBack}
+              onChange={handleAnchorageConcreteOffsetZBackChange}
+              step="0.05"
+              min="0"
+              placeholder="Enter concrete offset Z back"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset Z Front</label>
+            <input
+              type="number"
+              value={anchorageConcreteOffsetZFront}
+              onChange={handleAnchorageConcreteOffsetZFrontChange}
+              step="0.05"
+              min="0"
+              placeholder="Enter concrete offset Z front"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Thickness</label>
+            <input
+              type="number"
+              value={anchorageConcreteThickness}
+              onChange={handleAnchorageConcreteThicknessChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter concrete thickness"
             />
           </div>
         </>

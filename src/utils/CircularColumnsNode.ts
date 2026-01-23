@@ -15,12 +15,10 @@ export interface BaseStructureGroup {
 export class CircularColumnsNode extends BaseStructNodeImpl {
   private concreteGroup?: ConcreteNode;
   private circularColumn?: BABYLON.Mesh;
-  private posts?: BABYLON.Mesh[];
   private torqueMeshes?: BABYLON.Mesh[];
 
   constructor(group: BABYLON.TransformNode) {
     super(group);
-    this.posts = [];
     this.torqueMeshes = [];
   }
 
@@ -38,24 +36,6 @@ export class CircularColumnsNode extends BaseStructNodeImpl {
 
   setCircularColumn(column: BABYLON.Mesh): void {
     this.circularColumn = column;
-  }
-
-  getPosts(): BABYLON.Mesh[] {
-    return this.posts || [];
-  }
-
-  addPost(post: BABYLON.Mesh): void {
-    if (!this.posts) {
-      this.posts = [];
-    }
-    this.posts.push(post);
-  }
-
-  clearPosts(): void {
-    if (this.posts) {
-      this.posts.forEach(post => post.dispose());
-      this.posts = [];
-    }
   }
 
   getTorqueMeshes(): BABYLON.Mesh[] {

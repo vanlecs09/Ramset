@@ -38,11 +38,9 @@ export class ComplexColumnNode extends BaseStructNodeImpl {
   private concreteGroup?: ConcreteNode;
   private cuboid1?: BABYLON.Mesh;
   private cuboid2?: BABYLON.Mesh;
-  private posts?: BABYLON.Mesh[];
 
   constructor(group: BABYLON.TransformNode) {
     super(group);
-    this.posts = [];
   }
 
   getConcreteGroup(): ConcreteNode | undefined {
@@ -69,24 +67,6 @@ export class ComplexColumnNode extends BaseStructNodeImpl {
     this.cuboid2 = cuboid;
   }
 
-  getPosts(): BABYLON.Mesh[] {
-    return this.posts || [];
-  }
-
-  addPost(post: BABYLON.Mesh): void {
-    if (!this.posts) {
-      this.posts = [];
-    }
-    this.posts.push(post);
-  }
-
-  clearPosts(): void {
-    if (this.posts) {
-      this.posts.forEach(post => post.dispose());
-      this.posts = [];
-    }
-  }
-
   dispose(): void {
     // Dispose concrete group and all its resources
     if (this.concreteGroup) {
@@ -97,12 +77,7 @@ export class ComplexColumnNode extends BaseStructNodeImpl {
     this.cuboid1?.dispose();
     this.cuboid2?.dispose();
     
-    // Dispose posts
-    if (this.posts) {
-      this.posts.forEach(post => post.dispose());
-    }
-    
-    // Call parent to dispose axis meshes
+    // Call parent to dispose axis meshes and posts
     super.dispose();
   }
 }

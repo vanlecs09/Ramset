@@ -309,7 +309,7 @@ export const createAxesBasic = (
   yDirection: BABYLON.Vector3 = new BABYLON.Vector3(0, 1, 0),
   zDirection: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 1),
   axisLength: number = AXIS_CONSTANTS.DEFAULT_AXIS_LENGTH,
-  showLabels: boolean = true,
+  showLabels: boolean = false,
   advancedTexture?: GUI.AdvancedDynamicTexture
 ): { meshes: BABYLON.Mesh[]; labels: AxisLabelNode[] } => {
   const meshes: BABYLON.Mesh[] = [];

@@ -8,11 +8,9 @@ import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 export class RectangleColumnNode extends BaseStructNodeImpl {
     private concreteGroup?: ConcreteNode;
     private column?: BABYLON.Mesh;
-    private posts?: BABYLON.Mesh[];
 
     constructor(group: BABYLON.TransformNode) {
         super(group);
-        this.posts = [];
     }
 
     // Expose methods for safe access
@@ -32,34 +30,13 @@ export class RectangleColumnNode extends BaseStructNodeImpl {
         this.column = column;
     }
 
-    getPosts(): BABYLON.Mesh[] {
-        return this.posts || [];
-    }
-
-    addPost(post: BABYLON.Mesh): void {
-        if (!this.posts) {
-            this.posts = [];
-        }
-        this.posts.push(post);
-    }
-
-    clearPosts(): void {
-        if (this.posts) {
-            this.posts.forEach(post => post.dispose());
-            this.posts = [];
-        }
-    }
-
     dispose(): void {
         // Dispose concrete group and its dimension lines
         if (this.concreteGroup) {
             this.concreteGroup.dispose();
         }
         this.column?.dispose();
-        if (this.posts) {
-            this.posts.forEach(post => post.dispose());
-        }
-        // Call parent to dispose axis meshes
+        // Call parent to dispose axis meshes and posts
         super.dispose();
     }
 }

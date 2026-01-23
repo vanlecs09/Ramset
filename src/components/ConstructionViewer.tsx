@@ -4,13 +4,16 @@ import { createComplexColumn, updateComplexColumn } from '../utils/ComplexColumn
 import { createCircularColumns, updateCircularColumns } from '../utils/CircularColumnsNode';
 import { createRectangleColumn, updateRectangleColumn } from '../utils/RectangleColumnNode';
 import { createSlab, updateSlab } from '../utils/SlabNode';
+import { createEndAnchorage, updateEndAnchorage } from '../utils/EndAnchorageBeamNode';
 import { calculateCircularPostPositions } from '../utils/CircularPostPositionCalculator';
 import { calculateRectanglePostPositions, calculateYSurfacePostPositions } from '../utils/RectanglePostPositionCalculator';
 import type { CircularColumnsNode } from '../utils/CircularColumnsNode';
 import type { ComplexColumnNode } from '../utils/ComplexColumnNode';
 import type { RectangleColumnNode } from '../utils/RectangleColumnNode';
-import type { SlabToSlabNode } from '../utils/SlabNode';
+import type { SlabNode } from '../utils/SlabNode';
+import type { EndAnchorageBeamNode } from '../utils/EndAnchorageBeamNode';
 import type { RectangleColumnParams, SlabParams } from '../App';
+import type { EndAnchorageParams } from '../utils/EndAnchorageBeamNode';
 
 interface TowerParams {
   isFiniteConcrete: boolean;
@@ -49,11 +52,12 @@ interface ComplexColumnParams {
 
 interface ConstructionViewerProps {
   onSceneReady?: (scene: BABYLON.Scene) => void;
-  model?: 'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab';
+  model?: 'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'endAnchorage';
   towerParams?: TowerParams;
   complexColumnParams?: ComplexColumnParams;
   rectangleColumnParams?: RectangleColumnParams;
   slabParams?: SlabParams;
+  endAnchorageParams?: EndAnchorageParams;
 }
 
 interface ConcreteLayout {
@@ -165,6 +169,22 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     concreteOffsetZBack: 0.5,
     concreteOffsetZFront: 0.5,
   },
+  endAnchorageParams = {
+    beamWidth: 0.3,
+    beamDepth: 0.5,
+    beamHeight: 0.4,
+    beamOffsetX: 0.5,
+    pinDiameter: 0.02,
+    pinRows: 2,
+    pinColumns: 3,
+    pinSpacingX: 0.15,
+    pinSpacingY: 0.15,
+    concreteOffsetXRight: 0.5,
+    concreteOffsetXLeft: 0.5,
+    concreteOffsetZBack: 0.5,
+    concreteOffsetZFront: 0.5,
+    concreteThickness: 1,
+  },
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<BABYLON.Scene | null>(null);
@@ -172,7 +192,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   const circularColumnsRef = useRef<CircularColumnsNode | null>(null);
   const complexColumnRef = useRef<ComplexColumnNode | null>(null);
   const rectangleColumnRef = useRef<RectangleColumnNode | null>(null);
-  const slabRef = useRef<SlabToSlabNode | null>(null);
+  const slabRef = useRef<SlabNode | null>(null);
+  const endAnchorageRef = useRef<EndAnchorageBeamNode | null>(null);
 
   // Initialize scene and engine (once on mount)
   useEffect(() => {
@@ -265,6 +286,10 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       if (slabRef.current) {
         slabRef.current.dispose();
         slabRef.current = null;
+      }
+      if (endAnchorageRef.current) {
+        endAnchorageRef.current.dispose();
+        endAnchorageRef.current = null;
       }
     };
 
@@ -480,6 +505,36 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           slabParams.isFiniteConcrete
         );
       }
+    } else if (model === 'endAnchorage') {
+      // Calculate concrete dimensions and positions
+      const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
+        concreteOffsetXRight: endAnchorageParams.concreteOffsetXRight,
+        concreteOffsetXLeft: endAnchorageParams.concreteOffsetXLeft,
+        concreteOffsetZBack: endAnchorageParams.concreteOffsetZBack,
+        concreteOffsetZFront: endAnchorageParams.concreteOffsetZFront,
+        concreteThickness: endAnchorageParams.concreteThickness,
+      });
+
+      // Calculate post positions based on pin rows, columns, and spacing
+      let halfConcreteDepth = concreteDepth / 2;
+      const postPositions: BABYLON.Vector3[] = [];
+      const startX = -(endAnchorageParams.pinColumns - 1) * endAnchorageParams.pinSpacingX / 2;
+      const startZ = -(endAnchorageParams.pinRows - 1) * endAnchorageParams.pinSpacingY / 2;
+      
+      for (let row = 0; row < endAnchorageParams.pinRows; row++) {
+        for (let col = 0; col < endAnchorageParams.pinColumns; col++) {
+          const x = startX + col * endAnchorageParams.pinSpacingX;
+          const z = startZ + row * endAnchorageParams.pinSpacingY;
+          postPositions.push(new BABYLON.Vector3(x, 0, z + halfConcreteDepth));
+        }
+      }
+
+      if (!endAnchorageRef.current) {
+        disposePreviousStructure();
+        endAnchorageRef.current = createEndAnchorage(scene, postPositions, endAnchorageParams, concreteWidth, concreteDepth, concretePosition);
+      } else {
+        updateEndAnchorage(endAnchorageRef.current, postPositions, endAnchorageParams, concreteWidth, concreteDepth, concretePosition);
+      }
     }
   }, [
     model,
@@ -535,6 +590,16 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     slabParams.concreteOffsetXLeft,
     slabParams.concreteOffsetZBack,
     slabParams.concreteOffsetZFront,
+
+    endAnchorageParams.beamWidth,
+    endAnchorageParams.beamDepth,
+    endAnchorageParams.beamHeight,
+    endAnchorageParams.beamOffsetX,
+    endAnchorageParams.pinDiameter,
+    endAnchorageParams.pinRows,
+    endAnchorageParams.pinColumns,
+    endAnchorageParams.pinSpacingX,
+    endAnchorageParams.pinSpacingY,
   ]);
 
   return (
