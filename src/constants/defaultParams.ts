@@ -83,7 +83,7 @@ export const DEFAULT_SLAB_PARAMS: SlabParams = {
 export const DEFAULT_END_ANCHORAGE_PARAMS: EndAnchorageParams = {
   concreteThickness: 1,
   beamWidth: 0.5,
-  beamDepth: 0.2,
+  beamDepth: 0.5,
   beamHeight: 0.4,
   beamOffsetX: 0.5,
   pinDiameter: 0.02,

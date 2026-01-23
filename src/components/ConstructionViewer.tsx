@@ -219,8 +219,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
     const camera = new BABYLON.ArcRotateCamera(
       "camera",
-      Math.PI / 4,     // alpha
-      Math.PI / 3,     // beta
+      Math.PI / 2,     // alpha
+      0,     // beta
       5,               // radius
       BABYLON.Vector3.Zero(), // target
       scene
@@ -293,6 +293,85 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       }
     };
 
+    /**
+ * Rotate the upVector via the camera's forward direction.  This will then update
+ * the camera's perspective to appear as though it rotated.
+ */
+    const rotateCamera = (camera: BABYLON.ArcRotateCamera, localAxis: BABYLON.Vector3, angle: BABYLON.float) => {
+      const upVector = camera.upVector.clone();
+      const axis = BABYLON.Quaternion.RotationAxis(localAxis, angle);
+      upVector.applyRotationQuaternionInPlace(axis);
+      camera.upVector = upVector;
+
+      // Note about this function: If you want to keep the same position, you'll
+      // need to call this function.  This will take the current camera position
+      // and recalculate the alpha and beta values.  Not calling this function will
+      // instead force the position to be changed on the next camera update.
+      camera.rebuildAnglesAndRadius();
+
+      // Since alpha has no limits, we want to try and keep it between 0 and 2 * PI
+      if (camera.alpha > Math.PI * 2) {
+        camera.alpha -= Math.PI * 2;
+      }
+      else if (camera.alpha < 0) {
+        camera.alpha += Math.PI * 2;
+      }
+    }
+
+    const rollCamera = (camera: BABYLON.ArcRotateCamera, angle: BABYLON.float) => {
+      const localZ = camera.getDirection(BABYLON.Axis.Z);
+      rotateCamera(camera, localZ, angle);
+
+      // camUp.rotate(localZ, angle, BABYLON.Space.WORLD);
+    }
+
+
+    // Helper function to adjust camera based on model type
+    const adjustCameraForModel = (modelType: string) => {
+      const camera = scene.activeCamera as BABYLON.ArcRotateCamera;
+      if (!camera) return;
+
+      switch (modelType) {
+        // case 'circularColumns':
+        //   camera.target = BABYLON.Vector3.Zero();
+        //   camera.radius = 6;
+        //   camera.alpha = Math.PI / 2;
+        //   camera.beta = Math.PI / 4;
+        //   break;
+        // case 'complexColumn':
+        //   camera.target = BABYLON.Vector3.Zero();
+        //   camera.radius = 5;
+        //   camera.alpha = Math.PI / 3;
+        //   camera.beta = Math.PI / 3.5;
+        //   break;
+        // case 'rectangleColumn':
+        //   camera.target = BABYLON.Vector3.Zero();
+        //   camera.radius = 4;
+        //   camera.alpha = Math.PI / 2.5;
+        //   camera.beta = Math.PI / 3;
+        //   break;
+        // case 'slab':
+        //   camera.target = BABYLON.Vector3.Zero();
+        //   camera.radius = 3.5;
+        //   camera.alpha = Math.PI / 2;
+        //   camera.beta = Math.PI / 4;
+        //   break;
+        case 'endAnchorage':
+          camera.target = BABYLON.Vector3.Zero();
+          camera.radius = 4.5;
+          camera.alpha = 0;
+          camera.beta = Math.PI / 2;
+          rollCamera(camera, Math.PI / 2);
+          break;
+        default:
+          camera.target = BABYLON.Vector3.Zero();
+          camera.radius = 5;
+          camera.alpha = 0;
+          camera.beta = 90;
+          camera.upVector = new BABYLON.Vector3(0, 1, 0);
+      }
+    };
+
     if (model === 'circularColumns') {
 
       // Calculate post positions first
@@ -344,6 +423,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           postPositions,
         );
       }
+      adjustCameraForModel('circularColumns');
 
     } else if (model === 'complexColumn') {
 
@@ -402,6 +482,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           complexColumnParams.postOffset
         );
       }
+      adjustCameraForModel('complexColumn');
+
     } else if (model === 'rectangleColumn') {
 
       // Calculate concrete dimensions and positions
@@ -453,6 +535,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           rectangleColumnParams.isFiniteConcrete
         );
       }
+      adjustCameraForModel('rectangleColumn');
+
     } else if (model === 'slab') {
 
       // Calculate concrete dimensions and positions
@@ -505,6 +589,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           slabParams.isFiniteConcrete
         );
       }
+      adjustCameraForModel('slab');
+
     } else if (model === 'endAnchorage') {
       // Calculate concrete dimensions and positions
       const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
@@ -515,26 +601,26 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         concreteThickness: endAnchorageParams.concreteThickness,
       });
 
-      // Calculate post positions based on pin rows, columns, and spacing
-      let halfConcreteDepth = concreteDepth / 2;
-      const postPositions: BABYLON.Vector3[] = [];
-      const startX = -(endAnchorageParams.pinColumns - 1) * endAnchorageParams.pinSpacingX / 2;
-      const startZ = -(endAnchorageParams.pinRows - 1) * endAnchorageParams.pinSpacingY / 2;
-      
-      for (let row = 0; row < endAnchorageParams.pinRows; row++) {
-        for (let col = 0; col < endAnchorageParams.pinColumns; col++) {
-          const x = startX + col * endAnchorageParams.pinSpacingX;
-          const z = startZ + row * endAnchorageParams.pinSpacingY;
-          postPositions.push(new BABYLON.Vector3(x, 0, z + halfConcreteDepth));
-        }
-      }
+      const postPositions = calculateRectanglePostPositions(
+        endAnchorageParams.beamWidth,
+        endAnchorageParams.beamDepth,
+        3,
+        3,
+        endAnchorageParams.pinSpacingX,
+        0
+      );
+      let postPositions1 = postPositions.map(pos => pos.position);
+
+
+
 
       if (!endAnchorageRef.current) {
         disposePreviousStructure();
-        endAnchorageRef.current = createEndAnchorage(scene, postPositions, endAnchorageParams, concreteWidth, concreteDepth, concretePosition);
+        endAnchorageRef.current = createEndAnchorage(scene, postPositions1, endAnchorageParams, concreteWidth, concreteDepth, concretePosition);
       } else {
-        updateEndAnchorage(endAnchorageRef.current, postPositions, endAnchorageParams, concreteWidth, concreteDepth, concretePosition);
+        updateEndAnchorage(endAnchorageRef.current, postPositions1, endAnchorageParams, concreteWidth, concreteDepth, concretePosition);
       }
+      adjustCameraForModel('endAnchorage');
     }
   }, [
     model,

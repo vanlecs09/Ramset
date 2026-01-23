@@ -212,11 +212,11 @@ export const createEndAnchorage = (
     // 2. Create wave blocks (beam) extending from concrete
     const beamHeight = params.beamHeight;
     let beamPosition = new BABYLON.Vector3(
-        concretePosition.x + params.beamOffsetX,
-        concretePosition.y,
-        concretePosition.z + (concreteDepth / 2 + beamHeight / 2)
+        concretePosition.x ,
+        concretePosition.y + (beamHeight / 2),
+        concretePosition.z,
     );
-    addWaveBlocksFromRightFace(
+    createWaveBlockTop(
         anchorage,
         params.beamWidth,
         params.beamDepth,
@@ -244,7 +244,7 @@ export const createEndAnchorage = (
         scene,
         new BABYLON.Vector3(0, -0.5, concreteDepth / 2),
         new BABYLON.Vector3(1, 0, 0),
-        new BABYLON.Vector3(0, -1, 0),
+        new BABYLON.Vector3(0, 1, 0),
         new BABYLON.Vector3(0, 0, 1)
     );
     anchorage.setAxisMeshes(axesResult.meshes);
@@ -286,10 +286,10 @@ export const updateEndAnchorage = (
     const beamHeight = params.beamHeight;
     let beamPosition = new BABYLON.Vector3(
         concretePosition.x,
-        concretePosition.y,
-        concretePosition.z + (concreteDepth / 2 + beamHeight / 2)
+        concretePosition.y + (beamHeight / 2) + concreteGroup.getConcreteHeight() / 2,
+        concretePosition.z,
     );
-    addWaveBlocksFromRightFace(
+    createWaveBlockTop(
         anchorageGroup,
         params.beamWidth,
         params.beamDepth,
@@ -316,10 +316,10 @@ export const updateEndAnchorage = (
     // Update and cache axis meshes and labels
     const axesResult = createAxesBasic(
         scene,
-        new BABYLON.Vector3(0, -0.5, concreteDepth / 2),
+        new BABYLON.Vector3(0, 0, 0),
         new BABYLON.Vector3(1, 0, 0),
-        new BABYLON.Vector3(0, -1, 0),
-        new BABYLON.Vector3(0, 0, 1)
+        new BABYLON.Vector3(0, 0, 1),
+        new BABYLON.Vector3(0, 1, 0)
     );
     anchorageGroup.setAxisMeshes(axesResult.meshes);
     anchorageGroup.setLabels(axesResult.labels);
@@ -328,7 +328,7 @@ export const updateEndAnchorage = (
 /**
  * Add wave blocks (beam) extending from the concrete
  */
-export const addWaveBlocksFromRightFace = (
+export const createWaveBlockTop = (
     anchorageGroup: EndAnchorageBeamNode,
     blockWidth: number = 0.3,
     blockDepth: number = 0.5,
@@ -352,7 +352,7 @@ export const addWaveBlocksFromRightFace = (
         blockWidth,      // Width along X-axis
         blockHeight,     // Height along Y-axis
         blockDepth,      // Depth along Z-axis
-        'z',             // Wave on Z-axis
+        'y',             // Wave on Z-axis
         waveBlockMaterial!
     );
 
@@ -374,20 +374,6 @@ export const addWaveBlocksFromRightFace = (
     let depthArrow2Position = new BABYLON.Vector3(blockWidth / 2, blockHeight / 2 + zOffset, -blockDepth / 2);
     let depthCorner1 = new BABYLON.Vector3(-blockWidth / 2, blockHeight / 2, -blockDepth / 2);
     let depthCorner2 = new BABYLON.Vector3(blockWidth / 2, blockHeight / 2, -blockDepth / 2);
-
-    // Apply rotation from anchorageGroup to convert to world space
-    // this need to be the same rotation as blockMesh
-    const anchorageRotation = BABYLON.Quaternion.FromEulerAngles(
-        90 * (Math.PI / 180),
-        0,
-        0,
-    );
-    const rotationMatrix = BABYLON.Matrix.Identity();
-    anchorageRotation.toRotationMatrix(rotationMatrix);
-    depthArrow1Position = BABYLON.Vector3.TransformCoordinates(depthArrow1Position, rotationMatrix);
-    depthArrow2Position = BABYLON.Vector3.TransformCoordinates(depthArrow2Position, rotationMatrix);
-    depthCorner1 = BABYLON.Vector3.TransformCoordinates(depthCorner1, rotationMatrix);
-    depthCorner2 = BABYLON.Vector3.TransformCoordinates(depthCorner2, rotationMatrix);
 
     // Offset to block position in world space
     depthArrow1Position = depthArrow1Position.add(blockPosition);
@@ -427,12 +413,6 @@ export const addWaveBlocksFromRightFace = (
     let heightArrow2Position = new BABYLON.Vector3(blockWidth / 2 + zOffset, blockHeight / 2, blockDepth / 2);
     let heightCorner1 = new BABYLON.Vector3(blockWidth / 2, blockHeight / 2, -blockDepth / 2);
     let heightCorner2 = new BABYLON.Vector3(blockWidth / 2, blockHeight / 2, blockDepth / 2);
-
-    // Apply rotation from anchorageGroup to convert to world space
-    heightArrow1Position = BABYLON.Vector3.TransformCoordinates(heightArrow1Position, rotationMatrix);
-    heightArrow2Position = BABYLON.Vector3.TransformCoordinates(heightArrow2Position, rotationMatrix);
-    heightCorner1 = BABYLON.Vector3.TransformCoordinates(heightCorner1, rotationMatrix);
-    heightCorner2 = BABYLON.Vector3.TransformCoordinates(heightCorner2, rotationMatrix);
 
     // Offset to block position in world space
     heightArrow1Position = heightArrow1Position.add(blockPosition);

@@ -1,6 +1,6 @@
 import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
-import { createDimensionWithLabel, DimensionLineNode, type DimensionLabelNode } from './GeometryHelper';
+import { createDimensionWithLabel, DimensionLineNode } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
 
 export class ConcreteNode extends BaseStructNodeImpl {
@@ -8,6 +8,9 @@ export class ConcreteNode extends BaseStructNodeImpl {
     private material?: BABYLON.StandardMaterial;
     private infiniteBlocks?: BABYLON.Mesh[];
     private dimensionLines?: DimensionLineNode;
+    private concreteWidth: number = 0;
+    private concreteDepth: number = 0;
+    private concreteHeight: number = 0;
 
     constructor(group: BABYLON.TransformNode) {
         super(group);
@@ -43,6 +46,30 @@ export class ConcreteNode extends BaseStructNodeImpl {
 
     setDimensionLines(dimensionLines: DimensionLineNode | undefined): void {
         this.dimensionLines = dimensionLines;
+    }
+
+    getConcreteWidth(): number {
+        return this.concreteWidth;
+    }
+
+    setConcreteWidth(width: number): void {
+        this.concreteWidth = width;
+    }
+
+    getConcreteDepth(): number {
+        return this.concreteDepth;
+    }
+
+    setConcreteDepth(depth: number): void {
+        this.concreteDepth = depth;
+    }
+
+    getConcreteHeight(): number {
+        return this.concreteHeight;
+    }
+
+    setConcreteHeight(height: number): void {
+        this.concreteHeight = height;
     }
 
     dispose(): void {
@@ -243,6 +270,9 @@ export const createConcrete = (
     concreteNode.setMaterial(material);
     concreteNode.setInfiniteBlocks(sinBlocks);
     concreteNode.setDimensionLines(dimensionLines);
+    concreteNode.setConcreteWidth(concreteWidth);
+    concreteNode.setConcreteDepth(concreteDepth);
+    concreteNode.setConcreteHeight(concreteThickness);
 
     return concreteNode;
 };
@@ -386,6 +416,9 @@ export const updateConcrete = (
     concreteGroup.setMaterial(material);
     concreteGroup.setInfiniteBlocks(sinBlocks);
     concreteGroup.setDimensionLines(dimensionLines);
+    concreteGroup.setConcreteWidth(concreteWidth);
+    concreteGroup.setConcreteDepth(concreteDepth);
+    concreteGroup.setConcreteHeight(concreteThickness);
 };
 
 const createInfiniteBlocks = (
