@@ -24,10 +24,17 @@ export interface EndAnchorageParams {
     concreteOffsetZFront: number;
 }
 
+export interface ConcreteCreateParams {
+    thickness: number;
+    width: number;
+    depth: number;
+    position: BABYLON.Vector3;
+}
+
 
 
 export class EndAnchorageBeamNode extends BaseStructNodeImpl {
-    private concreteGroup?: ConcreteNode;
+    private concreteNode?: ConcreteNode;
     private waveBlocks?: BABYLON.Mesh[];
     private dimensionLines?: DimensionLineNode[];
     private bendingMomentNodes?: BendingMomentNode[];
@@ -43,11 +50,11 @@ export class EndAnchorageBeamNode extends BaseStructNodeImpl {
 
     // Expose methods for safe access
     getConcreteGroup(): ConcreteNode | undefined {
-        return this.concreteGroup;
+        return this.concreteNode;
     }
 
     setConcreteGroup(concreteGroup: ConcreteNode): void {
-        this.concreteGroup = concreteGroup;
+        this.concreteNode = concreteGroup;
     }
 
     getWaveBlocks(): BABYLON.Mesh[] {
@@ -147,8 +154,8 @@ export class EndAnchorageBeamNode extends BaseStructNodeImpl {
         this.clearTorsionMomentNodes();
 
         // Dispose concrete group and its dimension lines
-        if (this.concreteGroup) {
-            this.concreteGroup.dispose();
+        if (this.concreteNode) {
+            this.concreteNode.dispose();
         }
         this.clearWaveBlocks();
         this.clearDimensionLines();
@@ -189,42 +196,38 @@ export const createEndAnchorage = (
     scene: BABYLON.Scene,
     postPositions: BABYLON.Vector3[],
     params: EndAnchorageParams,
-    concreteWidth: number,
-    concreteDepth: number,
-    concretePosition: BABYLON.Vector3
+    concreteCreateParams: ConcreteCreateParams
 ): EndAnchorageBeamNode => {
-    const anchorageGroup = new BABYLON.TransformNode('endAnchorage', scene);
-    const anchorage = new EndAnchorageBeamNode(anchorageGroup);
+    const anchorageTrans = new BABYLON.TransformNode('endAnchorage', scene);
+    const anchorageNode = new EndAnchorageBeamNode(anchorageTrans);
 
     // Initialize materials
     initializeMaterials(scene);
 
     // 1. Create concrete
     const concreteGroup = createConcrete(scene,
-        params.concreteThickness,
-        concreteWidth,
-        concreteDepth,
-        concretePosition,
-        anchorageGroup,
+        concreteCreateParams,
+        anchorageTrans,
         true);
-    anchorage.setConcreteGroup(concreteGroup);
+    anchorageNode.setConcreteGroup(concreteGroup);
 
     // 2. Create wave blocks (beam) extending from concrete
+    const concretePosition = concreteCreateParams.position;
     const beamHeight = params.beamHeight;
     let beamPosition = new BABYLON.Vector3(
-        concretePosition.x ,
-        concretePosition.y + (beamHeight / 2),
+        concretePosition.x,
+        concretePosition.y + (beamHeight / 2) + concreteGroup.getConcreteHeight() / 2,
         concretePosition.z,
     );
     createWaveBlockTop(
-        anchorage,
+        anchorageNode,
         params.beamWidth,
         params.beamDepth,
-        beamHeight,
+        params.beamHeight,
         beamPosition
     );
 
-    // 3. Create posts connecting concrete to beam
+    // Update posts
     const postHeight = 0.3;
     for (const postPosition of postPositions) {
         const postGroup = createPost(
@@ -232,25 +235,26 @@ export const createEndAnchorage = (
             postHeight,
             params.pinDiameter,
             postPosition,
-            new BABYLON.Vector3(Math.PI / 2, 0, 0),
-            anchorageGroup,
+            new BABYLON.Vector3(0, 0, 0),
+            // new BABYLON.Vector3(Math.PI / 2, 0, 0),
+            anchorageNode.group,
             `anchoragePin_${Math.random()}`
         );
-        anchorage.addPost(postGroup.mesh!);
+        anchorageNode.addPost(postGroup.mesh!);
     }
 
-    // 4. Create and cache axis meshes and labels for visualization
+    // Update and cache axis meshes and labels
     const axesResult = createAxesBasic(
         scene,
-        new BABYLON.Vector3(0, -0.5, concreteDepth / 2),
+        new BABYLON.Vector3(0, 0, 0),
         new BABYLON.Vector3(1, 0, 0),
-        new BABYLON.Vector3(0, 1, 0),
-        new BABYLON.Vector3(0, 0, 1)
+        new BABYLON.Vector3(0, 0, 1),
+        new BABYLON.Vector3(0, 1, 0)
     );
-    anchorage.setAxisMeshes(axesResult.meshes);
-    anchorage.setLabels(axesResult.labels);
+    anchorageNode.setAxisMeshes(axesResult.meshes);
+    anchorageNode.setLabels(axesResult.labels);
 
-    return anchorage;
+    return anchorageNode;
 };
 
 export const updateEndAnchorage = (
@@ -274,10 +278,12 @@ export const updateEndAnchorage = (
     }
     updateConcrete(concreteGroup,
         scene,
-        params.concreteThickness,
-        concreteWidth,
-        concreteDepth,
-        concretePosition,
+        {
+            thickness: params.concreteThickness,
+            width: concreteWidth,
+            depth: concreteDepth,
+            position: concretePosition
+        },
         anchorageGroup.group,
         true);
     anchorageGroup.setConcreteGroup(concreteGroup);
@@ -329,19 +335,19 @@ export const updateEndAnchorage = (
  * Add wave blocks (beam) extending from the concrete
  */
 export const createWaveBlockTop = (
-    anchorageGroup: EndAnchorageBeamNode,
+    anchorageNode: EndAnchorageBeamNode,
     blockWidth: number = 0.3,
     blockDepth: number = 0.5,
     blockHeight: number = 0.4,
     beamPosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0)
 ) => {
-    const scene = anchorageGroup.group.getScene();
+    const scene = anchorageNode.group.getScene();
 
     // Initialize materials
     initializeMaterials(scene);
 
     // Clear existing wave blocks
-    anchorageGroup.clearWaveBlocks();
+    anchorageNode.clearWaveBlocks();
     const blockPosition = beamPosition;
 
     // Create beam (wave block)
@@ -357,15 +363,15 @@ export const createWaveBlockTop = (
     );
 
     blockMesh.receiveShadows = true;
-    blockMesh.parent = anchorageGroup.group;
-    anchorageGroup.addWaveBlock(blockMesh);
+    blockMesh.parent = anchorageNode.group;
+    anchorageNode.addWaveBlock(blockMesh);
 
     // Add dimension lines for beam
     const advancedTexture = getDimensionLabelTexture();
 
     // Create a dimension line node group to hold all dimension elements
     const dimensionGroup = new BABYLON.TransformNode('beamDimensions', scene);
-    dimensionGroup.parent = anchorageGroup.group;
+    dimensionGroup.parent = anchorageNode.group;
 
     // Dimension line for beam depth (X-axis)
     const zOffset = 0.1;
@@ -406,7 +412,7 @@ export const createWaveBlockTop = (
     (dimensionGroup.getChildren() as BABYLON.Mesh[]).forEach(mesh => {
         depthDimensionNode.addMesh(mesh);
     });
-    anchorageGroup.addDimensionLine(depthDimensionNode);
+    anchorageNode.addDimensionLine(depthDimensionNode);
 
     // Create positions in local space relative to block center
     let heightArrow1Position = new BABYLON.Vector3(blockWidth / 2 + zOffset, blockHeight / 2, -blockDepth / 2);

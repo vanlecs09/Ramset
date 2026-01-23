@@ -85,10 +85,12 @@ export const createRectangleColumn = (
 
     // 1. Create concrete using ConcreteBuilder
     const concreteGroup = createConcrete(scene,
-        concreteThickness,
-        concreteWidth,
-        concreteDepth,
-        concretePosition,
+        {
+            thickness: concreteThickness,
+            width: concreteWidth,
+            depth: concreteDepth,
+            position: concretePosition
+        },
         columnGroup,
         isFiniteConcrete);
     rectangleColumn.setConcreteGroup(concreteGroup);
@@ -151,10 +153,12 @@ export const updateRectangleColumn = (
     }
     updateConcrete(concreteGroup,
         scene,
-        concreteThickness,
-        concreteWidth,
-        concreteDepth,
-        concretePosition,
+        {
+            thickness: concreteThickness,
+            width: concreteWidth,
+            depth: concreteDepth,
+            position: concretePosition
+        },
         rectangleColumn.group,
         isFiniteConcrete);
     rectangleColumn.setConcreteGroup(concreteGroup);

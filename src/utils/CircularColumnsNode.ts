@@ -92,10 +92,12 @@ export const createCircularColumns = (
   // Create bottom concrete using ConcreteBuilder with offset parameters
   const concreteGroup = createConcrete(
     scene,
-    concreteThickness,
-    concreteWidth,
-    concreteDepth,
-    concretePosition,
+    {
+      thickness: concreteThickness,
+      width: concreteWidth,
+      depth: concreteDepth,
+      position: concretePosition
+    },
     towerGroup,
     isFiniteConcrete);
 
@@ -172,10 +174,12 @@ export const updateCircularColumns = (
     updateConcrete(
       concreteGroup,
       scene,
-      concreteThickness,
-      concreteWidth,
-      concreteDepth,
-      concretePosition,
+      {
+        thickness: concreteThickness,
+        width: concreteWidth,
+        depth: concreteDepth,
+        position: concretePosition
+      },
       circularColumnsGroup.group,
       isFiniteConcrete);
   }

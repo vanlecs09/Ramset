@@ -109,10 +109,12 @@ export const createComplexColumn = (
   // 1. Create concrete base using ConcreteBuilder
   const concreteGroup = createConcrete(
     scene,
-    concreteThickness,
-    concreteWidth,
-    concreteDepth,
-    concretePosition,
+    {
+      thickness: concreteThickness,
+      width: concreteWidth,
+      depth: concreteDepth,
+      position: concretePosition
+    },
     columnGroup,
     isFiniteConcrete
   );
@@ -224,10 +226,12 @@ export const updateComplexColumn = (
     updateConcrete(
       concreteGroup,
       scene,
-      concreteThickness,
-      concreteWidth,
-      concreteDepth,
-      concretePosition,
+      {
+        thickness: concreteThickness,
+        width: concreteWidth,
+        depth: concreteDepth,
+        position: concretePosition
+      },
       complexColumnGroup.group,
       isFiniteConcrete
     );

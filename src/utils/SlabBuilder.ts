@@ -216,11 +216,12 @@ export const createSlab = (
     initializeMaterials(scene);
 
     // 1. Create concrete using ConcreteBuilder
-    const concreteGroup = createConcrete(scene,
-        concreteThickness,
-        concreteWidth,
-        concreteDepth,
-        concretePosition,
+    const concreteGroup = createConcrete(scene, {
+        thickness: concreteThickness,
+        width: concreteWidth,
+        depth: concreteDepth,
+        position: concretePosition
+    },
         slabGroup,
         isFiniteConcrete);
     slab.setConcreteGroup(concreteGroup);
@@ -303,10 +304,12 @@ export const updateSlab = (
     }
     updateConcrete(concreteGroup,
         scene,
-        concreteThickness,
-        concreteWidth,
-        concreteDepth,
-        concretePosition,
+        {
+            thickness: concreteThickness,
+            width: concreteWidth,
+            depth: concreteDepth,
+            position: concretePosition
+        },
         slabGroup.group,
         isFiniteConcrete);
     slabGroup.setConcreteGroup(concreteGroup);
