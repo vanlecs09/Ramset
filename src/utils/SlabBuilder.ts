@@ -479,7 +479,7 @@ export const addWaveBlocksFromRightFace = (
     );
 
     // Create DimensionLineNode to manage depth dimension
-    const depthDimensionNode = new DimensionLineNode(dimensionGroup, blockWidth, blockDepth, blockHeight);
+    const depthDimensionNode = new DimensionLineNode(dimensionGroup);
     if (depthDimLabel) {
         depthDimensionNode.addLabel(depthDimLabel.label);
     }

@@ -4,7 +4,7 @@ import { createComplexColumn, updateComplexColumn } from '../utils/ComplexColumn
 import { createCircularColumns, updateCircularColumns } from '../utils/CircularColumnsNode';
 import { createRectangleColumn, updateRectangleColumn } from '../utils/RectangleColumnNode';
 import { createSlab, updateSlab } from '../utils/SlabNode';
-import { createEndAnchorage, updateEndAnchorage } from '../utils/EndAnchorageBeamNode';
+import { createEndAnchorage } from '../utils/EndAnchorageBeamNode';
 import { calculateCircularPostPositions } from '../utils/CircularPostPositionCalculator';
 import { calculateRectanglePostPositions, calculateYSurfacePostPositions } from '../utils/RectanglePostPositionCalculator';
 import type { CircularColumnsNode } from '../utils/CircularColumnsNode';
@@ -611,7 +611,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         endAnchorageParams.pinSpacingX,
         0
       );
-      let postPositions1 = postPositions.map(pos => pos.position);
+      let postPos = postPositions.map(pos => pos.position);
 
       if (!endAnchorageRef.current) {
         disposePreviousStructure();
@@ -625,8 +625,14 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         depth: concreteDepth,
         position: concretePosition
       };
+
+      let secondaryParams = {
+        beamWidth: endAnchorageParams.beamWidth,
+        beamDepth: endAnchorageParams.beamDepth,
+        beamHeight: endAnchorageParams.beamHeight,
+      };
       // updateEndAnchorage(endAnchorageRef.current!,
-      endAnchorageRef.current = createEndAnchorage(scene, postPositions1, endAnchorageParams, concreteParam);
+      endAnchorageRef.current = createEndAnchorage(scene, postPos, endAnchorageParams, concreteParam, secondaryParams);
 
     }
   }, [

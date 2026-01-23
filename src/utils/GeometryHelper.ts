@@ -91,20 +91,20 @@ export interface AxisLabelNode {
 export class DimensionLineNode extends BaseNodeImpl {
   private meshes: BABYLON.Mesh[] = [];
   private labels: GUI.TextBlock[] = [];
-  width: number;
-  depth: number;
-  height: number;
+  // width: number;
+  // depth: number;
+  // height: number;
 
   constructor(
     group: BABYLON.TransformNode,
-    width: number = 0,
-    depth: number = 0,
-    height: number = 0
+    // width: number = 0,
+    // depth: number = 0,
+    // height: number = 0
   ) {
     super(group);
-    this.width = width;
-    this.depth = depth;
-    this.height = height;
+    // this.width = width;
+    // this.depth = depth;
+    // this.height = height;
   }
 
   getMeshes(): BABYLON.Mesh[] {
@@ -505,4 +505,77 @@ export const createLineArrow = (beginPoint01: BABYLON.Vector3,
     arrow: arrow
   };
 }
+
+export const createLineTwoArrow = (
+  beginPoint01: BABYLON.Vector3,
+  endPoint01: BABYLON.Vector3,
+  name: string,
+  scene: BABYLON.Scene,
+  lineMat: BABYLON.Material,
+  labelText?: string
+) => {
+  const line = createLine(
+    beginPoint01,
+    endPoint01,
+    name,
+    DIMENSION_LINE_CONSTANTS.LINE_THICKNESS,
+    scene,
+    lineMat
+  );
+  let direction = endPoint01.subtract(beginPoint01).normalize();
+  // Create arrows at measurement points
+  const arrow = createArrow(
+    name,
+    DIMENSION_LINE_CONSTANTS.ARROW_DIAMETER,
+    DIMENSION_LINE_CONSTANTS.ARROW_SIZE,
+    scene,
+    endPoint01,
+    direction,
+    lineMat
+  );
+
+  const arrow2 = createArrow(
+    name,
+    DIMENSION_LINE_CONSTANTS.ARROW_DIAMETER,
+    DIMENSION_LINE_CONSTANTS.ARROW_SIZE,
+    scene,
+    beginPoint01,
+    direction.scale(-1),
+    lineMat
+  );
+
+  // Create label for the line if labelText is provided
+  let label: GUI.TextBlock | undefined;
+  let labelAnchor: BABYLON.Mesh | undefined;
+  if (labelText) {
+    const advancedTexture = getDimensionLabelTexture();
+    
+    // Calculate midpoint of the line
+    const midPoint = BABYLON.Vector3.Lerp(beginPoint01, endPoint01, 0.5);
+
+    label = new GUI.TextBlock();
+    label.text = labelText;
+    label.fontSize = DIMENSION_LINE_CONSTANTS.LABEL_FONT_SIZE;
+    label.color = 'black';
+    label.width = '120px';
+    label.height = '30px';
+    
+    // Create an invisible mesh at the midpoint to link the label
+    labelAnchor = BABYLON.MeshBuilder.CreateSphere('labelAnchor_' + name, { diameter: 0.01 }, scene);
+    labelAnchor.position = midPoint;
+    labelAnchor.isVisible = false;
+    
+    label.linkWithMesh(labelAnchor);
+    advancedTexture.addControl(label);
+    label.linkOffsetY = -30;
+  }
+
+  return {
+    line: line,
+    arrow: [arrow, arrow2],
+    label: label,
+    labelAnchor: labelAnchor
+  };
+}
+
 

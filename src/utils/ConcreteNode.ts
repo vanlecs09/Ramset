@@ -253,10 +253,7 @@ export const createConcrete = (
         if (heightLabel) labels.push(heightLabel.label);
 
         const dimensionLineResult2 = new DimensionLineNode(
-            dimensionGroup,
-            params.width,
-            params.depth,
-            params.thickness
+            dimensionGroup
         );
         dimensionLineResult2.setLabels(labels);
         // Add meshes from dimension group
@@ -403,9 +400,6 @@ export const updateConcrete = (
 
         const dimensionLineResult2 = new DimensionLineNode(
             dimensionGroup,
-            params.width,
-            params.depth,
-            params.thickness
         );
         dimensionLineResult2.setLabels(labels);
         // Add meshes from dimension group
