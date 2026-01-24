@@ -1,5 +1,7 @@
 import * as BABYLON from '@babylonjs/core';
-import type { DimensionLabelNode, AxisLabelNode } from './GeometryHelper';
+import type { DimensionLabelNode, AxisLabelNode, DimensionLineNode } from './GeometryHelper';
+import type { BendingMomentNode } from './BendingMomenNode';
+import type { TorsionMomentNode } from './TorsionMomentNode';
 
 /**
  * Union type for label nodes that can be stored in the base class.
@@ -40,12 +42,20 @@ export abstract class BaseStructNodeImpl implements BaseNode {
   protected axisMeshes?: BABYLON.Mesh[];
   protected labels?: LabelNode[];
   protected posts?: BABYLON.Mesh[];
+  protected waveBlocks?: BABYLON.Mesh[];
+  protected dimensionLines?: DimensionLineNode[];
+  protected bendingMomentNodes?: BendingMomentNode[];
+  protected torsionMomentNodes?: TorsionMomentNode[];
 
   constructor(group: BABYLON.TransformNode) {
     this.group = group;
     this.axisMeshes = [];
     this.labels = [];
     this.posts = [];
+    this.waveBlocks = [];
+    this.dimensionLines = [];
+    this.bendingMomentNodes = [];
+    this.torsionMomentNodes = [];
   }
 
   getAxisMeshes(): BABYLON.Mesh[] {
@@ -98,6 +108,88 @@ export abstract class BaseStructNodeImpl implements BaseNode {
     }
   }
 
+  getWaveBlocks(): BABYLON.Mesh[] {
+    return this.waveBlocks || [];
+  }
+
+  setWaveBlocks(waveBlocks: BABYLON.Mesh[]): void {
+    this.waveBlocks = waveBlocks;
+  }
+
+  addWaveBlock(waveBlock: BABYLON.Mesh): void {
+    if (!this.waveBlocks) {
+      this.waveBlocks = [];
+    }
+    this.waveBlocks.push(waveBlock);
+  }
+
+  clearWaveBlocks(): void {
+    if (this.waveBlocks) {
+      this.waveBlocks.forEach(block => block.dispose());
+      this.waveBlocks = [];
+    }
+  }
+
+  getDimensionLines(): DimensionLineNode[] {
+    return this.dimensionLines || [];
+  }
+
+  addDimensionLine(line: DimensionLineNode): void {
+    if (!this.dimensionLines) {
+      this.dimensionLines = [];
+    }
+    this.dimensionLines.push(line);
+  }
+
+  clearDimensionLines(): void {
+    if (this.dimensionLines) {
+      this.dimensionLines.forEach(line => {
+        line.dispose();
+      });
+      this.dimensionLines = [];
+    }
+  }
+
+  addBendingMomentNode(node: BendingMomentNode): void {
+    if (!this.bendingMomentNodes) {
+      this.bendingMomentNodes = [];
+    }
+    this.bendingMomentNodes.push(node);
+  }
+
+  getBendingMomentNodes(): BendingMomentNode[] {
+    return this.bendingMomentNodes || [];
+  }
+
+  clearBendingMomentNodes(): void {
+    if (this.bendingMomentNodes) {
+      this.bendingMomentNodes.forEach(node => {
+        node.dispose();
+      });
+      this.bendingMomentNodes = [];
+    }
+  }
+
+  addTorsionMomentNode(node: TorsionMomentNode): void {
+    if (!this.torsionMomentNodes) {
+      this.torsionMomentNodes = [];
+    }
+    this.torsionMomentNodes.push(node);
+  }
+
+  getTorsionMomentNodes(): TorsionMomentNode[] {
+    return this.torsionMomentNodes || [];
+  }
+
+  clearTorsionMomentNodes(): void {
+    if (this.torsionMomentNodes) {
+      this.torsionMomentNodes.forEach(node => {
+        node.dispose();
+      });
+      this.torsionMomentNodes = [];
+    }
+  }
+
   /**
    * Base dispose method that cleans up axis meshes, labels, and posts.
    * Subclasses should override this and call super.dispose() at the end.
@@ -106,5 +198,9 @@ export abstract class BaseStructNodeImpl implements BaseNode {
     this.clearAxisMeshes();
     this.clearLabels();
     this.clearPosts();
+    this.clearWaveBlocks();
+    this.clearDimensionLines();
+    this.clearBendingMomentNodes();
+    this.clearTorsionMomentNodes();
   }
 }

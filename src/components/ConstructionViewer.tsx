@@ -173,12 +173,10 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     beamWidth: 0.3,
     beamDepth: 0.5,
     beamHeight: 0.4,
-    beamOffsetX: 0.5,
-    pinDiameter: 0.02,
-    pinRows: 2,
-    pinColumns: 3,
-    pinSpacingX: 0.15,
-    pinSpacingY: 0.15,
+    postCountX: 3,
+    postCountZ: 2,
+    postDiameter: 0.03,
+    postOffset: 0.05,
     concreteOffsetXRight: 0.5,
     concreteOffsetXLeft: 0.5,
     concreteOffsetZBack: 0.5,
@@ -351,11 +349,6 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         //   camera.beta = Math.PI / 3;
         //   break;
         // case 'slab':
-        //   camera.target = BABYLON.Vector3.Zero();
-        //   camera.radius = 3.5;
-        //   camera.alpha = Math.PI / 2;
-        //   camera.beta = Math.PI / 4;
-        //   break;
         case 'endAnchorage':
           camera.target = BABYLON.Vector3.Zero();
           camera.radius = 4.5;
@@ -553,7 +546,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       // Calculate post positions first
       let halfConcreteDepth = concreteDepth / 2;
       const slabCenterZ = halfConcreteDepth;
-      const postPositions = calculateYSurfacePostPositions(
+      const postPositions = calculateRectanglePostPositions(
         slabParams.slabWidth,
         slabParams.slabDepth,
         slabParams.postCountX,
@@ -565,33 +558,21 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       if (!slabRef.current) {
         disposePreviousStructure();
         adjustCameraForModel('slab');
-        slabRef.current = createSlab(
-          scene,
-          postPositions,
-          slabParams.concreteThickness,
-          slabParams.slabWidth,
-          slabParams.slabDepth,
-          slabParams.postDiameter,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          slabParams.isFiniteConcrete
-        );
-      } else {
-        updateSlab(
-          slabRef.current,
-          postPositions,
-          slabParams.concreteThickness,
-          slabParams.slabWidth,
-          slabParams.slabDepth,
-          slabParams.postDiameter,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          slabParams.isFiniteConcrete
-        );
-      }
 
+      }
+      slabRef.current?.dispose();
+      slabRef.current = createSlab(
+        scene,
+        postPositions,
+        slabParams.concreteThickness,
+        slabParams.slabWidth,
+        slabParams.slabDepth,
+        slabParams.postDiameter,
+        concreteWidth,
+        concreteDepth,
+        concretePosition,
+        slabParams.isFiniteConcrete
+      );
 
     } else if (model === 'endAnchorage') {
       // Calculate concrete dimensions and positions
@@ -606,9 +587,9 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       const postPositions = calculateRectanglePostPositions(
         endAnchorageParams.beamWidth,
         endAnchorageParams.beamDepth,
-        3,
-        3,
-        endAnchorageParams.pinSpacingX,
+        endAnchorageParams.postCountX,
+        endAnchorageParams.postCountZ,
+        endAnchorageParams.postOffset,
         0
       );
       let postPos = postPositions.map(pos => pos.position);
@@ -693,12 +674,15 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     endAnchorageParams.beamWidth,
     endAnchorageParams.beamDepth,
     endAnchorageParams.beamHeight,
-    endAnchorageParams.beamOffsetX,
-    endAnchorageParams.pinDiameter,
-    endAnchorageParams.pinRows,
-    endAnchorageParams.pinColumns,
-    endAnchorageParams.pinSpacingX,
-    endAnchorageParams.pinSpacingY,
+    endAnchorageParams.postCountX,
+    endAnchorageParams.postCountZ,
+    endAnchorageParams.postDiameter,
+    endAnchorageParams.postOffset,
+    endAnchorageParams.concreteOffsetXRight,
+    endAnchorageParams.concreteOffsetXLeft,
+    endAnchorageParams.concreteOffsetZBack,
+    endAnchorageParams.concreteOffsetZFront,
+    endAnchorageParams.concreteThickness,
   ]);
 
   return (

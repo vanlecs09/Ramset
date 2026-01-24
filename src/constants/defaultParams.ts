@@ -67,7 +67,7 @@ export const DEFAULT_RECTANGLE_COLUMN_PARAMS: RectangleColumnParams = {
 
 export const DEFAULT_SLAB_PARAMS: SlabParams = {
   isFiniteConcrete: true,
-  concreteThickness: 0.25,
+  concreteThickness: 1,
   slabWidth: 1,
   slabDepth: 0.25,
   postCountX: 3,
@@ -76,23 +76,21 @@ export const DEFAULT_SLAB_PARAMS: SlabParams = {
   postOffset: 0.02,
   concreteOffsetXRight: 0.5,
   concreteOffsetXLeft: 0.5,
-  concreteOffsetZBack: 0.5,
-  concreteOffsetZFront: 0.5,
+  concreteOffsetZBack: 0.25 / 2,
+  concreteOffsetZFront: 0.25 / 2,
 };
 
 export const DEFAULT_END_ANCHORAGE_PARAMS: EndAnchorageParams = {
-  concreteThickness: 1,
-  beamWidth: 0.5,
+  beamWidth: 0.3,
   beamDepth: 0.5,
   beamHeight: 0.4,
-  beamOffsetX: 0.5,
-  pinDiameter: 0.02,
-  pinRows: 2,
-  pinColumns: 3,
-  pinSpacingX: 0.15,
-  pinSpacingY: 0.15,
+  postCountX: 3,
+  postCountZ: 2,
+  postDiameter: 0.01,
+  postOffset: 0.02,
   concreteOffsetXRight: 0.5,
   concreteOffsetXLeft: 0.5,
   concreteOffsetZBack: 0.5,
   concreteOffsetZFront: 0.5,
+  concreteThickness: 1,
 };

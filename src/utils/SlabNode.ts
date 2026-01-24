@@ -7,52 +7,23 @@ import { BaseStructNodeImpl } from './BaseNode';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 import { createBendingMomenNode, BendingMomentNode } from './BendingMomenNode';
 import { ArcDirection, TorsionMomentNode, createTorsionMoment as createTorsionMomentNode } from './TorsionMomentNode';
+import { createWaveBlockTop } from './EndAnchorageBeamNode';
 
 export class SlabNode extends BaseStructNodeImpl {
-    private concreteGroup?: ConcreteNode;
-    private waveBlocks?: BABYLON.Mesh[];
+    private concreteNode?: ConcreteNode;
     private secondaryPosts?: BABYLON.Mesh[];
-    private dimensionLines?: DimensionLineNode[];
-    private bendingMomentNodes?: BendingMomentNode[];
-    private torsionMomentNodes?: TorsionMomentNode[];
 
     constructor(group: BABYLON.TransformNode) {
         super(group);
-        this.waveBlocks = [];
-        this.dimensionLines = [];
-        this.bendingMomentNodes = [];
-        this.torsionMomentNodes = [];
     }
 
     // Expose methods for safe access
     getConcreteGroup(): ConcreteNode | undefined {
-        return this.concreteGroup;
+        return this.concreteNode;
     }
 
     setConcreteGroup(concreteGroup: ConcreteNode): void {
-        this.concreteGroup = concreteGroup;
-    }
-
-    getWaveBlocks(): BABYLON.Mesh[] {
-        return this.waveBlocks || [];
-    }
-
-    setWaveBlocks(waveBlocks: BABYLON.Mesh[]): void {
-        this.waveBlocks = waveBlocks;
-    }
-
-    addWaveBlock(waveBlock: BABYLON.Mesh): void {
-        if (!this.waveBlocks) {
-            this.waveBlocks = [];
-        }
-        this.waveBlocks.push(waveBlock);
-    }
-
-    clearWaveBlocks(): void {
-        if (this.waveBlocks) {
-            this.waveBlocks.forEach(block => block.dispose());
-            this.waveBlocks = [];
-        }
+        this.concreteNode = concreteGroup;
     }
 
     getSecondaryPosts(): BABYLON.Mesh[] {
@@ -73,91 +44,14 @@ export class SlabNode extends BaseStructNodeImpl {
         }
     }
 
-    getDimensionLines(): DimensionLineNode[] {
-        return this.dimensionLines || [];
-    }
-
-    addDimensionLine(line: DimensionLineNode): void {
-        if (!this.dimensionLines) {
-            this.dimensionLines = [];
-        }
-        this.dimensionLines.push(line);
-    }
-
-    clearDimensionLines(): void {
-        if (this.dimensionLines) {
-            this.dimensionLines.forEach(line => {
-                line.dispose();
-            });
-            this.dimensionLines = [];
-        }
-    }
-
-    addBendingMomentNode(node: BendingMomentNode): void {
-        if (!this.bendingMomentNodes) {
-            this.bendingMomentNodes = [];
-        }
-        this.bendingMomentNodes.push(node);
-    }
-
-    getBendingMomentNodes(): BendingMomentNode[] {
-        return this.bendingMomentNodes || [];
-    }
-
-    clearBendingMomentNodes(): void {
-        if (this.bendingMomentNodes) {
-            this.bendingMomentNodes.forEach(node => {
-                // Dispose meshes from bending moment node
-                node.meshes.forEach(mesh => {
-                    if (mesh && !mesh.isDisposed()) {
-                        mesh.dispose();
-                    }
-                });
-                // Dispose group
-                if (node.group && !node.group.isDisposed()) {
-                    node.group.dispose();
-                }
-            });
-            this.bendingMomentNodes = [];
-        }
-    }
-
-    addTorsionMomentNode(node: TorsionMomentNode): void {
-        if (!this.torsionMomentNodes) {
-            this.torsionMomentNodes = [];
-        }
-        this.torsionMomentNodes.push(node);
-    }
-
-    getTorsionMomentNodes(): TorsionMomentNode[] {
-        return this.torsionMomentNodes || [];
-    }
-
-    clearTorsionMomentNodes(): void {
-        if (this.torsionMomentNodes) {
-            this.torsionMomentNodes.forEach(node => {
-                node.dispose();
-            });
-            this.torsionMomentNodes = [];
-        }
-    }
-
     dispose(): void {
-        // Dispose moment nodes
-        this.clearBendingMomentNodes();
-        this.clearTorsionMomentNodes();
-
-        // Dispose concrete group and its dimension lines
-        if (this.concreteGroup) {
-            this.concreteGroup.dispose();
+        // Dispose concrete group
+        if (this.concreteNode) {
+            this.concreteNode.dispose();
         }
-        this.clearWaveBlocks();
-        this.clearDimensionLines();
+        // Dispose secondary posts
         this.clearSecondaryPosts();
-        if (this.posts) {
-            this.posts.forEach(post => post.dispose());
-        }
-        // Call parent to dispose axis meshes
+        // Call parent to dispose moment nodes, wave blocks, dimension lines, posts, and axis meshes
         super.dispose();
     }
 }
@@ -210,27 +104,40 @@ export const createSlab = (
     isFiniteConcrete: boolean = true
 ): SlabNode => {
     const slabGroup = new BABYLON.TransformNode('slab', scene);
-    const slab = new SlabNode(slabGroup);
+    const slabNode = new SlabNode(slabGroup);
 
     // Initialize materials
     initializeMaterials(scene);
 
     // 1. Create concrete using ConcreteBuilder
-    const concreteGroup = createConcrete(scene, {
-        thickness: concreteThickness,
-        width: concreteWidth,
-        depth: concreteDepth,
-        position: concretePosition
-    },
+    const concreteNode = createConcrete(scene,
+        {
+            thickness: concreteThickness,
+            width: concreteWidth,
+            depth: concreteDepth,
+            position: concretePosition
+        },
         slabGroup,
         isFiniteConcrete);
-    slab.setConcreteGroup(concreteGroup);
+    slabNode.setConcreteGroup(concreteNode);
 
     // 2. Create wave blocks extending from the right face of concrete
     const slabHeigth = 0.3;
-    let slabPosition = new BABYLON.Vector3(concretePosition.x, concretePosition.y, concretePosition.z + (concreteDepth / 2 + slabHeigth / 2));
-    addWaveBlocksFromRightFace(slab, slabWidth, slabDepth, concreteWidth, slabPosition);
-
+    let slabPosition = new BABYLON.Vector3(
+            concretePosition.x,
+            concretePosition.y + (slabHeigth / 2) + concreteNode.getConcreteHeight() / 2,
+            concretePosition.z,
+        );
+    
+    // let slabPosition = new BABYLON.Vector3(concretePosition.x, concretePosition.y, concretePosition.z + (concreteDepth / 2 + slabHeigth / 2));
+    // addWaveBlocksFromRightFace(slabNode, slabWidth, slabDepth, concreteWidth, slabPosition);
+    createWaveBlockTop(
+        slabNode as unknown as BaseStructNodeImpl,
+        slabWidth,
+        slabDepth,
+        slabHeigth,
+        slabPosition
+    );
     // 3. Create posts connecting concrete to wave blocks
     const postHeight = 0.3;
 
@@ -248,16 +155,16 @@ export const createSlab = (
             postHeight,
             postDiameter,
             adjustedPostPosition,
-            new BABYLON.Vector3(Math.PI / 2, 0, 0),
+            new BABYLON.Vector3(0, 0, 0),
             slabGroup,
             `slabPost_${postPos.index}`
         );
-        slab.addPost(postGroup.mesh!);
+        slabNode.addPost(postGroup.mesh!);
     });
 
     // 4. Create secondary posts inside concrete (black color, high density)
     addSecondaryPostsInsideConcrete(
-        slab,
+        slabNode,
         concretePosition,
         concreteWidth,
         concreteDepth,
@@ -268,15 +175,52 @@ export const createSlab = (
     // 5. Create and cache axis meshes and labels for visualization
     const axesResult = createUnitAxes(
         scene,
-        new BABYLON.Vector3(0, -concreteThickness / 2, concreteDepth / 2),
+        new BABYLON.Vector3(0, 0, 0),
         new BABYLON.Vector3(1, 0, 0),
-        new BABYLON.Vector3(0, -1, 0),
-        new BABYLON.Vector3(0, 0, 1)
+        new BABYLON.Vector3(0, 0, 1),
+        new BABYLON.Vector3(0, 1, 0)
     );
-    slab.setAxisMeshes(axesResult.meshes);
-    slab.setLabels(axesResult.labels);
+    slabNode.setAxisMeshes(axesResult.meshes);
+    slabNode.setLabels(axesResult.labels);
 
-    return slab;
+
+    const bendingMoment1 = createBendingMomenNode(
+        scene,
+        new BABYLON.Vector3(0, - concreteThickness / 2, concreteDepth / 2),
+        1,
+        new BABYLON.Vector3(1, 0, 0),
+        BABYLON.Color3.Black(),
+        '25kg'
+    );
+    slabNode.addBendingMomentNode(bendingMoment1);
+
+    const bendingMoment2 = createBendingMomenNode(
+        scene,
+        new BABYLON.Vector3(0, - concreteThickness / 2, concreteDepth / 2),
+        1,
+        new BABYLON.Vector3(0, 0, 1),
+        BABYLON.Color3.Black(),
+        '25kg'
+    );
+    slabNode.addBendingMomentNode(bendingMoment2);
+
+    const torsionMat = new BABYLON.StandardMaterial('torsionMat', scene);
+    torsionMat.diffuseColor = BABYLON.Color3.Black();
+
+    const torsion = createTorsionMomentNode(
+        'torque1',
+        scene,
+        new BABYLON.Vector3(1, - concreteThickness / 2, concreteDepth / 2),
+        new BABYLON.Vector3(0, 0, 1),    // Direction along X
+        new BABYLON.Vector3(0, -1, 0),    // Direction along XF
+        undefined,                        // arcAngle (use default)
+        ArcDirection.FORWARD,             // Forward pointing
+        torsionMat,
+        '200'                               // Label text
+    );
+    slabNode.addTorsionMomentNode(torsion);
+
+    return slabNode;
 };
 
 export const updateSlab = (
@@ -558,17 +502,17 @@ export const addSecondaryPostsInsideConcrete = (
     // Calculate start positions to center the posts within the concrete
     const concreteMinX = concretePosition.x - concreteWidth / 2;
     const concreteMaxX = concretePosition.x + concreteWidth / 2;
-    const concreteMinY = concretePosition.y - concreteThickness / 2;
-    const concreteMaxY = concretePosition.y + concreteThickness / 2;
+    const concreteMinZ = concretePosition.z - concreteDepth / 2;
+    const concreteMaxZ = concretePosition.z + concreteDepth / 2;
 
     // Post depth extends through concrete (along Z-axis)
-    const postDepth = concreteDepth;
-    const postCenterZ = concretePosition.z;
+    const postDepth = concreteThickness;;
+    const postCentery = concretePosition.y;
 
     // Generate grid of secondary posts (X-Y grid, extending along Z)
     for (let x = concreteMinX + xSpacing / 2; x < concreteMaxX; x += xSpacing) {
-        for (let y = concreteMinY + ySpacing / 2; y < concreteMaxY; y += ySpacing) {
-            const postPosition = new BABYLON.Vector3(x, y, postCenterZ);
+        for (let z = concreteMinZ + ySpacing / 2; z < concreteMaxZ; z += ySpacing) {
+            const postPosition = new BABYLON.Vector3(x, postCentery, z);
 
             // Create secondary post using createPost with rotation for Z-axis alignment
             const postGroup = createPost(
@@ -576,9 +520,9 @@ export const addSecondaryPostsInsideConcrete = (
                 postDepth,
                 postDiameter,
                 postPosition,
-                new BABYLON.Vector3(Math.PI / 2, 0, 0),  // Same direction as main posts
+                new BABYLON.Vector3(0, 0, 0),  // Same direction as main posts
                 slabGroup.group,
-                `secondaryPost_${Math.floor((x - concreteMinX) / xSpacing)}_${Math.floor((y - concreteMinY) / ySpacing)}`
+                `secondaryPost_${Math.floor((x - concreteMinX) / xSpacing)}_${Math.floor((z - concreteMinZ) / ySpacing)}`
             );
 
             // Apply black material

@@ -57,6 +57,16 @@ export const calculateRectanglePostPositions = (
         });
     }
 
+    // Left edge (X = -edgeX): postCountZ posts from top to bottom (excluding both corners)
+    for (let i = postCountZ - 2; i >= 1; i--) {
+        const x = -edgeX;
+        const z = -edgeZ + (i * spacingZ);
+        positions.push({
+            position: new BABYLON.Vector3(x, baseY, z),
+            index: index++,
+        });
+    }
+
     return positions;
 };
 

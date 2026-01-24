@@ -15,7 +15,6 @@ export class BendingMomentNode {
     readonly arrow: BABYLON.Mesh;
     readonly label?: GUI.TextBlock | null;
     readonly labels: GUI.TextBlock[];
-    private isDisposed: boolean = false;
 
     /**
      * Creates a new BendingMomentNode instance.
@@ -41,35 +40,14 @@ export class BendingMomentNode {
      * Should be called before discarding the instance to prevent memory leaks.
      */
     dispose(): void {
-        if (this.isDisposed) return;
+        // if (this.isDisposed) return;
 
         // Dispose all meshes
-        this.meshes.forEach(mesh => {
-            if (mesh && !mesh.isDisposed()) {
-                mesh.dispose();
-            }
-        });
-
+        this.meshes.forEach(mesh => mesh.dispose());
         // Dispose labels
-        this.labels.forEach(label => {
-            if (label) {
-                label.dispose();
-            }
-        });
-
-        // Dispose transform group
-        if (this.group && !this.group.isDisposed()) {
-            this.group.dispose();
-        }
-
-        this.isDisposed = true;
-    }
-
-    /**
-     * Checks if the node has been disposed.
-     */
-    getIsDisposed(): boolean {
-        return this.isDisposed;
+        this.labels.forEach(label => label.dispose());
+        this.label?.dispose()
+        this.group.dispose();
     }
 }
 

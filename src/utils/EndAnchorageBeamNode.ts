@@ -9,20 +9,18 @@ import { BendingMomentNode, createBendingMomenNode } from './BendingMomenNode';
 import { ArcDirection, TorsionMomentNode, createTorsionMoment as createTorsionMomentNode } from './TorsionMomentNode';
 
 export interface EndAnchorageParams {
-    concreteThickness: number;
     beamWidth: number;
     beamDepth: number;
     beamHeight: number;
-    beamOffsetX: number;
-    pinDiameter: number;
-    pinRows: number;
-    pinColumns: number;
-    pinSpacingX: number;
-    pinSpacingY: number;
+    postCountX: number;
+    postCountZ: number;
+    postDiameter: number;
+    postOffset: number;
     concreteOffsetXRight: number;
     concreteOffsetXLeft: number;
     concreteOffsetZBack: number;
     concreteOffsetZFront: number;
+    concreteThickness: number;
 }
 
 
@@ -48,17 +46,9 @@ export interface ConcreteParams {
 
 export class EndAnchorageBeamNode extends BaseStructNodeImpl {
     private concreteNode?: ConcreteNode;
-    private waveBlocks?: BABYLON.Mesh[];
-    private dimensionLines?: DimensionLineNode[];
-    private bendingMomentNodes?: BendingMomentNode[];
-    private torsionMomentNodes?: TorsionMomentNode[];
 
     constructor(group: BABYLON.TransformNode) {
         super(group);
-        this.waveBlocks = [];
-        this.dimensionLines = [];
-        this.bendingMomentNodes = [];
-        this.torsionMomentNodes = [];
     }
 
     // Expose methods for safe access
@@ -70,109 +60,12 @@ export class EndAnchorageBeamNode extends BaseStructNodeImpl {
         this.concreteNode = concreteGroup;
     }
 
-    getWaveBlocks(): BABYLON.Mesh[] {
-        return this.waveBlocks || [];
-    }
-
-    setWaveBlocks(waveBlocks: BABYLON.Mesh[]): void {
-        this.waveBlocks = waveBlocks;
-    }
-
-    addWaveBlock(waveBlock: BABYLON.Mesh): void {
-        if (!this.waveBlocks) {
-            this.waveBlocks = [];
-        }
-        this.waveBlocks.push(waveBlock);
-    }
-
-    clearWaveBlocks(): void {
-        if (this.waveBlocks) {
-            this.waveBlocks.forEach(block => block.dispose());
-            this.waveBlocks = [];
-        }
-    }
-
-    getDimensionLines(): DimensionLineNode[] {
-        return this.dimensionLines || [];
-    }
-
-    addDimensionLine(line: DimensionLineNode): void {
-        if (!this.dimensionLines) {
-            this.dimensionLines = [];
-        }
-        this.dimensionLines.push(line);
-    }
-
-    clearDimensionLines(): void {
-        if (this.dimensionLines) {
-            this.dimensionLines.forEach(line => {
-                line.dispose();
-            });
-            this.dimensionLines = [];
-        }
-    }
-
-    addBendingMomentNode(node: BendingMomentNode): void {
-        if (!this.bendingMomentNodes) {
-            this.bendingMomentNodes = [];
-        }
-        this.bendingMomentNodes.push(node);
-    }
-
-    getBendingMomentNodes(): BendingMomentNode[] {
-        return this.bendingMomentNodes || [];
-    }
-
-    clearBendingMomentNodes(): void {
-        if (this.bendingMomentNodes) {
-            this.bendingMomentNodes.forEach(node => {
-                // Dispose meshes from bending moment node
-                node.meshes.forEach(mesh => {
-                    if (mesh && !mesh.isDisposed()) {
-                        mesh.dispose();
-                    }
-                });
-                // Dispose group
-                if (node.group && !node.group.isDisposed()) {
-                    node.group.dispose();
-                }
-            });
-            this.bendingMomentNodes = [];
-        }
-    }
-
-    addTorsionMomentNode(node: TorsionMomentNode): void {
-        if (!this.torsionMomentNodes) {
-            this.torsionMomentNodes = [];
-        }
-        this.torsionMomentNodes.push(node);
-    }
-
-    getTorsionMomentNodes(): TorsionMomentNode[] {
-        return this.torsionMomentNodes || [];
-    }
-
-    clearTorsionMomentNodes(): void {
-        if (this.torsionMomentNodes) {
-            this.torsionMomentNodes.forEach(node => {
-                node.dispose();
-            });
-            this.torsionMomentNodes = [];
-        }
-    }
-
     dispose(): void {
-        // Dispose moment nodes
-        this.clearBendingMomentNodes();
-        this.clearTorsionMomentNodes();
-
-        // Dispose concrete group and its dimension lines
+        // Dispose concrete group
         if (this.concreteNode) {
             this.concreteNode.dispose();
         }
-        this.clearWaveBlocks();
-        this.clearDimensionLines();
-        // Call parent to dispose axis meshes and posts
+        // Call parent to dispose moment nodes, wave blocks, dimension lines, axis meshes and posts
         super.dispose();
     }
 }
@@ -251,7 +144,7 @@ export const createEndAnchorage = (
         const postGroup = createPost(
             scene,
             postHeight,
-            params.pinDiameter,
+            params.postDiameter,
             postPosition,
             new BABYLON.Vector3(0, 0, 0),
             // new BABYLON.Vector3(Math.PI / 2, 0, 0),
@@ -264,7 +157,7 @@ export const createEndAnchorage = (
     // Update and cache axis meshes and labels
     const axisNode = createUnitAxes(
         scene,
-        new BABYLON.Vector3(0, 0, 0),
+        new BABYLON.Vector3(concretePosition.x, 0, concretePosition.z),
         new BABYLON.Vector3(1, 0, 0),
         new BABYLON.Vector3(0, 0, 1),
         new BABYLON.Vector3(0, 1, 0)
@@ -344,7 +237,7 @@ export const createEndAnchorage = (
  * Add wave blocks (beam) extending from the concrete
  */
 export const createWaveBlockTop = (
-    anchorageNode: EndAnchorageBeamNode,
+    anchorageNode: BaseStructNodeImpl,
     blockWidth: number = 0.3,
     blockDepth: number = 0.5,
     blockHeight: number = 0.4,

@@ -7,7 +7,7 @@ export class ConcreteNode extends BaseStructNodeImpl {
     private mesh?: BABYLON.Mesh;
     private material?: BABYLON.StandardMaterial;
     private infiniteBlocks?: BABYLON.Mesh[];
-    private dimensionLines?: DimensionLineNode;
+    // private dimensionLines?: DimensionLineNode;
     private concreteWidth: number = 0;
     private concreteDepth: number = 0;
     private concreteHeight: number = 0;
@@ -40,13 +40,13 @@ export class ConcreteNode extends BaseStructNodeImpl {
         this.infiniteBlocks = blocks;
     }
 
-    getDimensionLines(): DimensionLineNode | undefined {
-        return this.dimensionLines;
-    }
+    // getDimensionLines(): DimensionLineNode | undefined {
+    //     return this.dimensionLines;
+    // }
 
-    setDimensionLines(dimensionLines: DimensionLineNode | undefined): void {
-        this.dimensionLines = dimensionLines;
-    }
+    // setDimensionLines(dimensionLines: DimensionLineNode | undefined): void {
+    //     this.dimensionLines = dimensionLines;
+    // }
 
     getConcreteWidth(): number {
         return this.concreteWidth;
@@ -73,7 +73,7 @@ export class ConcreteNode extends BaseStructNodeImpl {
     }
 
     dispose(): void {
-        this.dimensionLines?.dispose?.();
+        // this.dimensionLines?.dispose?.();
         this.mesh?.dispose();
         this.infiniteBlocks?.forEach(block => block.dispose());
         // Call parent to dispose axis meshes
@@ -270,7 +270,7 @@ export const createConcrete = (
     concreteNode.setMesh(concrete);
     concreteNode.setMaterial(material);
     concreteNode.setInfiniteBlocks(sinBlocks);
-    concreteNode.setDimensionLines(dimensionLines);
+    concreteNode.addDimensionLine(dimensionLines!);
     concreteNode.setConcreteWidth(params.width);
     concreteNode.setConcreteDepth(params.depth);
     concreteNode.setConcreteHeight(params.thickness);
@@ -416,7 +416,7 @@ export const updateConcrete = (
     concreteNode?.setMesh(concrete);
     concreteNode?.setMaterial(material);
     concreteNode?.setInfiniteBlocks(sinBlocks);
-    concreteNode?.setDimensionLines(dimensionLines);
+    // concreteNode?.setDimensionLines(dimensionLines);
     concreteNode?.setConcreteWidth(params.width);
     concreteNode?.setConcreteDepth(params.depth);
     concreteNode?.setConcreteHeight(params.thickness);

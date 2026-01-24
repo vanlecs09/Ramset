@@ -25,7 +25,7 @@ export class TorsionMomentNode {
     readonly label?: GUI.TextBlock | null;
     readonly meshes: BABYLON.Mesh[];
     readonly labels: GUI.TextBlock[];
-    private isDisposed: boolean = false;
+    // private isDisposed: boolean = false;
 
     /**
      * Creates a new TorsionMomentNode instance.
@@ -51,7 +51,7 @@ export class TorsionMomentNode {
      * Should be called before discarding the instance to prevent memory leaks.
      */
     dispose(): void {
-        if (this.isDisposed) return;
+        // if (this.isDisposed) return;
 
         // Dispose meshes
         this.meshes.forEach(mesh => {
@@ -72,15 +72,15 @@ export class TorsionMomentNode {
             this.group.dispose();
         }
 
-        this.isDisposed = true;
+        // this.isDisposed = true;
     }
 
     /**
      * Checks if the node has been disposed.
      */
-    getIsDisposed(): boolean {
-        return this.isDisposed;
-    }
+    // getIsDisposed(): boolean {
+    //     return this.isDisposed;
+    // }
 }
 
 

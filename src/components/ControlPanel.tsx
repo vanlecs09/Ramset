@@ -123,12 +123,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [anchorageBeamWidth, setAnchorageBeamWidth] = useState(DEFAULT_END_ANCHORAGE_PARAMS.beamWidth);
   const [anchorageBeamDepth, setAnchorageBeamDepth] = useState(DEFAULT_END_ANCHORAGE_PARAMS.beamDepth);
   const [anchorageBeamHeight, setAnchorageBeamHeight] = useState(DEFAULT_END_ANCHORAGE_PARAMS.beamHeight);
-  const [anchorageBeamOffsetX, setAnchorageBeamOffsetX] = useState(DEFAULT_END_ANCHORAGE_PARAMS.beamOffsetX);
-  const [anchoragePinDiameter, setAnchoragePinDiameterState] = useState(DEFAULT_END_ANCHORAGE_PARAMS.pinDiameter);
-  const [anchoragePinRows, setAnchoragePinRows] = useState(DEFAULT_END_ANCHORAGE_PARAMS.pinRows);
-  const [anchoragePinColumns, setAnchoragePinColumns] = useState(DEFAULT_END_ANCHORAGE_PARAMS.pinColumns);
-  const [anchoragePinSpacingX, setAnchoragePinSpacingX] = useState(DEFAULT_END_ANCHORAGE_PARAMS.pinSpacingX);
-  const [anchoragePinSpacingY, setAnchoragePinSpacingY] = useState(DEFAULT_END_ANCHORAGE_PARAMS.pinSpacingY);
+  const [anchoragePostCountX, setAnchoragePostCountX] = useState(DEFAULT_END_ANCHORAGE_PARAMS.postCountX);
+  const [anchoragePostCountZ, setAnchoragePostCountZ] = useState(DEFAULT_END_ANCHORAGE_PARAMS.postCountZ);
+  const [anchoragePostDiameter, setAnchoragePostDiameter] = useState(DEFAULT_END_ANCHORAGE_PARAMS.postDiameter);
+  const [anchoragePostOffset, setAnchoragePostOffset] = useState(DEFAULT_END_ANCHORAGE_PARAMS.postOffset);
   const [anchorageConcreteOffsetXRight, setAnchorageConcreteOffsetXRight] = useState(DEFAULT_END_ANCHORAGE_PARAMS.concreteOffsetXRight);
   const [anchorageConcreteOffsetXLeft, setAnchorageConcreteOffsetXLeft] = useState(DEFAULT_END_ANCHORAGE_PARAMS.concreteOffsetXLeft);
   const [anchorageConcreteOffsetZBack, setAnchorageConcreteOffsetZBack] = useState(DEFAULT_END_ANCHORAGE_PARAMS.concreteOffsetZBack);
@@ -895,17 +893,15 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     });
   };
 
-  // End Anchorage parameter handlers
+  // Helper function to build complete end anchorage params
   const getEndAnchorageParams = (overrides?: Partial<EndAnchorageParams>): EndAnchorageParams => ({
     beamWidth: overrides?.beamWidth ?? anchorageBeamWidth,
     beamDepth: overrides?.beamDepth ?? anchorageBeamDepth,
     beamHeight: overrides?.beamHeight ?? anchorageBeamHeight,
-    beamOffsetX: overrides?.beamOffsetX ?? anchorageBeamOffsetX,
-    pinDiameter: overrides?.pinDiameter ?? anchoragePinDiameter,
-    pinRows: overrides?.pinRows ?? anchoragePinRows,
-    pinColumns: overrides?.pinColumns ?? anchoragePinColumns,
-    pinSpacingX: overrides?.pinSpacingX ?? anchoragePinSpacingX,
-    pinSpacingY: overrides?.pinSpacingY ?? anchoragePinSpacingY,
+    postCountX: overrides?.postCountX ?? anchoragePostCountX,
+    postCountZ: overrides?.postCountZ ?? anchoragePostCountZ,
+    postDiameter: overrides?.postDiameter ?? anchoragePostDiameter,
+    postOffset: overrides?.postOffset ?? anchoragePostOffset,
     concreteOffsetXRight: overrides?.concreteOffsetXRight ?? anchorageConcreteOffsetXRight,
     concreteOffsetXLeft: overrides?.concreteOffsetXLeft ?? anchorageConcreteOffsetXLeft,
     concreteOffsetZBack: overrides?.concreteOffsetZBack ?? anchorageConcreteOffsetZBack,
@@ -931,41 +927,29 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     onEndAnchorageParamsChange(getEndAnchorageParams({ beamHeight: value }));
   };
 
-  const handleAnchorageBeamOffsetXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value) || 0;
-    setAnchorageBeamOffsetX(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ beamOffsetX: value }));
-  };
-
-  const handleAnchoragePinDiameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value) || 0;
-    setAnchoragePinDiameterState(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ pinDiameter: value }));
-  };
-
-  const handleAnchoragePinRowsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAnchoragePostCountXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value) || 1;
-    setAnchoragePinRows(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ pinRows: value }));
+    setAnchoragePostCountX(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ postCountX: value }));
   };
 
-  const handleAnchoragePinColumnsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAnchoragePostCountZChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value) || 1;
-    setAnchoragePinColumns(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ pinColumns: value }));
+    setAnchoragePostCountZ(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ postCountZ: value }));
   };
 
-  const handleAnchoragePinSpacingXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAnchoragePostDiameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setAnchoragePinSpacingX(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ pinSpacingX: value }));
+    setAnchoragePostDiameter(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ postDiameter: value }));
   };
 
-  const handleAnchoragePinSpacingYChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAnchoragePostOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setAnchoragePinSpacingY(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ pinSpacingY: value }));
-  };
+    setAnchoragePostOffset(value);
+    onEndAnchorageParamsChange(getEndAnchorageParams({ postOffset: value }));
+  }
 
   const handleAnchorageConcreteOffsetXRightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
@@ -1728,73 +1712,50 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           </div>
 
           <div className="control-group">
-            <label>Beam Offset X</label>
+            <label>Post Count X</label>
             <input
               type="number"
-              value={anchorageBeamOffsetX}
-              onChange={handleAnchorageBeamOffsetXChange}
-              step="0.1"
-              placeholder="Enter beam offset X"
+              value={anchoragePostCountX}
+              onChange={handleAnchoragePostCountXChange}
+              step="1"
+              min="1"
+              placeholder="Enter number of posts in X direction"
             />
           </div>
 
           <div className="control-group">
-            <label>Pin Diameter</label>
+            <label>Post Count Z</label>
             <input
               type="number"
-              value={anchoragePinDiameter}
-              onChange={handleAnchoragePinDiameterChange}
+              value={anchoragePostCountZ}
+              onChange={handleAnchoragePostCountZChange}
+              step="1"
+              min="1"
+              placeholder="Enter number of posts in Z direction"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Diameter</label>
+            <input
+              type="number"
+              value={anchoragePostDiameter}
+              onChange={handleAnchoragePostDiameterChange}
               step="0.01"
               min="0.01"
-              placeholder="Enter pin diameter"
+              placeholder="Enter post diameter"
             />
           </div>
 
           <div className="control-group">
-            <label>Pin Rows</label>
+            <label>Post Offset</label>
             <input
               type="number"
-              value={anchoragePinRows}
-              onChange={handleAnchoragePinRowsChange}
-              step="1"
-              min="1"
-              placeholder="Enter number of pin rows"
-            />
-          </div>
-
-          <div className="control-group">
-            <label>Pin Columns</label>
-            <input
-              type="number"
-              value={anchoragePinColumns}
-              onChange={handleAnchoragePinColumnsChange}
-              step="1"
-              min="1"
-              placeholder="Enter number of pin columns"
-            />
-          </div>
-
-          <div className="control-group">
-            <label>Pin Spacing X</label>
-            <input
-              type="number"
-              value={anchoragePinSpacingX}
-              onChange={handleAnchoragePinSpacingXChange}
+              value={anchoragePostOffset}
+              onChange={handleAnchoragePostOffsetChange}
               step="0.05"
-              min="0.05"
-              placeholder="Enter X spacing between pins"
-            />
-          </div>
-
-          <div className="control-group">
-            <label>Pin Spacing Z</label>
-            <input
-              type="number"
-              value={anchoragePinSpacingY}
-              onChange={handleAnchoragePinSpacingYChange}
-              step="0.05"
-              min="0.05"
-              placeholder="Enter Z spacing between pins"
+              min="0"
+              placeholder="Enter post offset"
             />
           </div>
 
