@@ -215,7 +215,7 @@ export const createDimensionWithLabel = (
   corner2Position: BABYLON.Vector3,
   material: BABYLON.Material,
   dimensionValue: number,
-  parentGroup: BABYLON.TransformNode,
+  parentTransNode: BABYLON.TransformNode,
   advancedTexture?: GUI.AdvancedDynamicTexture,
   labelOffsetX: number = 0,
   labelOffsetY: number = 0,
@@ -239,7 +239,7 @@ export const createDimensionWithLabel = (
 
   // Parent all meshes to the group
   result.meshes.forEach(mesh => {
-    mesh.parent = parentGroup;
+    mesh.parent = parentTransNode;
   });
 
   // Create label data with positioning info
@@ -302,7 +302,7 @@ export const createArrow = (
  * Creates a visual helper displaying X, Y, Z coordinate axes with arrows and labels.
  * Each axis is rendered as a colored line with an arrow head and text label.
  */
-export const createAxesBasic = (
+export const createUnitAxes = (
   scene: BABYLON.Scene,
   origin: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
   xDirection: BABYLON.Vector3 = new BABYLON.Vector3(1, 0, 0),
@@ -511,6 +511,7 @@ export const createLineTwoArrow = (
   endPoint01: BABYLON.Vector3,
   name: string,
   scene: BABYLON.Scene,
+  parent: BABYLON.TransformNode,
   lineMat: BABYLON.Material,
   labelText?: string
 ) => {
@@ -522,6 +523,21 @@ export const createLineTwoArrow = (
     scene,
     lineMat
   );
+  line.parent = parent;
+
+
+  let texture = getDimensionLabelTexture();
+  line.parent = parent;
+  const label = new GUI.TextBlock();
+  label.text = labelText!;
+  label.fontSize = 20;
+  label.color = BABYLON.Color3.Black().toHexString();
+
+  texture.addControl(label);
+  label.linkWithMesh(line);
+  // label.linkOffsetY = 20
+  // label.linkOffsetX = 20
+
   let direction = endPoint01.subtract(beginPoint01).normalize();
   // Create arrows at measurement points
   const arrow = createArrow(
@@ -533,6 +549,7 @@ export const createLineTwoArrow = (
     direction,
     lineMat
   );
+  arrow.parent = parent;
 
   const arrow2 = createArrow(
     name,
@@ -543,38 +560,12 @@ export const createLineTwoArrow = (
     direction.scale(-1),
     lineMat
   );
-
-  // Create label for the line if labelText is provided
-  let label: GUI.TextBlock | undefined;
-  let labelAnchor: BABYLON.Mesh | undefined;
-  if (labelText) {
-    const advancedTexture = getDimensionLabelTexture();
-    
-    // Calculate midpoint of the line
-    const midPoint = BABYLON.Vector3.Lerp(beginPoint01, endPoint01, 0.5);
-
-    label = new GUI.TextBlock();
-    label.text = labelText;
-    label.fontSize = DIMENSION_LINE_CONSTANTS.LABEL_FONT_SIZE;
-    label.color = 'black';
-    label.width = '120px';
-    label.height = '30px';
-    
-    // Create an invisible mesh at the midpoint to link the label
-    labelAnchor = BABYLON.MeshBuilder.CreateSphere('labelAnchor_' + name, { diameter: 0.01 }, scene);
-    labelAnchor.position = midPoint;
-    labelAnchor.isVisible = false;
-    
-    label.linkWithMesh(labelAnchor);
-    advancedTexture.addControl(label);
-    label.linkOffsetY = -30;
-  }
-
+  arrow2.parent = parent;
+  
   return {
     line: line,
     arrow: [arrow, arrow2],
-    label: label,
-    labelAnchor: labelAnchor
+    label: label
   };
 }
 

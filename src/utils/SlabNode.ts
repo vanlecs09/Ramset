@@ -2,7 +2,7 @@ import * as BABYLON from '@babylonjs/core';
 import { createConcrete, updateConcrete, ConcreteNode, getDimensionLabelTexture } from './ConcreteNode';
 import { createPost } from './PostNode';
 import { createWaveBlock } from './WaveBuilder';
-import { createAxesBasic, createDimensionWithLabel, DimensionLineNode } from './GeometryHelper';
+import { createUnitAxes, createDimensionWithLabel, DimensionLineNode } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 import { createBendingMomenNode, BendingMomentNode } from './BendingMomenNode';
@@ -266,7 +266,7 @@ export const createSlab = (
     );
 
     // 5. Create and cache axis meshes and labels for visualization
-    const axesResult = createAxesBasic(
+    const axesResult = createUnitAxes(
         scene,
         new BABYLON.Vector3(0, -concreteThickness / 2, concreteDepth / 2),
         new BABYLON.Vector3(1, 0, 0),
@@ -354,7 +354,7 @@ export const updateSlab = (
     );
 
     // Update and cache axis meshes and labels
-    const axesResult = createAxesBasic(
+    const axesResult = createUnitAxes(
         scene,
         new BABYLON.Vector3(0, -concreteThickness / 2, concreteDepth / 2),
         new BABYLON.Vector3(1, 0, 0),
@@ -479,7 +479,7 @@ export const addWaveBlocksFromRightFace = (
     );
 
     // Create DimensionLineNode to manage depth dimension
-    const depthDimensionNode = new DimensionLineNode(dimensionGroup, blockWidth, blockDepth, blockHeight);
+    const depthDimensionNode = new DimensionLineNode(dimensionGroup);
     if (depthDimLabel) {
         depthDimensionNode.addLabel(depthDimLabel.label);
     }

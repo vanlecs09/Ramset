@@ -3,10 +3,10 @@ import * as GUI from '@babylonjs/gui';
 import { createConcrete, updateConcrete, ConcreteNode, getDimensionLabelTexture } from './ConcreteNode';
 import { createPost } from './PostNode';
 import { createWaveBlock } from './WaveBuilder';
-import { createAxesBasic, createDimensionWithLabel, createLineTwoArrow, DimensionLineNode } from './GeometryHelper';
+import { createUnitAxes as createUnitAxes, createDimensionWithLabel, createLine, createLineTwoArrow, DimensionLineNode } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
-import { BendingMomentNode } from './BendingMomenNode';
-import { TorsionMomentNode } from './TorsionMomentNode';
+import { BendingMomentNode, createBendingMomenNode } from './BendingMomenNode';
+import { ArcDirection, TorsionMomentNode, createTorsionMoment as createTorsionMomentNode } from './TorsionMomentNode';
 
 export interface EndAnchorageParams {
     concreteThickness: number;
@@ -262,7 +262,7 @@ export const createEndAnchorage = (
     }
 
     // Update and cache axis meshes and labels
-    const axisNode = createAxesBasic(
+    const axisNode = createUnitAxes(
         scene,
         new BABYLON.Vector3(0, 0, 0),
         new BABYLON.Vector3(1, 0, 0),
@@ -271,6 +271,70 @@ export const createEndAnchorage = (
     );
     anchorageNode.setAxisMeshes(axisNode.meshes);
     anchorageNode.setLabels(axisNode.labels);
+
+    const bendingMoment1 = createBendingMomenNode(
+        scene,
+        new BABYLON.Vector3(concretePosition.x, concretePosition.y + concreteParams.thickness / 2, concretePosition.z),
+        1,
+        new BABYLON.Vector3(1, 0, 0),
+        BABYLON.Color3.Black(),
+        '25kg'
+    );
+    anchorageNode.addBendingMomentNode(bendingMoment1);
+    
+    let basePosition = new BABYLON.Vector3(concretePosition.x, concretePosition.y + concreteParams.thickness / 2, concretePosition.z);
+    const bendingMoment2 = createBendingMomenNode(
+        scene,
+        basePosition,
+        1,
+        new BABYLON.Vector3(0, 0, 1),
+        BABYLON.Color3.Black(),
+        '25kg'
+    );
+    anchorageNode.addBendingMomentNode(bendingMoment2);
+
+
+    const bendingMoment3 = createBendingMomenNode(
+        scene,
+        basePosition,
+        1,
+        new BABYLON.Vector3(0, 1, 0),
+        BABYLON.Color3.Black(),
+        '25kg'
+    );
+    anchorageNode.addBendingMomentNode(bendingMoment3);
+
+
+
+    const torsionMat = new BABYLON.StandardMaterial('torsionMat', scene);
+    torsionMat.diffuseColor = BABYLON.Color3.Black();
+
+    const torsion = createTorsionMomentNode(
+        'torque1',
+        scene,
+        basePosition.add(new BABYLON.Vector3(1, 0, 0)),
+        new BABYLON.Vector3(0, 0, 1),    // Direction along X
+        new BABYLON.Vector3(0, -1, 0),    // Direction along XF
+        undefined,                        // arcAngle (use default)
+        ArcDirection.FORWARD,             // Forward pointing
+        torsionMat,
+        '200'                               // Label text
+    );
+    anchorageNode.addTorsionMomentNode(torsion);
+
+
+      const torsion2 = createTorsionMomentNode(
+        'torque1',
+        scene,
+        basePosition.add(new BABYLON.Vector3(0, 1, 0)),
+        new BABYLON.Vector3(0, 0, 1),    // Direction along X
+        new BABYLON.Vector3(1, 0, 0),    // Direction along XF
+        undefined,                        // arcAngle (use default)
+        ArcDirection.FORWARD,             // Forward pointing
+        torsionMat,
+        '200'                               // Label text
+    );
+    anchorageNode.addTorsionMomentNode(torsion2);
 
     return anchorageNode;
 };
@@ -315,8 +379,8 @@ export const createWaveBlockTop = (
     const advancedTexture = getDimensionLabelTexture();
 
     // Create a dimension line node group to hold all dimension elements
-    const dimensionGroup = new BABYLON.TransformNode('beamDimensions', scene);
-    dimensionGroup.parent = anchorageNode.group;
+    const dimensionNodes = new BABYLON.TransformNode('beamDimensions', scene);
+    dimensionNodes.parent = anchorageNode.group;
 
     // Dimension line for beam depth (X-axis)
     const zOffset = 0.1;
@@ -342,19 +406,19 @@ export const createWaveBlockTop = (
         depthCorner2,
         dimensionMaterial!,
         blockWidth,
-        dimensionGroup,
+        dimensionNodes,
         advancedTexture,
         25,
         0
     );
 
     // Create DimensionLineNode to manage depth dimension
-    const depthDimensionNode = new DimensionLineNode(dimensionGroup);
+    const depthDimensionNode = new DimensionLineNode(dimensionNodes);
     // if (depthDimLabel) {
     depthDimensionNode.addLabel(depthDimLabel!.label);
     // }
     // Add all child meshes from dimension group
-    (dimensionGroup.getChildren() as BABYLON.Mesh[]).forEach(mesh => {
+    (dimensionNodes.getChildren() as BABYLON.Mesh[]).forEach(mesh => {
         depthDimensionNode.addMesh(mesh);
     });
     anchorageNode.addDimensionLine(depthDimensionNode);
@@ -380,7 +444,7 @@ export const createWaveBlockTop = (
         heightCorner2,
         dimensionMaterial!,
         blockDepth,
-        dimensionGroup,
+        dimensionNodes,
         advancedTexture,
         -40,
         0
@@ -393,17 +457,26 @@ export const createWaveBlockTop = (
 };
 
 export type EndAnchorageNode = EndAnchorageBeamNode;
-function createDeimensionLine(concretePosition: BABYLON.Vector3, beamParams: SecondaryEndAnchorageParams, concreteParams: ConcreteParams, beamPosition: BABYLON.Vector3, scene: BABYLON.Scene, anchorageNode: EndAnchorageBeamNode) {
+function createDeimensionLine(concretePosition: BABYLON.Vector3,
+    beamParams: SecondaryEndAnchorageParams, concreteParams:
+        ConcreteParams,
+    beamPosition: BABYLON.Vector3,
+    scene: BABYLON.Scene,
+    anchorageNode: EndAnchorageBeamNode) {
+
+    const dimensionNodes = new BABYLON.TransformNode('beamDimensionsDistance', scene);
     const beamWidthMeasure = Math.abs(beamParams.beamWidth / 2).toFixed(2);
     const result1 = createLineTwoArrow(
         new BABYLON.Vector3(concretePosition.x + beamParams.beamWidth / 2, concretePosition.y + concreteParams.thickness / 2, beamPosition.z - beamParams.beamDepth / 2),
-        new BABYLON.Vector3(concretePosition.x + concreteParams.width  / 2, concretePosition.y + concreteParams.thickness / 2, beamPosition.z - beamParams.beamDepth / 2),
+        new BABYLON.Vector3(concretePosition.x + concreteParams.width / 2, concretePosition.y + concreteParams.thickness / 2, beamPosition.z - beamParams.beamDepth / 2),
         'beamWidthArrow',
         scene,
+        dimensionNodes,
         dimensionMaterial!,
-        `Width: ${beamWidthMeasure}m`
+        `${beamWidthMeasure}m`
     );
-    let dimensionLineNode1 = new DimensionLineNode(anchorageNode.group);
+
+    let dimensionLineNode1 = new DimensionLineNode(dimensionNodes);
     dimensionLineNode1.addMesh(result1.line!);
     if (result1.label) dimensionLineNode1.addLabel(result1.label);
     dimensionLineNode1.addMesh(result1.arrow[0]!);
@@ -412,12 +485,14 @@ function createDeimensionLine(concretePosition: BABYLON.Vector3, beamParams: Sec
 
     const result2 = createLineTwoArrow(
         new BABYLON.Vector3(concretePosition.x - beamParams.beamWidth / 2, concretePosition.y + concreteParams.thickness / 2, beamPosition.z - beamParams.beamDepth / 2),
-        new BABYLON.Vector3(concretePosition.x - concreteParams.width  / 2, concretePosition.y + concreteParams.thickness / 2, beamPosition.z - beamParams.beamDepth / 2),
+        new BABYLON.Vector3(concretePosition.x - concreteParams.width / 2, concretePosition.y + concreteParams.thickness / 2, beamPosition.z - beamParams.beamDepth / 2),
         'beamWidthArrow',
         scene,
+        dimensionNodes,
         dimensionMaterial!,
-        `Width: ${beamWidthMeasure}m`
+        ` ${beamWidthMeasure}m`
     );
+
     let dimensionLineNode2 = new DimensionLineNode(anchorageNode.group);
     dimensionLineNode2.addMesh(result2.line!);
     if (result2.label) dimensionLineNode2.addLabel(result2.label);
@@ -431,9 +506,11 @@ function createDeimensionLine(concretePosition: BABYLON.Vector3, beamParams: Sec
         new BABYLON.Vector3(concretePosition.x + beamParams.beamWidth / 2, concretePosition.y + concreteParams.thickness / 2, beamPosition.z - concreteParams.depth / 2),
         'beamWidthArrow',
         scene,
+        dimensionNodes,
         dimensionMaterial!,
-        `Depth: ${beamDepthMeasure}m`
+        ` ${beamDepthMeasure}m`
     );
+
     let dimensionLineNode3 = new DimensionLineNode(anchorageNode.group);
     dimensionLineNode3.addMesh(result3.line!);
     if (result3.label) dimensionLineNode3.addLabel(result3.label);
@@ -446,8 +523,9 @@ function createDeimensionLine(concretePosition: BABYLON.Vector3, beamParams: Sec
         new BABYLON.Vector3(concretePosition.x + beamParams.beamWidth / 2, concretePosition.y + concreteParams.thickness / 2, beamPosition.z + concreteParams.depth / 2),
         'beamWidthArrow',
         scene,
+        dimensionNodes,
         dimensionMaterial!,
-        `Depth: ${beamDepthMeasure}m`
+        `${beamDepthMeasure}m`
     );
     let dimensionLineNode4 = new DimensionLineNode(anchorageNode.group);
     dimensionLineNode4.addMesh(result4.line!);
