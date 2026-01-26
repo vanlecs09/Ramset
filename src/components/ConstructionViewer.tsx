@@ -3,14 +3,14 @@ import * as BABYLON from '@babylonjs/core';
 import { createComplexColumn, updateComplexColumn } from '../utils/ComplexColumnNode';
 import { createCircularColumns, updateCircularColumns } from '../utils/CircularColumnsNode';
 import { createRectangleColumn, updateRectangleColumn } from '../utils/RectangleColumnNode';
-import { createSlab, updateSlab } from '../utils/SlabNode';
+import { createLapsplice } from '../utils/SlabNode';
 import { createEndAnchorage } from '../utils/EndAnchorageBeamNode';
 import { calculateCircularPostPositions } from '../utils/CircularPostPositionCalculator';
-import { calculateRectanglePostPositions, calculateYSurfacePostPositions } from '../utils/RectanglePostPositionCalculator';
+import { calculateRectanglePostPositions } from '../utils/RectanglePostPositionCalculator';
 import type { CircularColumnsNode } from '../utils/CircularColumnsNode';
 import type { ComplexColumnNode } from '../utils/ComplexColumnNode';
 import type { RectangleColumnNode } from '../utils/RectangleColumnNode';
-import type { SlabNode } from '../utils/SlabNode';
+import type { BaseLapSpliceNode } from '../utils/SlabNode';
 import { BaseEndAnchorageNode } from '../utils/EndAnchorageBeamNode';
 import type { RectangleColumnParams, SlabParams } from '../App';
 import type { EndAnchorageParams } from '../utils/EndAnchorageBeamNode';
@@ -220,7 +220,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   const circularColumnsRef = useRef<CircularColumnsNode | null>(null);
   const complexColumnRef = useRef<ComplexColumnNode | null>(null);
   const rectangleColumnRef = useRef<RectangleColumnNode | null>(null);
-  const slabRef = useRef<SlabNode | null>(null);
+  const slabRef = useRef<BaseLapSpliceNode | null>(null);
   const endAnchorageRef = useRef<BaseEndAnchorageNode | null>(null);
   const endAnchorageSlabRef = useRef<BaseEndAnchorageNode | null>(null);
   const endAnchorageWallRef = useRef<BaseEndAnchorageNode | null>(null);
@@ -358,9 +358,18 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
     const rollCamera = (camera: BABYLON.ArcRotateCamera, angle: BABYLON.float) => {
       const localZ = camera.getDirection(BABYLON.Axis.Z);
-      rotateCamera(camera, localZ, angle);
+      rotateCamera(camera, localZ, angle); 
 
       // camUp.rotate(localZ, angle, BABYLON.Space.WORLD);
+    }
+
+    const resetScene = (camera: BABYLON.ArcRotateCamera) => {
+      camera.upVector = BABYLON.Axis.Y;
+      // camUp.rotation.copyFromFloats(0, 0, 0);
+      // camUp.rotationQuaternion = null;
+      // Like in the rotateCamera function, we're calling this so that the position remains
+      // the same and the angles are rotated instead.
+      camera.rebuildAnglesAndRadius();
     }
 
 
@@ -368,7 +377,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     const adjustCameraForModel = (modelType: string) => {
       const camera = scene.activeCamera as BABYLON.ArcRotateCamera;
       if (!camera) return;
-
+      resetScene(camera);
       switch (modelType) {
         // case 'circularColumns':
         //   camera.target = BABYLON.Vector3.Zero();
@@ -603,7 +612,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       }
       slabRef.current?.dispose();
-      slabRef.current = createSlab(
+      slabRef.current = createLapsplice(
         scene,
         postPositions,
         slabParams.concreteThickness,
