@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './App.css';
 import ConstructionViewer from './components/ConstructionViewer';
 import { ControlPanel } from './components/ControlPanel';
-import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS } from './constants/defaultParams';
+import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_SLAB_PARAMS, DEFAULT_LAPSPLICE_BEAM_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS } from './constants/defaultParams';
 import type { EndAnchorageParams } from './utils/BaseEndAnchorageNode';
 
 export interface CircularColumnParams {
@@ -71,11 +71,12 @@ export interface SlabParams {
 }
 
 function App() {
-  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall'>('endAnchorageWall');
+  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'lapspliceBeam' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall'>('endAnchorageWall');
   const [towerParams, setTowerParams] = useState<CircularColumnParams>(DEFAULT_TOWER_PARAMS);
   const [complexColumnParams, setComplexColumnParams] = useState<ComplexColumnParams>(DEFAULT_COMPLEX_COLUMN_PARAMS);
   const [rectangleColumnParams, setRectangleColumnParams] = useState<RectangleColumnParams>(DEFAULT_RECTANGLE_COLUMN_PARAMS);
   const [slabParams, setSlabParams] = useState<SlabParams>(DEFAULT_SLAB_PARAMS);
+  const [lapspliceBeamParams, setLapspliceBeamParams] = useState<SlabParams>(DEFAULT_LAPSPLICE_BEAM_PARAMS);
   const [endAnchorageParams, setEndAnchorageParams] = useState<EndAnchorageParams>(DEFAULT_END_ANCHORAGE_PARAMS);
   const [endAnchorageSlabParams, setEndAnchorageSlabParams] = useState<EndAnchorageParams>(DEFAULT_END_ANCHORAGE_SLAB_PARAMS);
   const [endAnchorageWallParams, setEndAnchorageWallParams] = useState<EndAnchorageParams>(DEFAULT_END_ANCHORAGE_WALL_PARAMS);
@@ -88,6 +89,7 @@ function App() {
         onComplexColumnParamsChange={setComplexColumnParams}
         onRectangleColumnParamsChange={setRectangleColumnParams}
         onSlabParamsChange={setSlabParams}
+        onLapspliceBeamParamsChange={setLapspliceBeamParams}
         onEndAnchorageParamsChange={setEndAnchorageParams}
         onEndAnchorageSlabParamsChange={setEndAnchorageSlabParams}
         onEndAnchorageWallParamsChange={setEndAnchorageWallParams}
@@ -99,6 +101,7 @@ function App() {
           complexColumnParams={complexColumnParams}
           rectangleColumnParams={rectangleColumnParams}
           slabParams={slabParams}
+          lapspliceBeamParams={lapspliceBeamParams}
           endAnchorageParams={endAnchorageParams}
           endAnchorageSlabParams={endAnchorageSlabParams}
           endAnchorageWallParams={endAnchorageWallParams}

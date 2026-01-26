@@ -80,6 +80,21 @@ export const DEFAULT_SLAB_PARAMS: SlabParams = {
   concreteOffsetZFront: 0.25 / 2,
 };
 
+export const DEFAULT_LAPSPLICE_BEAM_PARAMS: SlabParams = {
+  isFiniteConcrete: true,
+  concreteThickness: 1,
+  slabWidth: 0.4,
+  slabDepth: 0.6,
+  postCountX: 3,
+  postCountZ: 2,
+  postDiameter: 0.01,
+  postOffset: 0.02,
+  concreteOffsetXRight: 0.2,
+  concreteOffsetXLeft: 0.2,
+  concreteOffsetZBack: 0.3,
+  concreteOffsetZFront: 0.3,
+};
+
 export const DEFAULT_END_ANCHORAGE_PARAMS: EndAnchorageParams = {
   beamWidth: 0.3,
   beamDepth: 0.5,

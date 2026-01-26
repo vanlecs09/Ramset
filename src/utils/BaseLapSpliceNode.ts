@@ -107,7 +107,7 @@ export const createLapsplice = (
     }
 ): BaseLapSpliceNode => {
     const slabGroup = new BABYLON.TransformNode('slab', scene);
-    const slabNode = new BaseLapSpliceNode(slabGroup);
+    const mainNode = new BaseLapSpliceNode(slabGroup);
 
     // Initialize materials
     initializeMaterials(scene);
@@ -117,7 +117,7 @@ export const createLapsplice = (
         concreteParam,
         slabGroup,
         slabParam.isFiniteConcrete);
-    slabNode.setConcreteGroup(concreteNode);
+    mainNode.setConcreteGroup(concreteNode);
 
     // 2. Create wave blocks extending from the right face of concrete
     const slabHeigth = 0.3;
@@ -130,7 +130,7 @@ export const createLapsplice = (
     // let slabPosition = new BABYLON.Vector3(concretePosition.x, concretePosition.y, concretePosition.z + (concreteDepth / 2 + slabHeigth / 2));
     // addWaveBlocksFromRightFace(slabNode, slabWidth, slabDepth, concreteWidth, slabPosition);
     createWaveBlockTop(
-        slabNode as unknown as BaseStructNodeImpl,
+        mainNode as unknown as BaseStructNodeImpl,
         slabParam.slabWidth,
         slabParam.slabDepth,
         slabHeigth,
@@ -157,7 +157,7 @@ export const createLapsplice = (
             slabGroup,
             `slabPost_${postPos.index}`
         );
-        slabNode.addPost(postGroup.mesh!);
+        mainNode.addPost(postGroup.mesh!);
     });
 
 
@@ -170,29 +170,41 @@ export const createLapsplice = (
         new BABYLON.Vector3(0, 0, 1),
         new BABYLON.Vector3(0, 1, 0)
     );
-    slabNode.setAxisMeshes(axesResult.meshes);
-    slabNode.setLabels(axesResult.labels);
+    mainNode.setAxisMeshes(axesResult.meshes);
+    mainNode.setLabels(axesResult.labels);
 
-
+    const concretePosition = concreteParam.position;
     const bendingMoment1 = createBendingMomenNode(
         scene,
-        new BABYLON.Vector3(0, - concreteParam.thickness / 2, concreteParam.depth / 2),
+        new BABYLON.Vector3(concretePosition.x, concretePosition.y + concreteParam.thickness / 2, concretePosition.z),
         1,
         new BABYLON.Vector3(1, 0, 0),
         BABYLON.Color3.Black(),
-        '25kg'
+        '200'
     );
-    slabNode.addBendingMomentNode(bendingMoment1);
+    mainNode.addBendingMomentNode(bendingMoment1);
 
+    let basePosition = new BABYLON.Vector3(concretePosition.x, concretePosition.y + concreteParam.thickness / 2, concretePosition.z);
     const bendingMoment2 = createBendingMomenNode(
         scene,
-        new BABYLON.Vector3(0, - concreteParam.thickness / 2, concreteParam.depth / 2),
+        basePosition,
         1,
         new BABYLON.Vector3(0, 0, 1),
         BABYLON.Color3.Black(),
-        '25kg'
+        '200'
     );
-    slabNode.addBendingMomentNode(bendingMoment2);
+    mainNode.addBendingMomentNode(bendingMoment2);
+
+
+    const bendingMoment3 = createBendingMomenNode(
+        scene,
+        basePosition,
+        1,
+        new BABYLON.Vector3(0, 1, 0),
+        BABYLON.Color3.Black(),
+        '200'
+    );
+    mainNode.addBendingMomentNode(bendingMoment3);
 
     const torsionMat = new BABYLON.StandardMaterial('torsionMat', scene);
     torsionMat.diffuseColor = BABYLON.Color3.Black();
@@ -200,19 +212,35 @@ export const createLapsplice = (
     const torsion = createTorsionMomentNode(
         'torque1',
         scene,
-        new BABYLON.Vector3(1, - concreteParam.thickness / 2, concreteParam.depth / 2),
-        new BABYLON.Vector3(0, 0, 1),    // Direction along X
+        basePosition.add(new BABYLON.Vector3(1, 0, 0)),
+
         new BABYLON.Vector3(0, -1, 0),    // Direction along XF
+        new BABYLON.Vector3(0, 0, 1),    // Direction along X
         undefined,                        // arcAngle (use default)
         ArcDirection.FORWARD,             // Forward pointing
         torsionMat,
-        '200'                               // Label text
+        '25kg'                               // Label text
     );
-    slabNode.addTorsionMomentNode(torsion);
+    mainNode.addTorsionMomentNode(torsion);
+
+
+    const torsion2 = createTorsionMomentNode(
+        'torque1',
+        scene,
+        basePosition.add(new BABYLON.Vector3(0, 0, 1)),
+
+        new BABYLON.Vector3(1, 0, 0),    // Direction along XF
+        new BABYLON.Vector3(0, 1, 0),    // Direction along X
+        undefined,                        // arcAngle (use default)
+        ArcDirection.FORWARD,             // Forward pointing
+        torsionMat,
+        '25kg'                               // Label text
+    );
+    mainNode.addTorsionMomentNode(torsion2);
 
     // 4. Create secondary posts inside concrete (black color, high density)
     addSecondaryPostsInsideConcrete(
-        slabNode,
+        mainNode,
         concreteParam.position,
         concreteParam.width,
         concreteParam.depth,
@@ -220,7 +248,7 @@ export const createLapsplice = (
         slabParam.postDiameter * 0.7  // Slightly smaller diameter
     );
 
-    return slabNode;
+    return mainNode;
 };
 
 

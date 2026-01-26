@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import '../styles/ControlPanel.css';
 import type { RectangleColumnParams, SlabParams } from '../App';
 import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
-import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS } from '../constants/defaultParams';
+import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_SLAB_PARAMS, DEFAULT_LAPSPLICE_BEAM_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS } from '../constants/defaultParams';
 
 interface ComplexColumnParams {
   isFiniteConcrete: boolean;
@@ -26,7 +26,7 @@ interface ComplexColumnParams {
 }
 
 interface ControlPanelProps {
-  onModelChange: (model:  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall') => void;
+  onModelChange: (model:  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'lapspliceBeam' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall') => void;
   onTowerParamsChange: (params: {
     isFiniteConcrete: boolean;
     concreteThickness: number;
@@ -43,6 +43,7 @@ interface ControlPanelProps {
   onComplexColumnParamsChange: (params: ComplexColumnParams) => void;
   onRectangleColumnParamsChange: (params: RectangleColumnParams) => void;
   onSlabParamsChange: (params: SlabParams) => void;
+  onLapspliceBeamParamsChange: (params: SlabParams) => void;
   onEndAnchorageParamsChange: (params: EndAnchorageParams) => void;
   onEndAnchorageSlabParamsChange: (params: EndAnchorageParams) => void;
   onEndAnchorageWallParamsChange: (params: EndAnchorageParams) => void;
@@ -54,11 +55,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onComplexColumnParamsChange,
   onRectangleColumnParamsChange,
   onSlabParamsChange,
+  onLapspliceBeamParamsChange,
   onEndAnchorageParamsChange,
   onEndAnchorageSlabParamsChange,
   onEndAnchorageWallParamsChange,
 }) => {
-  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall'>('endAnchorage');
+  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'lapspliceBeam' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall'>('endAnchorage');
 
   // Tower parameters
   const [towerIsFiniteConcrete, setTowerIsFiniteConcrete] = useState(DEFAULT_TOWER_PARAMS.isFiniteConcrete);
@@ -122,6 +124,20 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [slabConcreteOffsetXLeft, setSlabConcreteOffsetXLeft] = useState(DEFAULT_SLAB_PARAMS.concreteOffsetXLeft);
   const [slabConcreteOffsetZBack, setSlabConcreteOffsetZBack] = useState(DEFAULT_SLAB_PARAMS.concreteOffsetZBack);
   const [slabConcreteOffsetZFront, setSlabConcreteOffsetZFront] = useState(DEFAULT_SLAB_PARAMS.concreteOffsetZFront);
+
+  // Lapsplice Beam parameters
+  const [beamIsFiniteConcrete, setBeamIsFiniteConcrete] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.isFiniteConcrete);
+  const [beamConcreteThickness, setBeamConcreteThickness] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.concreteThickness);
+  const [beamWidth, setBeamWidth] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.slabWidth);
+  const [beamDepth, setBeamDepth] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.slabDepth);
+  const [beamPostCountX, setBeamPostCountX] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.postCountX);
+  const [beamPostCountZ, setBeamPostCountZ] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.postCountZ);
+  const [beamPostDiameter, setBeamPostDiameter] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.postDiameter);
+  const [beamPostOffset, setBeamPostOffset] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.postOffset);
+  const [beamConcreteOffsetXRight, setBeamConcreteOffsetXRight] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.concreteOffsetXRight);
+  const [beamConcreteOffsetXLeft, setBeamConcreteOffsetXLeft] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.concreteOffsetXLeft);
+  const [beamConcreteOffsetZBack, setBeamConcreteOffsetZBack] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.concreteOffsetZBack);
+  const [beamConcreteOffsetZFront, setBeamConcreteOffsetZFront] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.concreteOffsetZFront);
 
   // End Anchorage parameters
   const [anchorageBeamWidth, setAnchorageBeamWidth] = useState(DEFAULT_END_ANCHORAGE_PARAMS.beamWidth);
@@ -1190,7 +1206,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const model = e.target.value as  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'endAnchorage';
+    const model = e.target.value as  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'lapspliceBeam' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall';
     setCurrentModel(model);
     onModelChange(model);
   };
@@ -1206,6 +1222,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           <option value="complexColumn">Complex Column</option>
           <option value="rectangleColumn">Rectangle Column</option>
           <option value="slab">Slab</option>
+          <option value="lapspliceBeam">Lapsplice Beam</option>
           <option value="endAnchorage">End Anchorage</option>
           <option value="endAnchorageSlab">End Anchorage Slab</option>
           <option value="endAnchorageWall">End Anchorage Wall</option>
@@ -1875,6 +1892,357 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               type="number"
               value={slabConcreteOffsetZFront}
               onChange={handleSlabConcreteOffsetZFrontChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter Concrete Offset Z-"
+            />
+          </div>
+        </>
+      )}
+
+      {currentModel === 'lapspliceBeam' && (
+        <>
+          <div className="control-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={beamIsFiniteConcrete}
+                onChange={(e) => {
+                  setBeamIsFiniteConcrete(e.target.checked);
+                  onLapspliceBeamParamsChange({
+                    isFiniteConcrete: e.target.checked,
+                    concreteThickness: beamConcreteThickness,
+                    slabWidth: beamWidth,
+                    slabDepth: beamDepth,
+                    postCountX: beamPostCountX,
+                    postCountZ: beamPostCountZ,
+                    postDiameter: beamPostDiameter,
+                    postOffset: beamPostOffset,
+                    concreteOffsetXRight: beamConcreteOffsetXRight,
+                    concreteOffsetXLeft: beamConcreteOffsetXLeft,
+                    concreteOffsetZBack: beamConcreteOffsetZBack,
+                    concreteOffsetZFront: beamConcreteOffsetZFront,
+                  });
+                }}
+              />
+              Finite Concrete
+            </label>
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Thickness</label>
+            <input
+              type="number"
+              value={beamConcreteThickness}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                setBeamConcreteThickness(value);
+                onLapspliceBeamParamsChange({
+                  isFiniteConcrete: beamIsFiniteConcrete,
+                  concreteThickness: value,
+                  slabWidth: beamWidth,
+                  slabDepth: beamDepth,
+                  postCountX: beamPostCountX,
+                  postCountZ: beamPostCountZ,
+                  postDiameter: beamPostDiameter,
+                  postOffset: beamPostOffset,
+                  concreteOffsetXRight: beamConcreteOffsetXRight,
+                  concreteOffsetXLeft: beamConcreteOffsetXLeft,
+                  concreteOffsetZBack: beamConcreteOffsetZBack,
+                  concreteOffsetZFront: beamConcreteOffsetZFront,
+                });
+              }}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter thickness"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Beam Width (X)</label>
+            <input
+              type="number"
+              value={beamWidth}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                setBeamWidth(value);
+                onLapspliceBeamParamsChange({
+                  isFiniteConcrete: beamIsFiniteConcrete,
+                  concreteThickness: beamConcreteThickness,
+                  slabWidth: value,
+                  slabDepth: beamDepth,
+                  postCountX: beamPostCountX,
+                  postCountZ: beamPostCountZ,
+                  postDiameter: beamPostDiameter,
+                  postOffset: beamPostOffset,
+                  concreteOffsetXRight: beamConcreteOffsetXRight,
+                  concreteOffsetXLeft: beamConcreteOffsetXLeft,
+                  concreteOffsetZBack: beamConcreteOffsetZBack,
+                  concreteOffsetZFront: beamConcreteOffsetZFront,
+                });
+              }}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter width"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Beam Depth (Z)</label>
+            <input
+              type="number"
+              value={beamDepth}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                setBeamDepth(value);
+                onLapspliceBeamParamsChange({
+                  isFiniteConcrete: beamIsFiniteConcrete,
+                  concreteThickness: beamConcreteThickness,
+                  slabWidth: beamWidth,
+                  slabDepth: value,
+                  postCountX: beamPostCountX,
+                  postCountZ: beamPostCountZ,
+                  postDiameter: beamPostDiameter,
+                  postOffset: beamPostOffset,
+                  concreteOffsetXRight: beamConcreteOffsetXRight,
+                  concreteOffsetXLeft: beamConcreteOffsetXLeft,
+                  concreteOffsetZBack: beamConcreteOffsetZBack,
+                  concreteOffsetZFront: beamConcreteOffsetZFront,
+                });
+              }}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter depth"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Count X</label>
+            <input
+              type="number"
+              value={beamPostCountX}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 1;
+                setBeamPostCountX(value);
+                onLapspliceBeamParamsChange({
+                  isFiniteConcrete: beamIsFiniteConcrete,
+                  concreteThickness: beamConcreteThickness,
+                  slabWidth: beamWidth,
+                  slabDepth: beamDepth,
+                  postCountX: value,
+                  postCountZ: beamPostCountZ,
+                  postDiameter: beamPostDiameter,
+                  postOffset: beamPostOffset,
+                  concreteOffsetXRight: beamConcreteOffsetXRight,
+                  concreteOffsetXLeft: beamConcreteOffsetXLeft,
+                  concreteOffsetZBack: beamConcreteOffsetZBack,
+                  concreteOffsetZFront: beamConcreteOffsetZFront,
+                });
+              }}
+              step="1"
+              min="1"
+              placeholder="Enter post count in X"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Count Z</label>
+            <input
+              type="number"
+              value={beamPostCountZ}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 1;
+                setBeamPostCountZ(value);
+                onLapspliceBeamParamsChange({
+                  isFiniteConcrete: beamIsFiniteConcrete,
+                  concreteThickness: beamConcreteThickness,
+                  slabWidth: beamWidth,
+                  slabDepth: beamDepth,
+                  postCountX: beamPostCountX,
+                  postCountZ: value,
+                  postDiameter: beamPostDiameter,
+                  postOffset: beamPostOffset,
+                  concreteOffsetXRight: beamConcreteOffsetXRight,
+                  concreteOffsetXLeft: beamConcreteOffsetXLeft,
+                  concreteOffsetZBack: beamConcreteOffsetZBack,
+                  concreteOffsetZFront: beamConcreteOffsetZFront,
+                });
+              }}
+              step="1"
+              min="1"
+              placeholder="Enter post count in Z"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Diameter</label>
+            <input
+              type="number"
+              value={beamPostDiameter}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                setBeamPostDiameter(value);
+                onLapspliceBeamParamsChange({
+                  isFiniteConcrete: beamIsFiniteConcrete,
+                  concreteThickness: beamConcreteThickness,
+                  slabWidth: beamWidth,
+                  slabDepth: beamDepth,
+                  postCountX: beamPostCountX,
+                  postCountZ: beamPostCountZ,
+                  postDiameter: value,
+                  postOffset: beamPostOffset,
+                  concreteOffsetXRight: beamConcreteOffsetXRight,
+                  concreteOffsetXLeft: beamConcreteOffsetXLeft,
+                  concreteOffsetZBack: beamConcreteOffsetZBack,
+                  concreteOffsetZFront: beamConcreteOffsetZFront,
+                });
+              }}
+              step="0.01"
+              min="0.01"
+              placeholder="Enter post diameter"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Offset from Perimeter</label>
+            <input
+              type="number"
+              value={beamPostOffset}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                setBeamPostOffset(value);
+                onLapspliceBeamParamsChange({
+                  isFiniteConcrete: beamIsFiniteConcrete,
+                  concreteThickness: beamConcreteThickness,
+                  slabWidth: beamWidth,
+                  slabDepth: beamDepth,
+                  postCountX: beamPostCountX,
+                  postCountZ: beamPostCountZ,
+                  postDiameter: beamPostDiameter,
+                  postOffset: value,
+                  concreteOffsetXRight: beamConcreteOffsetXRight,
+                  concreteOffsetXLeft: beamConcreteOffsetXLeft,
+                  concreteOffsetZBack: beamConcreteOffsetZBack,
+                  concreteOffsetZFront: beamConcreteOffsetZFront,
+                });
+              }}
+              step="0.01"
+              min="0.01"
+              max="0.5"
+              placeholder="Enter offset"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset X+ (Right)</label>
+            <input
+              type="number"
+              value={beamConcreteOffsetXRight}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                setBeamConcreteOffsetXRight(value);
+                onLapspliceBeamParamsChange({
+                  isFiniteConcrete: beamIsFiniteConcrete,
+                  concreteThickness: beamConcreteThickness,
+                  slabWidth: beamWidth,
+                  slabDepth: beamDepth,
+                  postCountX: beamPostCountX,
+                  postCountZ: beamPostCountZ,
+                  postDiameter: beamPostDiameter,
+                  postOffset: beamPostOffset,
+                  concreteOffsetXRight: value,
+                  concreteOffsetXLeft: beamConcreteOffsetXLeft,
+                  concreteOffsetZBack: beamConcreteOffsetZBack,
+                  concreteOffsetZFront: beamConcreteOffsetZFront,
+                });
+              }}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter Concrete Offset X+"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset X- (Left)</label>
+            <input
+              type="number"
+              value={beamConcreteOffsetXLeft}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                setBeamConcreteOffsetXLeft(value);
+                onLapspliceBeamParamsChange({
+                  isFiniteConcrete: beamIsFiniteConcrete,
+                  concreteThickness: beamConcreteThickness,
+                  slabWidth: beamWidth,
+                  slabDepth: beamDepth,
+                  postCountX: beamPostCountX,
+                  postCountZ: beamPostCountZ,
+                  postDiameter: beamPostDiameter,
+                  postOffset: beamPostOffset,
+                  concreteOffsetXRight: beamConcreteOffsetXRight,
+                  concreteOffsetXLeft: value,
+                  concreteOffsetZBack: beamConcreteOffsetZBack,
+                  concreteOffsetZFront: beamConcreteOffsetZFront,
+                });
+              }}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter Concrete Offset X-"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset Z+ (Back)</label>
+            <input
+              type="number"
+              value={beamConcreteOffsetZBack}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                setBeamConcreteOffsetZBack(value);
+                onLapspliceBeamParamsChange({
+                  isFiniteConcrete: beamIsFiniteConcrete,
+                  concreteThickness: beamConcreteThickness,
+                  slabWidth: beamWidth,
+                  slabDepth: beamDepth,
+                  postCountX: beamPostCountX,
+                  postCountZ: beamPostCountZ,
+                  postDiameter: beamPostDiameter,
+                  postOffset: beamPostOffset,
+                  concreteOffsetXRight: beamConcreteOffsetXRight,
+                  concreteOffsetXLeft: beamConcreteOffsetXLeft,
+                  concreteOffsetZBack: value,
+                  concreteOffsetZFront: beamConcreteOffsetZFront,
+                });
+              }}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter Concrete Offset Z+"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset Z- (Front)</label>
+            <input
+              type="number"
+              value={beamConcreteOffsetZFront}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                setBeamConcreteOffsetZFront(value);
+                onLapspliceBeamParamsChange({
+                  isFiniteConcrete: beamIsFiniteConcrete,
+                  concreteThickness: beamConcreteThickness,
+                  slabWidth: beamWidth,
+                  slabDepth: beamDepth,
+                  postCountX: beamPostCountX,
+                  postCountZ: beamPostCountZ,
+                  postDiameter: beamPostDiameter,
+                  postOffset: beamPostOffset,
+                  concreteOffsetXRight: beamConcreteOffsetXRight,
+                  concreteOffsetXLeft: beamConcreteOffsetXLeft,
+                  concreteOffsetZBack: beamConcreteOffsetZBack,
+                  concreteOffsetZFront: value,
+                });
+              }}
               step="0.1"
               min="0.1"
               placeholder="Enter Concrete Offset Z-"

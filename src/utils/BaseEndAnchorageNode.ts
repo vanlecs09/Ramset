@@ -106,7 +106,7 @@ export const createEndAnchorage = (
 
 ): BaseEndAnchorageNode => {
     const anchorageTrans = new BABYLON.TransformNode('endAnchorage', scene);
-    const anchorageNode = new BaseEndAnchorageNode(anchorageTrans);
+    const mainNode = new BaseEndAnchorageNode(anchorageTrans);
 
     // Initialize materials
     initializeMaterials(scene);
@@ -116,7 +116,7 @@ export const createEndAnchorage = (
         concreteParams,
         anchorageTrans,
         true);
-    anchorageNode.setConcreteGroup(concreteNode);
+    mainNode.setConcreteGroup(concreteNode);
 
     // 2. Create wave blocks (beam) extending from concrete
     const concretePosition = concreteParams.position;
@@ -126,11 +126,11 @@ export const createEndAnchorage = (
         0,
     );
 
-    createDeimensionLine(concretePosition, beamParams, concreteParams, beamPosition, scene, anchorageNode);
+    createDeimensionLine(concretePosition, beamParams, concreteParams, beamPosition, scene, mainNode);
 
 
     createWaveBlockTop(
-        anchorageNode,
+        mainNode,
         beamParams.beamWidth,
         beamParams.beamDepth,
         beamParams.beamHeight,
@@ -147,10 +147,10 @@ export const createEndAnchorage = (
             postPosition,
             new BABYLON.Vector3(0, 0, 0),
             // new BABYLON.Vector3(Math.PI / 2, 0, 0),
-            anchorageNode.group,
+            mainNode.group,
             `anchoragePin_${Math.random()}`
         );
-        anchorageNode.addPost(postGroup.mesh!);
+        mainNode.addPost(postGroup.mesh!);
     }
 
     // Update and cache axis meshes and labels
@@ -161,8 +161,8 @@ export const createEndAnchorage = (
         new BABYLON.Vector3(0, 0, 1),
         new BABYLON.Vector3(0, 1, 0)
     );
-    anchorageNode.setAxisMeshes(axisNode.meshes);
-    anchorageNode.setLabels(axisNode.labels);
+    mainNode.setAxisMeshes(axisNode.meshes);
+    mainNode.setLabels(axisNode.labels);
 
     const bendingMoment1 = createBendingMomenNode(
         scene,
@@ -172,7 +172,7 @@ export const createEndAnchorage = (
         BABYLON.Color3.Black(),
         '200'
     );
-    anchorageNode.addBendingMomentNode(bendingMoment1);
+    mainNode.addBendingMomentNode(bendingMoment1);
 
     let basePosition = new BABYLON.Vector3(concretePosition.x, concretePosition.y + concreteParams.thickness / 2, concretePosition.z);
     const bendingMoment2 = createBendingMomenNode(
@@ -183,7 +183,7 @@ export const createEndAnchorage = (
         BABYLON.Color3.Black(),
         '200'
     );
-    anchorageNode.addBendingMomentNode(bendingMoment2);
+    mainNode.addBendingMomentNode(bendingMoment2);
 
 
     const bendingMoment3 = createBendingMomenNode(
@@ -194,7 +194,7 @@ export const createEndAnchorage = (
         BABYLON.Color3.Black(),
         '200'
     );
-    anchorageNode.addBendingMomentNode(bendingMoment3);
+    mainNode.addBendingMomentNode(bendingMoment3);
 
 
 
@@ -213,7 +213,7 @@ export const createEndAnchorage = (
         torsionMat,
         '25kg'                               // Label text
     );
-    anchorageNode.addTorsionMomentNode(torsion);
+    mainNode.addTorsionMomentNode(torsion);
 
 
     const torsion2 = createTorsionMomentNode(
@@ -228,9 +228,9 @@ export const createEndAnchorage = (
         torsionMat,
         '25kg'                               // Label text
     );
-    anchorageNode.addTorsionMomentNode(torsion2);
+    mainNode.addTorsionMomentNode(torsion2);
 
-    return anchorageNode;
+    return mainNode;
 };
 
 
