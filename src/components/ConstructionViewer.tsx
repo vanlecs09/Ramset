@@ -11,7 +11,7 @@ import type { CircularColumnsNode } from '../utils/CircularColumnsNode';
 import type { ComplexColumnNode } from '../utils/ComplexColumnNode';
 import type { RectangleColumnNode } from '../utils/RectangleColumnNode';
 import type { SlabNode } from '../utils/SlabNode';
-import { EndAnchorageBeamNode } from '../utils/EndAnchorageBeamNode';
+import { BaseEndAnchorageNode } from '../utils/EndAnchorageBeamNode';
 import type { RectangleColumnParams, SlabParams } from '../App';
 import type { EndAnchorageParams } from '../utils/EndAnchorageBeamNode';
 
@@ -191,7 +191,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   const complexColumnRef = useRef<ComplexColumnNode | null>(null);
   const rectangleColumnRef = useRef<RectangleColumnNode | null>(null);
   const slabRef = useRef<SlabNode | null>(null);
-  const endAnchorageRef = useRef<EndAnchorageBeamNode | null>(null);
+  const endAnchorageRef = useRef<BaseEndAnchorageNode | null>(null);
 
   // Initialize scene and engine (once on mount)
   useEffect(() => {

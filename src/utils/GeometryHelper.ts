@@ -32,6 +32,8 @@ export const AXIS_COLORS = {
   Z: new BABYLON.Color3(0, 0, 1),   // Blue
 } as const;
 
+export const SCREEN_TO_WORLD_UNIT = 1000;
+
 /**
  * Configuration options for creating dimension lines with various styling and layout options.
  * @interface DimensionLineOptions
@@ -193,7 +195,7 @@ export const createDimensionLine = (
   let label: GUI.TextBlock | undefined;
   if (showLabel && labelValue !== undefined) {
     label = new GUI.TextBlock();
-    label.text = `${Number(labelValue).toFixed(2)}m`;
+    label.text = `${Number(labelValue * SCREEN_TO_WORLD_UNIT).toFixed(0)}mm`;
     label.color = 'black';
     label.fontSize = DIMENSION_LINE_CONSTANTS.LABEL_FONT_SIZE;
     texture.addControl(label);
@@ -385,7 +387,7 @@ const createAxisLine = (
   }, scene);
 
   const material = new BABYLON.StandardMaterial(name + 'Material', scene);
-  material.emissiveColor = color;
+  material.diffuseColor = color;
   line.material = material;
 
   return line;
@@ -403,7 +405,7 @@ const createAxisArrow = (
   color: BABYLON.Color3
 ): BABYLON.Mesh => {
   const arrowMaterial = new BABYLON.StandardMaterial(name + 'ArrowMaterial', scene);
-  arrowMaterial.emissiveColor = color;
+  arrowMaterial.diffuseColor = color;
 
   return createArrow(
     name,
@@ -513,8 +515,9 @@ export const createLineTwoArrow = (
   scene: BABYLON.Scene,
   parent: BABYLON.TransformNode,
   lineMat: BABYLON.Material,
-  labelText?: string
+  // length: number
 ) => {
+  const length = BABYLON.Vector3.Distance(beginPoint01, endPoint01);
   const line = createLine(
     beginPoint01,
     endPoint01,
@@ -529,7 +532,7 @@ export const createLineTwoArrow = (
   let texture = getDimensionLabelTexture();
   line.parent = parent;
   const label = new GUI.TextBlock();
-  label.text = labelText!;
+  label.text = `${length * SCREEN_TO_WORLD_UNIT}mm`
   label.fontSize = 20;
   label.color = BABYLON.Color3.Black().toHexString();
 
@@ -561,7 +564,7 @@ export const createLineTwoArrow = (
     lineMat
   );
   arrow2.parent = parent;
-  
+
   return {
     line: line,
     arrow: [arrow, arrow2],
