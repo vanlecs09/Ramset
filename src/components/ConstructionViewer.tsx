@@ -52,12 +52,13 @@ interface ComplexColumnParams {
 
 interface ConstructionViewerProps {
   onSceneReady?: (scene: BABYLON.Scene) => void;
-  model?: 'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'endAnchorage';
+  model?: 'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'endAnchorage' | 'endAnchorageSlab';
   towerParams?: TowerParams;
   complexColumnParams?: ComplexColumnParams;
   rectangleColumnParams?: RectangleColumnParams;
   slabParams?: SlabParams;
   endAnchorageParams?: EndAnchorageParams;
+  endAnchorageSlabParams?: EndAnchorageParams;
 }
 
 interface ConcreteLayout {
@@ -183,6 +184,20 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     concreteOffsetZFront: 0.5,
     concreteThickness: 1,
   },
+  endAnchorageSlabParams = {
+    beamWidth: 0.3,
+    beamDepth: 0.5,
+    beamHeight: 0.4,
+    postCountX: 3,
+    postCountZ: 2,
+    postDiameter: 0.03,
+    postOffset: 0.05,
+    concreteOffsetXRight: 0.5,
+    concreteOffsetXLeft: 0.5,
+    concreteOffsetZBack: 0.5,
+    concreteOffsetZFront: 0.5,
+    concreteThickness: 1,
+  },
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<BABYLON.Scene | null>(null);
@@ -192,6 +207,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   const rectangleColumnRef = useRef<RectangleColumnNode | null>(null);
   const slabRef = useRef<SlabNode | null>(null);
   const endAnchorageRef = useRef<BaseEndAnchorageNode | null>(null);
+  const endAnchorageSlabRef = useRef<BaseEndAnchorageNode | null>(null);
 
   // Initialize scene and engine (once on mount)
   useEffect(() => {
@@ -289,6 +305,10 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         endAnchorageRef.current.dispose();
         endAnchorageRef.current = null;
       }
+      if (endAnchorageSlabRef.current) {
+        endAnchorageSlabRef.current.dispose();
+        endAnchorageSlabRef.current = null;
+      }
     };
 
     /**
@@ -350,6 +370,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         //   break;
         // case 'slab':
         case 'endAnchorage':
+        case 'endAnchorageSlab':
           camera.target = BABYLON.Vector3.Zero();
           camera.radius = 4.5;
           camera.alpha = 0;
@@ -615,6 +636,44 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       // updateEndAnchorage(endAnchorageRef.current!,
       endAnchorageRef.current = createEndAnchorage(scene, postPos, endAnchorageParams, concreteParam, secondaryParams);
 
+    } else if (model === 'endAnchorageSlab') {
+      // Calculate concrete dimensions and positions
+      const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
+        concreteOffsetXRight: endAnchorageSlabParams.concreteOffsetXRight,
+        concreteOffsetXLeft: endAnchorageSlabParams.concreteOffsetXLeft,
+        concreteOffsetZBack: endAnchorageSlabParams.concreteOffsetZBack,
+        concreteOffsetZFront: endAnchorageSlabParams.concreteOffsetZFront,
+        concreteThickness: endAnchorageSlabParams.concreteThickness,
+      });
+
+      const postPositions = calculateRectanglePostPositions(
+        endAnchorageSlabParams.beamWidth,
+        endAnchorageSlabParams.beamDepth,
+        endAnchorageSlabParams.postCountX,
+        endAnchorageSlabParams.postCountZ,
+        endAnchorageSlabParams.postOffset,
+        0
+      );
+      let postPos = postPositions.map(pos => pos.position);
+
+      if (!endAnchorageSlabRef.current) {
+        disposePreviousStructure();
+        adjustCameraForModel('endAnchorageSlab');
+      }
+      endAnchorageSlabRef.current?.dispose();
+      let concreteParam = {
+        thickness: endAnchorageSlabParams.concreteThickness,
+        width: concreteWidth,
+        depth: concreteDepth,
+        position: concretePosition
+      };
+
+      let secondaryParams = {
+        beamWidth: endAnchorageSlabParams.beamWidth,
+        beamDepth: endAnchorageSlabParams.beamDepth,
+        beamHeight: endAnchorageSlabParams.beamHeight,
+      };
+      endAnchorageSlabRef.current = createEndAnchorage(scene, postPos, endAnchorageSlabParams, concreteParam, secondaryParams);
     }
   }, [
     model,
@@ -683,6 +742,19 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     endAnchorageParams.concreteOffsetZBack,
     endAnchorageParams.concreteOffsetZFront,
     endAnchorageParams.concreteThickness,
+
+    endAnchorageSlabParams.beamWidth,
+    endAnchorageSlabParams.beamDepth,
+    endAnchorageSlabParams.beamHeight,
+    endAnchorageSlabParams.postCountX,
+    endAnchorageSlabParams.postCountZ,
+    endAnchorageSlabParams.postDiameter,
+    endAnchorageSlabParams.postOffset,
+    endAnchorageSlabParams.concreteOffsetXRight,
+    endAnchorageSlabParams.concreteOffsetXLeft,
+    endAnchorageSlabParams.concreteOffsetZBack,
+    endAnchorageSlabParams.concreteOffsetZFront,
+    endAnchorageSlabParams.concreteThickness,
   ]);
 
   return (
