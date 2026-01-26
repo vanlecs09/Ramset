@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import '../styles/ControlPanel.css';
 import type { RectangleColumnParams, SlabParams } from '../App';
 import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
-import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_LAPSPLICE_SLAB_PARAMS, DEFAULT_LAPSPLICE_BEAM_PARAMS, DEFAULT_LAPSPLICE_WALL_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS } from '../constants/defaultParams';
+import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_LAPSPLICE_SLAB_PARAMS, DEFAULT_LAPSPLICE_BEAM_PARAMS, DEFAULT_LAPSPLICE_WALL_PARAMS, DEFAULT_LAPSPLICE_COLUMN_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS } from '../constants/defaultParams';
 
 interface ComplexColumnParams {
   isFiniteConcrete: boolean;
@@ -26,7 +26,7 @@ interface ComplexColumnParams {
 }
 
 interface ControlPanelProps {
-  onModelChange: (model:  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall') => void;
+  onModelChange: (model:  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall') => void;
   onTowerParamsChange: (params: {
     isFiniteConcrete: boolean;
     concreteThickness: number;
@@ -45,6 +45,7 @@ interface ControlPanelProps {
   onLapspliceSlabParamsChange: (params: SlabParams) => void;
   onLapspliceBeamParamsChange: (params: SlabParams) => void;
   onLapspliceWallParamsChange: (params: SlabParams) => void;
+  onLapspliceColumnParamsChange: (params: SlabParams) => void;
   onEndAnchorageBeamParamsChange: (params: EndAnchorageParams) => void;
   onEndAnchorageSlabParamsChange: (params: EndAnchorageParams) => void;
   onEndAnchorageWallParamsChange: (params: EndAnchorageParams) => void;
@@ -58,11 +59,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onLapspliceSlabParamsChange,
   onLapspliceBeamParamsChange,
   onLapspliceWallParamsChange,
+  onLapspliceColumnParamsChange,
   onEndAnchorageBeamParamsChange,
   onEndAnchorageSlabParamsChange,
   onEndAnchorageWallParamsChange,
 }) => {
-  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall'>('endAnchorageBeam');
+  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall'>('endAnchorageBeam');
 
   // Tower parameters
   const [towerIsFiniteConcrete, setTowerIsFiniteConcrete] = useState(DEFAULT_TOWER_PARAMS.isFiniteConcrete);
@@ -154,6 +156,20 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [wallConcreteOffsetXLeft, setWallConcreteOffsetXLeft] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.concreteOffsetXLeft);
   const [wallConcreteOffsetZBack, setWallConcreteOffsetZBack] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.concreteOffsetZBack);
   const [wallConcreteOffsetZFront, setWallConcreteOffsetZFront] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.concreteOffsetZFront);
+
+  // Lapsplice Column parameters
+  const [lapColumnIsFiniteConcrete, setLapColumnIsFiniteConcrete] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.isFiniteConcrete);
+  const [lapColumnConcreteThickness, setLapColumnConcreteThickness] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.concreteThickness);
+  const [lapColumnWidth, setLapColumnWidth] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.slabWidth);
+  const [lapColumnDepth, setLapColumnDepth] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.slabDepth);
+  const [lapColumnPostCountX, setLapColumnPostCountX] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.postCountX);
+  const [lapColumnPostCountZ, setLapColumnPostCountZ] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.postCountZ);
+  const [lapColumnPostDiameter, setLapColumnPostDiameter] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.postDiameter);
+  const [lapColumnPostOffset, setLapColumnPostOffset] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.postOffset);
+  const [lapColumnConcreteOffsetXRight, setLapColumnConcreteOffsetXRight] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.concreteOffsetXRight);
+  const [lapColumnConcreteOffsetXLeft, setLapColumnConcreteOffsetXLeft] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.concreteOffsetXLeft);
+  const [lapColumnConcreteOffsetZBack, setLapColumnConcreteOffsetZBack] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.concreteOffsetZBack);
+  const [lapColumnConcreteOffsetZFront, setLapColumnConcreteOffsetZFront] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.concreteOffsetZFront);
 
   // End Anchorage parameters
   const [anchorageBeamWidth, setAnchorageBeamWidth] = useState(DEFAULT_END_ANCHORAGE_PARAMS.beamWidth);
@@ -1186,6 +1202,216 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     });
   };
 
+  // Lapsplice Column handlers
+  const handleLapColumnWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setLapColumnWidth(value);
+    onLapspliceColumnParamsChange({
+      isFiniteConcrete: lapColumnIsFiniteConcrete,
+      concreteThickness: lapColumnConcreteThickness,
+      slabWidth: value,
+      slabDepth: lapColumnDepth,
+      postCountX: lapColumnPostCountX,
+      postCountZ: lapColumnPostCountZ,
+      postDiameter: lapColumnPostDiameter,
+      postOffset: lapColumnPostOffset,
+      concreteOffsetXRight: lapColumnConcreteOffsetXRight,
+      concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
+      concreteOffsetZBack: lapColumnConcreteOffsetZBack,
+      concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+    });
+  };
+
+  const handleLapColumnDepthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setLapColumnDepth(value);
+    onLapspliceColumnParamsChange({
+      isFiniteConcrete: lapColumnIsFiniteConcrete,
+      concreteThickness: lapColumnConcreteThickness,
+      slabWidth: lapColumnWidth,
+      slabDepth: value,
+      postCountX: lapColumnPostCountX,
+      postCountZ: lapColumnPostCountZ,
+      postDiameter: lapColumnPostDiameter,
+      postOffset: lapColumnPostOffset,
+      concreteOffsetXRight: lapColumnConcreteOffsetXRight,
+      concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
+      concreteOffsetZBack: lapColumnConcreteOffsetZBack,
+      concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+    });
+  };
+
+  const handleLapColumnPostCountXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 1;
+    setLapColumnPostCountX(value);
+    onLapspliceColumnParamsChange({
+      isFiniteConcrete: lapColumnIsFiniteConcrete,
+      concreteThickness: lapColumnConcreteThickness,
+      slabWidth: lapColumnWidth,
+      slabDepth: lapColumnDepth,
+      postCountX: value,
+      postCountZ: lapColumnPostCountZ,
+      postDiameter: lapColumnPostDiameter,
+      postOffset: lapColumnPostOffset,
+      concreteOffsetXRight: lapColumnConcreteOffsetXRight,
+      concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
+      concreteOffsetZBack: lapColumnConcreteOffsetZBack,
+      concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+    });
+  };
+
+  const handleLapColumnPostCountZChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 1;
+    setLapColumnPostCountZ(value);
+    onLapspliceColumnParamsChange({
+      isFiniteConcrete: lapColumnIsFiniteConcrete,
+      concreteThickness: lapColumnConcreteThickness,
+      slabWidth: lapColumnWidth,
+      slabDepth: lapColumnDepth,
+      postCountX: lapColumnPostCountX,
+      postCountZ: value,
+      postDiameter: lapColumnPostDiameter,
+      postOffset: lapColumnPostOffset,
+      concreteOffsetXRight: lapColumnConcreteOffsetXRight,
+      concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
+      concreteOffsetZBack: lapColumnConcreteOffsetZBack,
+      concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+    });
+  };
+
+  const handleLapColumnPostDiameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setLapColumnPostDiameter(value);
+    onLapspliceColumnParamsChange({
+      isFiniteConcrete: lapColumnIsFiniteConcrete,
+      concreteThickness: lapColumnConcreteThickness,
+      slabWidth: lapColumnWidth,
+      slabDepth: lapColumnDepth,
+      postCountX: lapColumnPostCountX,
+      postCountZ: lapColumnPostCountZ,
+      postDiameter: value,
+      postOffset: lapColumnPostOffset,
+      concreteOffsetXRight: lapColumnConcreteOffsetXRight,
+      concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
+      concreteOffsetZBack: lapColumnConcreteOffsetZBack,
+      concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+    });
+  };
+
+  const handleLapColumnPostOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setLapColumnPostOffset(value);
+    onLapspliceColumnParamsChange({
+      isFiniteConcrete: lapColumnIsFiniteConcrete,
+      concreteThickness: lapColumnConcreteThickness,
+      slabWidth: lapColumnWidth,
+      slabDepth: lapColumnDepth,
+      postCountX: lapColumnPostCountX,
+      postCountZ: lapColumnPostCountZ,
+      postDiameter: lapColumnPostDiameter,
+      postOffset: value,
+      concreteOffsetXRight: lapColumnConcreteOffsetXRight,
+      concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
+      concreteOffsetZBack: lapColumnConcreteOffsetZBack,
+      concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+    });
+  }
+
+  const handleLapColumnConcreteOffsetXRightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setLapColumnConcreteOffsetXRight(value);
+    onLapspliceColumnParamsChange({
+      isFiniteConcrete: lapColumnIsFiniteConcrete,
+      concreteThickness: lapColumnConcreteThickness,
+      slabWidth: lapColumnWidth,
+      slabDepth: lapColumnDepth,
+      postCountX: lapColumnPostCountX,
+      postCountZ: lapColumnPostCountZ,
+      postDiameter: lapColumnPostDiameter,
+      postOffset: lapColumnPostOffset,
+      concreteOffsetXRight: value,
+      concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
+      concreteOffsetZBack: lapColumnConcreteOffsetZBack,
+      concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+    });
+  };
+
+  const handleLapColumnConcreteOffsetXLeftChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setLapColumnConcreteOffsetXLeft(value);
+    onLapspliceColumnParamsChange({
+      isFiniteConcrete: lapColumnIsFiniteConcrete,
+      concreteThickness: lapColumnConcreteThickness,
+      slabWidth: lapColumnWidth,
+      slabDepth: lapColumnDepth,
+      postCountX: lapColumnPostCountX,
+      postCountZ: lapColumnPostCountZ,
+      postDiameter: lapColumnPostDiameter,
+      postOffset: lapColumnPostOffset,
+      concreteOffsetXRight: lapColumnConcreteOffsetXRight,
+      concreteOffsetXLeft: value,
+      concreteOffsetZBack: lapColumnConcreteOffsetZBack,
+      concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+    });
+  };
+
+  const handleLapColumnConcreteOffsetZBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setLapColumnConcreteOffsetZBack(value);
+    onLapspliceColumnParamsChange({
+      isFiniteConcrete: lapColumnIsFiniteConcrete,
+      concreteThickness: lapColumnConcreteThickness,
+      slabWidth: lapColumnWidth,
+      slabDepth: lapColumnDepth,
+      postCountX: lapColumnPostCountX,
+      postCountZ: lapColumnPostCountZ,
+      postDiameter: lapColumnPostDiameter,
+      postOffset: lapColumnPostOffset,
+      concreteOffsetXRight: lapColumnConcreteOffsetXRight,
+      concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
+      concreteOffsetZBack: value,
+      concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+    });
+  };
+
+  const handleLapColumnConcreteOffsetZFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setLapColumnConcreteOffsetZFront(value);
+    onLapspliceColumnParamsChange({
+      isFiniteConcrete: lapColumnIsFiniteConcrete,
+      concreteThickness: lapColumnConcreteThickness,
+      slabWidth: lapColumnWidth,
+      slabDepth: lapColumnDepth,
+      postCountX: lapColumnPostCountX,
+      postCountZ: lapColumnPostCountZ,
+      postDiameter: lapColumnPostDiameter,
+      postOffset: lapColumnPostOffset,
+      concreteOffsetXRight: lapColumnConcreteOffsetXRight,
+      concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
+      concreteOffsetZBack: lapColumnConcreteOffsetZBack,
+      concreteOffsetZFront: value,
+    });
+  };
+
+  const handleLapColumnConcreteThicknessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setLapColumnConcreteThickness(value);
+    onLapspliceColumnParamsChange({
+      isFiniteConcrete: lapColumnIsFiniteConcrete,
+      concreteThickness: value,
+      slabWidth: lapColumnWidth,
+      slabDepth: lapColumnDepth,
+      postCountX: lapColumnPostCountX,
+      postCountZ: lapColumnPostCountZ,
+      postDiameter: lapColumnPostDiameter,
+      postOffset: lapColumnPostOffset,
+      concreteOffsetXRight: lapColumnConcreteOffsetXRight,
+      concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
+      concreteOffsetZBack: lapColumnConcreteOffsetZBack,
+      concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+    });
+  };
+
   // Helper function to build complete end anchorage params
   const getEndAnchorageParams = (overrides?: Partial<EndAnchorageParams>): EndAnchorageParams => ({
     beamWidth: overrides?.beamWidth ?? anchorageBeamWidth,
@@ -1469,6 +1695,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           <option value="lapspliceSlab">Lapsplice Slab</option>
           <option value="lapspliceBeam">Lapsplice Beam</option>
           <option value="lapspliceWall">Lapsplice Wall</option>
+          <option value="lapspliceColumn">Lapsplice Column</option>
           <option value="endAnchorageBeam">End Anchorage Beam</option>
           <option value="endAnchorageSlab">End Anchorage Slab</option>
           <option value="endAnchorageWall">End Anchorage Wall</option>
@@ -2637,6 +2864,170 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               type="number"
               value={wallConcreteOffsetZFront}
               onChange={handleWallConcreteOffsetZFrontChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter Concrete Offset Z-"
+            />
+          </div>
+        </>
+      )}
+
+      {currentModel === 'lapspliceColumn' && (
+        <>
+          <div className="control-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={lapColumnIsFiniteConcrete}
+                onChange={(e) => {
+                  setLapColumnIsFiniteConcrete(e.target.checked);
+                  onLapspliceColumnParamsChange({
+                    isFiniteConcrete: e.target.checked,
+                    concreteThickness: lapColumnConcreteThickness,
+                    slabWidth: lapColumnWidth,
+                    slabDepth: lapColumnDepth,
+                    postCountX: lapColumnPostCountX,
+                    postCountZ: lapColumnPostCountZ,
+                    postDiameter: lapColumnPostDiameter,
+                    postOffset: lapColumnPostOffset,
+                    concreteOffsetXRight: lapColumnConcreteOffsetXRight,
+                    concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
+                    concreteOffsetZBack: lapColumnConcreteOffsetZBack,
+                    concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+                  });
+                }}
+              />
+              Finite Concrete
+            </label>
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Thickness</label>
+            <input
+              type="number"
+              value={lapColumnConcreteThickness}
+              onChange={handleLapColumnConcreteThicknessChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter thickness"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Column Width (X)</label>
+            <input
+              type="number"
+              value={lapColumnWidth}
+              onChange={handleLapColumnWidthChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter width"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Column Depth (Z)</label>
+            <input
+              type="number"
+              value={lapColumnDepth}
+              onChange={handleLapColumnDepthChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter depth"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Count X</label>
+            <input
+              type="number"
+              value={lapColumnPostCountX}
+              onChange={handleLapColumnPostCountXChange}
+              step="1"
+              min="1"
+              placeholder="Enter post count in X"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Count Z</label>
+            <input
+              type="number"
+              value={lapColumnPostCountZ}
+              onChange={handleLapColumnPostCountZChange}
+              step="1"
+              min="1"
+              placeholder="Enter post count in Z"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Diameter</label>
+            <input
+              type="number"
+              value={lapColumnPostDiameter}
+              onChange={handleLapColumnPostDiameterChange}
+              step="0.01"
+              min="0.01"
+              placeholder="Enter post diameter"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Offset from Perimeter</label>
+            <input
+              type="number"
+              value={lapColumnPostOffset}
+              onChange={handleLapColumnPostOffsetChange}
+              step="0.01"
+              min="0.01"
+              max="0.5"
+              placeholder="Enter offset"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset X+ (Right)</label>
+            <input
+              type="number"
+              value={lapColumnConcreteOffsetXRight}
+              onChange={handleLapColumnConcreteOffsetXRightChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter Concrete Offset X+"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset X- (Left)</label>
+            <input
+              type="number"
+              value={lapColumnConcreteOffsetXLeft}
+              onChange={handleLapColumnConcreteOffsetXLeftChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter Concrete Offset X-"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset Z+ (Back)</label>
+            <input
+              type="number"
+              value={lapColumnConcreteOffsetZBack}
+              onChange={handleLapColumnConcreteOffsetZBackChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter Concrete Offset Z+"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset Z- (Front)</label>
+            <input
+              type="number"
+              value={lapColumnConcreteOffsetZFront}
+              onChange={handleLapColumnConcreteOffsetZFrontChange}
               step="0.1"
               min="0.1"
               placeholder="Enter Concrete Offset Z-"

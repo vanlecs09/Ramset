@@ -110,6 +110,21 @@ export const DEFAULT_LAPSPLICE_WALL_PARAMS: SlabParams = {
   concreteOffsetZFront: 0.25 / 2,
 };
 
+export const DEFAULT_LAPSPLICE_COLUMN_PARAMS: SlabParams = {
+  isFiniteConcrete: true,
+  concreteThickness: 2,
+  slabWidth: 0.5,
+  slabDepth: 0.5,
+  postCountX: 3,
+  postCountZ: 2,
+  postDiameter: 0.01,
+  postOffset: 0.02,
+  concreteOffsetXRight: 0.25,
+  concreteOffsetXLeft: 0.25,
+  concreteOffsetZBack: 0.25,
+  concreteOffsetZFront: 0.25,
+};
+
 export const DEFAULT_END_ANCHORAGE_PARAMS: EndAnchorageParams = {
   beamWidth: 0.3,
   beamDepth: 0.5,
