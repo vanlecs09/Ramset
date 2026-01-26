@@ -26,7 +26,7 @@ interface ComplexColumnParams {
 }
 
 interface ControlPanelProps {
-  onModelChange: (model:  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall') => void;
+  onModelChange: (model:  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall') => void;
   onTowerParamsChange: (params: {
     isFiniteConcrete: boolean;
     concreteThickness: number;
@@ -45,7 +45,7 @@ interface ControlPanelProps {
   onLapspliceSlabParamsChange: (params: SlabParams) => void;
   onLapspliceBeamParamsChange: (params: SlabParams) => void;
   onLapspliceWallParamsChange: (params: SlabParams) => void;
-  onEndAnchorageParamsChange: (params: EndAnchorageParams) => void;
+  onEndAnchorageBeamParamsChange: (params: EndAnchorageParams) => void;
   onEndAnchorageSlabParamsChange: (params: EndAnchorageParams) => void;
   onEndAnchorageWallParamsChange: (params: EndAnchorageParams) => void;
 }
@@ -58,11 +58,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onLapspliceSlabParamsChange,
   onLapspliceBeamParamsChange,
   onLapspliceWallParamsChange,
-  onEndAnchorageParamsChange,
+  onEndAnchorageBeamParamsChange,
   onEndAnchorageSlabParamsChange,
   onEndAnchorageWallParamsChange,
 }) => {
-  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall'>('endAnchorage');
+  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall'>('endAnchorageBeam');
 
   // Tower parameters
   const [towerIsFiniteConcrete, setTowerIsFiniteConcrete] = useState(DEFAULT_TOWER_PARAMS.isFiniteConcrete);
@@ -1205,73 +1205,73 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const handleAnchorageBeamWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setAnchorageBeamWidth(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ beamWidth: value }));
+    onEndAnchorageBeamParamsChange(getEndAnchorageParams({ beamWidth: value }));
   };
 
   const handleAnchorageBeamDepthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setAnchorageBeamDepth(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ beamDepth: value }));
+    onEndAnchorageBeamParamsChange(getEndAnchorageParams({ beamDepth: value }));
   };
 
   const handleAnchorageBeamHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setAnchorageBeamHeight(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ beamHeight: value }));
+    onEndAnchorageBeamParamsChange(getEndAnchorageParams({ beamHeight: value }));
   };
 
   const handleAnchoragePostCountXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value) || 1;
     setAnchoragePostCountX(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ postCountX: value }));
+    onEndAnchorageBeamParamsChange(getEndAnchorageParams({ postCountX: value }));
   };
 
   const handleAnchoragePostCountZChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value) || 1;
     setAnchoragePostCountZ(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ postCountZ: value }));
+    onEndAnchorageBeamParamsChange(getEndAnchorageParams({ postCountZ: value }));
   };
 
   const handleAnchoragePostDiameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setAnchoragePostDiameter(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ postDiameter: value }));
+    onEndAnchorageBeamParamsChange(getEndAnchorageParams({ postDiameter: value }));
   };
 
   const handleAnchoragePostOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setAnchoragePostOffset(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ postOffset: value }));
+    onEndAnchorageBeamParamsChange(getEndAnchorageParams({ postOffset: value }));
   }
 
   const handleAnchorageConcreteOffsetXRightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setAnchorageConcreteOffsetXRight(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ concreteOffsetXRight: value }));
+    onEndAnchorageBeamParamsChange(getEndAnchorageParams({ concreteOffsetXRight: value }));
   };
 
   const handleAnchorageConcreteOffsetXLeftChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setAnchorageConcreteOffsetXLeft(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ concreteOffsetXLeft: value }));
+    onEndAnchorageBeamParamsChange(getEndAnchorageParams({ concreteOffsetXLeft: value }));
   };
 
   const handleAnchorageConcreteOffsetZBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setAnchorageConcreteOffsetZBack(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ concreteOffsetZBack: value }));
+    onEndAnchorageBeamParamsChange(getEndAnchorageParams({ concreteOffsetZBack: value }));
   };
 
   const handleAnchorageConcreteOffsetZFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setAnchorageConcreteOffsetZFront(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ concreteOffsetZFront: value }));
+    onEndAnchorageBeamParamsChange(getEndAnchorageParams({ concreteOffsetZFront: value }));
   };
 
   const handleAnchorageConcreteThicknessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
     setAnchorageConcreteThickness(value);
-    onEndAnchorageParamsChange(getEndAnchorageParams({ concreteThickness: value }));
+    onEndAnchorageBeamParamsChange(getEndAnchorageParams({ concreteThickness: value }));
   };
 
   // Helper function to build complete end anchorage slab params
@@ -1451,7 +1451,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const model = e.target.value as  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall';
+    const model = e.target.value as  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall';
     setCurrentModel(model);
     onModelChange(model);
   };
@@ -1469,7 +1469,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           <option value="lapspliceSlab">Lapsplice Slab</option>
           <option value="lapspliceBeam">Lapsplice Beam</option>
           <option value="lapspliceWall">Lapsplice Wall</option>
-          <option value="endAnchorage">End Anchorage</option>
+          <option value="endAnchorageBeam">End Anchorage Beam</option>
           <option value="endAnchorageSlab">End Anchorage Slab</option>
           <option value="endAnchorageWall">End Anchorage Wall</option>
         </select>
@@ -2645,7 +2645,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         </>
       )}
 
-      {currentModel === 'endAnchorage' && (
+      {currentModel === 'endAnchorageBeam' && (
         <>
           <div className="control-group">
             <label>Beam Width (X)</label>
