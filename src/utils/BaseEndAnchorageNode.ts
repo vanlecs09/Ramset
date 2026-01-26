@@ -359,6 +359,7 @@ function createDeimensionLine(concretePosition: BABYLON.Vector3,
     anchorageNode: BaseEndAnchorageNode) {
 
     const dimensionNodes = new BABYLON.TransformNode('beamDimensionsDistance', scene);
+    dimensionNodes.parent = anchorageNode.group;
     // const beamWidthMeasure = Math.abs(beamParams.beamWidth / 2);szz//s
     {
         const beginPos = new BABYLON.Vector3(concretePosition.x + beamParams.beamWidth / 2, concretePosition.y + concreteParams.thickness / 2, beamPosition.z - beamParams.beamDepth / 2);
@@ -375,7 +376,7 @@ function createDeimensionLine(concretePosition: BABYLON.Vector3,
                 // beamWidthMeasure
             );
 
-            let dimensionLineNode1 = new DimensionLineNode(dimensionNodes);
+            let dimensionLineNode1 = new DimensionLineNode(anchorageNode.group);
             dimensionLineNode1.addMesh(result1.line!);
             if (result1.label) dimensionLineNode1.addLabel(result1.label);
             dimensionLineNode1.addMesh(result1.arrow[0]!);
@@ -410,8 +411,8 @@ function createDeimensionLine(concretePosition: BABYLON.Vector3,
     }
 
     {
-        const beginPos = new BABYLON.Vector3(concretePosition.x + beamParams.beamWidth / 2, concretePosition.y + concreteParams.thickness / 2, beamPosition.z + beamParams.beamDepth / 2);
-        const endPos = new BABYLON.Vector3(concretePosition.x + concreteParams.width / 2, concretePosition.y + concreteParams.thickness / 2, beamPosition.z + beamParams.beamDepth / 2);
+        const beginPos = new BABYLON.Vector3(concretePosition.x + beamParams.beamWidth / 2, concretePosition.y + concreteParams.thickness / 2, beamPosition.z - beamParams.beamDepth / 2);
+        const endPos = new BABYLON.Vector3(concretePosition.x + beamParams.beamWidth / 2, concretePosition.y + concreteParams.thickness / 2, beamPosition.z - concreteParams.depth / 2);
         const length = BABYLON.Vector3.Distance(beginPos, endPos);
         if (length > 0) {
             const result3 = createLineTwoArrow(
