@@ -52,12 +52,13 @@ interface ComplexColumnParams {
 
 interface ConstructionViewerProps {
   onSceneReady?: (scene: BABYLON.Scene) => void;
-  model?: 'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'lapspliceBeam' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall';
+  model?: 'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall';
   towerParams?: TowerParams;
   complexColumnParams?: ComplexColumnParams;
   rectangleColumnParams?: RectangleColumnParams;
-  slabParams?: SlabParams;
+  lapspliceSlabParams?: SlabParams;
   lapspliceBeamParams?: SlabParams;
+  lapspliceWallParams?: SlabParams;
   endAnchorageParams?: EndAnchorageParams;
   endAnchorageSlabParams?: EndAnchorageParams;
   endAnchorageWallParams?: EndAnchorageParams;
@@ -158,7 +159,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     concreteOffsetZBack: 1.5,
     concreteOffsetZFront: 1.5,
   },
-  slabParams = {
+  lapspliceSlabParams = {
     isFiniteConcrete: true,
     concreteThickness: 1,
     slabWidth: 0.1,
@@ -185,6 +186,20 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     concreteOffsetXLeft: 0.2,
     concreteOffsetZBack: 0.3,
     concreteOffsetZFront: 0.3,
+  },
+  lapspliceWallParams = {
+    isFiniteConcrete: true,
+    concreteThickness: 1,
+    slabWidth: 1,
+    slabDepth: 0.25,
+    postCountX: 3,
+    postCountZ: 2,
+    postDiameter: 0.01,
+    postOffset: 0.02,
+    concreteOffsetXRight: 0.5,
+    concreteOffsetXLeft: 0.5,
+    concreteOffsetZBack: 0.125,
+    concreteOffsetZFront: 0.125,
   },
   endAnchorageParams = {
     beamWidth: 0.3,
@@ -235,8 +250,9 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   const circularColumnsRef = useRef<CircularColumnsNode | null>(null);
   const complexColumnRef = useRef<ComplexColumnNode | null>(null);
   const rectangleColumnRef = useRef<RectangleColumnNode | null>(null);
-  const slabRef = useRef<BaseLapSpliceNode | null>(null);
+  const lapspliceSlabRef = useRef<BaseLapSpliceNode | null>(null);
   const lapspliceBeamRef = useRef<BaseLapSpliceNode | null>(null);
+  const lapspliceWallRef = useRef<BaseLapSpliceNode | null>(null);
   const endAnchorageRef = useRef<BaseEndAnchorageNode | null>(null);
   const endAnchorageSlabRef = useRef<BaseEndAnchorageNode | null>(null);
   const endAnchorageWallRef = useRef<BaseEndAnchorageNode | null>(null);
@@ -329,13 +345,17 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         rectangleColumnRef.current.dispose();
         rectangleColumnRef.current = null;
       }
-      if (slabRef.current) {
-        slabRef.current.dispose();
-        slabRef.current = null;
+      if (lapspliceSlabRef.current) {
+        lapspliceSlabRef.current.dispose();
+        lapspliceSlabRef.current = null;
       }
       if (lapspliceBeamRef.current) {
         lapspliceBeamRef.current.dispose();
         lapspliceBeamRef.current = null;
+      }
+      if (lapspliceWallRef.current) {
+        lapspliceWallRef.current.dispose();
+        lapspliceWallRef.current = null;
       }
       if (endAnchorageRef.current) {
         endAnchorageRef.current.dispose();
@@ -417,34 +437,32 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         //   camera.alpha = Math.PI / 2.5;
         //   camera.beta = Math.PI / 3;
         //   break;
-        case 'slab':
-          camera.target = BABYLON.Vector3.Zero();
-          camera.radius = 3.0;
-          camera.alpha = Math.PI * (-20 / 180);
-          camera.beta = Math.PI / 2 + Math.PI * (-20 / 180);
-          rollCamera(camera, Math.PI / 2);
-          break;
-        case 'lapspliceBeam':
-          camera.target = BABYLON.Vector3.Zero();
-          camera.radius = 3.0;
-          camera.alpha = Math.PI * (-20 / 180);
-          camera.beta = Math.PI / 2 + Math.PI * (-20 / 180);
-          rollCamera(camera, Math.PI / 2);
-          break;
-        case 'endAnchorage':
-        case 'endAnchorageSlab':
-        case 'endAnchorageWall':
-          camera.target = BABYLON.Vector3.Zero();
-          camera.radius = 3.0;
-          camera.alpha = 0;
-          camera.beta = Math.PI / 2;
-          rollCamera(camera, Math.PI / 2);
-          break;
+  
+        // case 'lapspliceSlab':
+        // case 'lapspliceBeam':
+
+        //   camera.target = BABYLON.Vector3.Zero();
+        //   camera.radius = 3.0;
+        //   camera.alpha = Math.PI * (-20 / 180);
+        //   camera.beta = Math.PI / 2 + Math.PI * (-20 / 180);
+        //   rollCamera(camera, Math.PI / 2 + Math.PI * (10 / 180));
+        //   break;
+        // // case 'lapspliceWall':
+        // case 'endAnchorage':
+        // // case 'endAnchorageSlab':
+        // case 'endAnchorageWall':
+        //   camera.target = BABYLON.Vector3.Zero();
+        //   camera.radius = 3.0;
+        //   camera.alpha = Math.PI * (-45 / 180);
+        //   camera.beta = Math.PI / 2 + Math.PI * (-45 / 180); 
+        //   rollCamera(camera, Math.PI / 2 + Math.PI * ((45/2) / 180));
+        //   // rollCamera(camera, Math.PI / 2);
+        //   break;
         default:
           camera.target = BABYLON.Vector3.Zero();
-          camera.radius = 5;
-          camera.alpha = 0;
-          camera.beta = 0;
+          camera.radius = 3;
+          camera.alpha = Math.PI * (20 / 180);
+          camera.beta = Math.PI / 2 + Math.PI * (-20 / 180);
           camera.upVector = new BABYLON.Vector3(0, 1, 0);
       }
     };
@@ -616,55 +634,57 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       }
 
 
-    } else if (model === 'slab') {
+    } else if (model === 'lapspliceSlab') {
 
       // Calculate concrete dimensions and positions
       const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
-        concreteOffsetXRight: slabParams.concreteOffsetXRight,
-        concreteOffsetXLeft: slabParams.concreteOffsetXLeft,
-        concreteOffsetZBack: slabParams.concreteOffsetZBack,
-        concreteOffsetZFront: slabParams.concreteOffsetZFront,
-        concreteThickness: slabParams.concreteThickness,
+        concreteOffsetXRight: lapspliceSlabParams.concreteOffsetXRight,
+        concreteOffsetXLeft: lapspliceSlabParams.concreteOffsetXLeft,
+        concreteOffsetZBack: lapspliceSlabParams.concreteOffsetZBack,
+        concreteOffsetZFront: lapspliceSlabParams.concreteOffsetZFront,
+        concreteThickness: lapspliceSlabParams.concreteThickness,
       });
 
       // Calculate post positions first
       let halfConcreteDepth = concreteDepth / 2;
       const slabCenterZ = halfConcreteDepth;
       const postPositions = calculateRectanglePostPositions(
-        slabParams.slabWidth,
-        slabParams.slabDepth,
-        slabParams.postCountX,
-        slabParams.postCountZ,
-        slabParams.postOffset,
+        lapspliceSlabParams.slabWidth,
+        lapspliceSlabParams.slabDepth,
+        lapspliceSlabParams.postCountX,
+        lapspliceSlabParams.postCountZ,
+        lapspliceSlabParams.postOffset,
         slabCenterZ
       );
 
       let concreteParam = {
-        thickness: slabParams.concreteThickness,
+        thickness: lapspliceSlabParams.concreteThickness,
         width: concreteWidth,
         depth: concreteDepth,
         position: concretePosition
       };
 
       let slabParam = {
-        slabWidth: slabParams.slabWidth,
-        slabDepth: slabParams.slabDepth,
-        postDiameter: slabParams.postDiameter,
-        isFiniteConcrete: slabParams.isFiniteConcrete
+        slabWidth: lapspliceSlabParams.slabWidth,
+        slabDepth: lapspliceSlabParams.slabDepth,
+        postDiameter: lapspliceSlabParams.postDiameter,
+        isFiniteConcrete: lapspliceSlabParams.isFiniteConcrete
       };
 
-      if (!slabRef.current) {
+      if (!lapspliceSlabRef.current) {
         disposePreviousStructure();
-        adjustCameraForModel('slab');
+        adjustCameraForModel('lapspliceSlab');
 
       }
-      slabRef.current?.dispose();
-      slabRef.current = createLapsplice(
+      lapspliceSlabRef.current?.dispose();
+      lapspliceSlabRef.current = createLapsplice(
         scene,
         postPositions,
         concreteParam,
         slabParam
       );
+      // Rotate the group by 90 degrees on X-axis
+      lapspliceSlabRef.current.group.rotation.x = Math.PI / 2;
 
     } else if (model === 'lapspliceBeam') {
       // Calculate concrete dimensions and positions
@@ -713,6 +733,56 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         concreteParam,
         beamParam
       );
+      // Rotate the group by 90 degrees on X-axis
+      lapspliceBeamRef.current.group.rotation.x = Math.PI / 2;
+
+    } else if (model === 'lapspliceWall') {
+      // Calculate concrete dimensions and positions
+      const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
+        concreteOffsetXRight: lapspliceWallParams.concreteOffsetXRight,
+        concreteOffsetXLeft: lapspliceWallParams.concreteOffsetXLeft,
+        concreteOffsetZBack: lapspliceWallParams.concreteOffsetZBack,
+        concreteOffsetZFront: lapspliceWallParams.concreteOffsetZFront,
+        concreteThickness: lapspliceWallParams.concreteThickness,
+      });
+
+      // Calculate post positions first
+      let halfConcreteDepth = concreteDepth / 2;
+      const wallCenterZ = halfConcreteDepth;
+      const postPositions = calculateRectanglePostPositions(
+        lapspliceWallParams.slabWidth,
+        lapspliceWallParams.slabDepth,
+        lapspliceWallParams.postCountX,
+        lapspliceWallParams.postCountZ,
+        lapspliceWallParams.postOffset,
+        wallCenterZ
+      );
+
+      let concreteParam = {
+        thickness: lapspliceWallParams.concreteThickness,
+        width: concreteWidth,
+        depth: concreteDepth,
+        position: concretePosition
+      };
+
+      let wallParam = {
+        slabWidth: lapspliceWallParams.slabWidth,
+        slabDepth: lapspliceWallParams.slabDepth,
+        postDiameter: lapspliceWallParams.postDiameter,
+        isFiniteConcrete: lapspliceWallParams.isFiniteConcrete
+      };
+
+      if (!lapspliceWallRef.current) {
+        disposePreviousStructure();
+        adjustCameraForModel('lapspliceWall');
+      }
+      lapspliceWallRef.current?.dispose();
+      lapspliceWallRef.current = createLapsplice(
+        scene,
+        postPositions,
+        concreteParam,
+        wallParam
+      );
 
     } else if (model === 'endAnchorage') {
       // Calculate concrete dimensions and positions
@@ -754,6 +824,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       };
       // updateEndAnchorage(endAnchorageRef.current!,
       endAnchorageRef.current = createEndAnchorage(scene, postPos, endAnchorageParams, concreteParam, secondaryParams);
+      // Rotate the group by 90 degrees on X-axis
+      endAnchorageRef.current.group.rotation.x = Math.PI / 2;
 
     } else if (model === 'endAnchorageSlab') {
       // Calculate concrete dimensions and positions
@@ -793,6 +865,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         beamHeight: endAnchorageSlabParams.beamHeight,
       };
       endAnchorageSlabRef.current = createEndAnchorage(scene, postPos, endAnchorageSlabParams, concreteParam, secondaryParams);
+      // Rotate the group by 90 degrees on X-axis
+      endAnchorageSlabRef.current.group.rotation.x = Math.PI / 2;
     } else if (model === 'endAnchorageWall') {
       // Calculate concrete dimensions and positions
       const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
@@ -831,6 +905,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         beamHeight: endAnchorageWallParams.beamHeight,
       };
       endAnchorageWallRef.current = createEndAnchorage(scene, postPos, endAnchorageWallParams, concreteParam, secondaryParams);
+      // Rotate the group by 90 degrees on X-axis
+      endAnchorageWallRef.current.group.rotation.x = Math.PI / 2;
     }
   }, [
     model,
@@ -874,18 +950,18 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     rectangleColumnParams.concreteOffsetZBack,
     rectangleColumnParams.concreteOffsetZFront,
 
-    slabParams.isFiniteConcrete,
-    slabParams.concreteThickness,
-    slabParams.slabWidth,
-    slabParams.slabDepth,
-    slabParams.postCountX,
-    slabParams.postCountZ,
-    slabParams.postDiameter,
-    slabParams.postOffset,
-    slabParams.concreteOffsetXRight,
-    slabParams.concreteOffsetXLeft,
-    slabParams.concreteOffsetZBack,
-    slabParams.concreteOffsetZFront,
+    lapspliceSlabParams.isFiniteConcrete,
+    lapspliceSlabParams.concreteThickness,
+    lapspliceSlabParams.slabWidth,
+    lapspliceSlabParams.slabDepth,
+    lapspliceSlabParams.postCountX,
+    lapspliceSlabParams.postCountZ,
+    lapspliceSlabParams.postDiameter,
+    lapspliceSlabParams.postOffset,
+    lapspliceSlabParams.concreteOffsetXRight,
+    lapspliceSlabParams.concreteOffsetXLeft,
+    lapspliceSlabParams.concreteOffsetZBack,
+    lapspliceSlabParams.concreteOffsetZFront,
 
     lapspliceBeamParams.isFiniteConcrete,
     lapspliceBeamParams.concreteThickness,
@@ -899,6 +975,19 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     lapspliceBeamParams.concreteOffsetXLeft,
     lapspliceBeamParams.concreteOffsetZBack,
     lapspliceBeamParams.concreteOffsetZFront,
+
+    lapspliceWallParams.isFiniteConcrete,
+    lapspliceWallParams.concreteThickness,
+    lapspliceWallParams.slabWidth,
+    lapspliceWallParams.slabDepth,
+    lapspliceWallParams.postCountX,
+    lapspliceWallParams.postCountZ,
+    lapspliceWallParams.postDiameter,
+    lapspliceWallParams.postOffset,
+    lapspliceWallParams.concreteOffsetXRight,
+    lapspliceWallParams.concreteOffsetXLeft,
+    lapspliceWallParams.concreteOffsetZBack,
+    lapspliceWallParams.concreteOffsetZFront,
 
     endAnchorageParams.beamWidth,
     endAnchorageParams.beamDepth,

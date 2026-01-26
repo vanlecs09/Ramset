@@ -65,7 +65,7 @@ export const DEFAULT_RECTANGLE_COLUMN_PARAMS: RectangleColumnParams = {
   concreteOffsetZFront: 0.5,
 };
 
-export const DEFAULT_SLAB_PARAMS: SlabParams = {
+export const DEFAULT_LAPSPLICE_SLAB_PARAMS: SlabParams = {
   isFiniteConcrete: true,
   concreteThickness: 1,
   slabWidth: 1,
@@ -93,6 +93,21 @@ export const DEFAULT_LAPSPLICE_BEAM_PARAMS: SlabParams = {
   concreteOffsetXLeft: 0.2,
   concreteOffsetZBack: 0.3,
   concreteOffsetZFront: 0.3,
+};
+
+export const DEFAULT_LAPSPLICE_WALL_PARAMS: SlabParams = {
+  isFiniteConcrete: true,
+  concreteThickness: 1,
+  slabWidth: 1,
+  slabDepth: 0.25,
+  postCountX: 3,
+  postCountZ: 2,
+  postDiameter: 0.01,
+  postOffset: 0.02,
+  concreteOffsetXRight: 0.5,
+  concreteOffsetXLeft: 0.5,
+  concreteOffsetZBack: 0.25 / 2,
+  concreteOffsetZFront: 0.25 / 2,
 };
 
 export const DEFAULT_END_ANCHORAGE_PARAMS: EndAnchorageParams = {

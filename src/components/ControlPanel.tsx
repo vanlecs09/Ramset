@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import '../styles/ControlPanel.css';
 import type { RectangleColumnParams, SlabParams } from '../App';
 import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
-import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_SLAB_PARAMS, DEFAULT_LAPSPLICE_BEAM_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS } from '../constants/defaultParams';
+import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_LAPSPLICE_SLAB_PARAMS, DEFAULT_LAPSPLICE_BEAM_PARAMS, DEFAULT_LAPSPLICE_WALL_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS } from '../constants/defaultParams';
 
 interface ComplexColumnParams {
   isFiniteConcrete: boolean;
@@ -26,7 +26,7 @@ interface ComplexColumnParams {
 }
 
 interface ControlPanelProps {
-  onModelChange: (model:  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'lapspliceBeam' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall') => void;
+  onModelChange: (model:  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall') => void;
   onTowerParamsChange: (params: {
     isFiniteConcrete: boolean;
     concreteThickness: number;
@@ -42,8 +42,9 @@ interface ControlPanelProps {
   }) => void;
   onComplexColumnParamsChange: (params: ComplexColumnParams) => void;
   onRectangleColumnParamsChange: (params: RectangleColumnParams) => void;
-  onSlabParamsChange: (params: SlabParams) => void;
+  onLapspliceSlabParamsChange: (params: SlabParams) => void;
   onLapspliceBeamParamsChange: (params: SlabParams) => void;
+  onLapspliceWallParamsChange: (params: SlabParams) => void;
   onEndAnchorageParamsChange: (params: EndAnchorageParams) => void;
   onEndAnchorageSlabParamsChange: (params: EndAnchorageParams) => void;
   onEndAnchorageWallParamsChange: (params: EndAnchorageParams) => void;
@@ -54,13 +55,14 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onTowerParamsChange,
   onComplexColumnParamsChange,
   onRectangleColumnParamsChange,
-  onSlabParamsChange,
+  onLapspliceSlabParamsChange,
   onLapspliceBeamParamsChange,
+  onLapspliceWallParamsChange,
   onEndAnchorageParamsChange,
   onEndAnchorageSlabParamsChange,
   onEndAnchorageWallParamsChange,
 }) => {
-  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'lapspliceBeam' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall'>('endAnchorage');
+  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall'>('endAnchorage');
 
   // Tower parameters
   const [towerIsFiniteConcrete, setTowerIsFiniteConcrete] = useState(DEFAULT_TOWER_PARAMS.isFiniteConcrete);
@@ -111,19 +113,19 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [concreteOffsetZBack, setConcreteOffsetZBack] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.concreteOffsetZBack);
   const [concreteOffsetZFront, setConcreteOffsetZFront] = useState(DEFAULT_RECTANGLE_COLUMN_PARAMS.concreteOffsetZFront);
 
-  // Slab parameters
-  const [slabIsFiniteConcrete, setSlabIsFiniteConcrete] = useState(DEFAULT_SLAB_PARAMS.isFiniteConcrete);
-  const [slabConcreteThickness, setSlabConcreteThickness] = useState(DEFAULT_SLAB_PARAMS.concreteThickness);
-  const [slabWidth, setSlabWidth] = useState(DEFAULT_SLAB_PARAMS.slabWidth);
-  const [slabDepth, setSlabDepth] = useState(DEFAULT_SLAB_PARAMS.slabDepth);
-  const [slabPostCountX, setSlabPostCountX] = useState(DEFAULT_SLAB_PARAMS.postCountX);
-  const [slabPostCountZ, setSlabPostCountZ] = useState(DEFAULT_SLAB_PARAMS.postCountZ);
-  const [slabPostDiameter, setSlabPostDiameter] = useState(DEFAULT_SLAB_PARAMS.postDiameter);
-  const [slabPostOffset, setSlabPostOffset] = useState(DEFAULT_SLAB_PARAMS.postOffset);
-  const [slabConcreteOffsetXRight, setSlabConcreteOffsetXRight] = useState(DEFAULT_SLAB_PARAMS.concreteOffsetXRight);
-  const [slabConcreteOffsetXLeft, setSlabConcreteOffsetXLeft] = useState(DEFAULT_SLAB_PARAMS.concreteOffsetXLeft);
-  const [slabConcreteOffsetZBack, setSlabConcreteOffsetZBack] = useState(DEFAULT_SLAB_PARAMS.concreteOffsetZBack);
-  const [slabConcreteOffsetZFront, setSlabConcreteOffsetZFront] = useState(DEFAULT_SLAB_PARAMS.concreteOffsetZFront);
+  // Lapsplice Slab parameters
+  const [lapspliceSlabIsFiniteConcrete, setLapspliceSlabIsFiniteConcrete] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.isFiniteConcrete);
+  const [lapspliceSlabConcreteThickness, setLapspliceSlabConcreteThickness] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.concreteThickness);
+  const [lapspliceSlabWidth, setLapspliceSlabWidth] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.slabWidth);
+  const [lapspliceSlabDepth, setLapspliceSlabDepth] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.slabDepth);
+  const [lapspliceSlabPostCountX, setLapspliceSlabPostCountX] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.postCountX);
+  const [lapspliceSlabPostCountZ, setLapspliceSlabPostCountZ] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.postCountZ);
+  const [lapspliceSlabPostDiameter, setLapspliceSlabPostDiameter] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.postDiameter);
+  const [lapspliceSlabPostOffset, setLapspliceSlabPostOffset] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.postOffset);
+  const [lapspliceSlabConcreteOffsetXRight, setLapspliceSlabConcreteOffsetXRight] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.concreteOffsetXRight);
+  const [lapspliceSlabConcreteOffsetXLeft, setLapspliceSlabConcreteOffsetXLeft] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.concreteOffsetXLeft);
+  const [lapspliceSlabConcreteOffsetZBack, setLapspliceSlabConcreteOffsetZBack] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.concreteOffsetZBack);
+  const [lapspliceSlabConcreteOffsetZFront, setLapspliceSlabConcreteOffsetZFront] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.concreteOffsetZFront);
 
   // Lapsplice Beam parameters
   const [beamIsFiniteConcrete, setBeamIsFiniteConcrete] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.isFiniteConcrete);
@@ -138,6 +140,20 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [beamConcreteOffsetXLeft, setBeamConcreteOffsetXLeft] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.concreteOffsetXLeft);
   const [beamConcreteOffsetZBack, setBeamConcreteOffsetZBack] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.concreteOffsetZBack);
   const [beamConcreteOffsetZFront, setBeamConcreteOffsetZFront] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.concreteOffsetZFront);
+
+  // Lapsplice Wall parameters
+  const [wallIsFiniteConcrete, setWallIsFiniteConcrete] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.isFiniteConcrete);
+  const [wallConcreteThickness, setWallConcreteThickness] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.concreteThickness);
+  const [wallWidth, setWallWidth] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.slabWidth);
+  const [wallDepth, setWallDepth] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.slabDepth);
+  const [wallPostCountX, setWallPostCountX] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.postCountX);
+  const [wallPostCountZ, setWallPostCountZ] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.postCountZ);
+  const [wallPostDiameter, setWallPostDiameter] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.postDiameter);
+  const [wallPostOffset, setWallPostOffset] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.postOffset);
+  const [wallConcreteOffsetXRight, setWallConcreteOffsetXRight] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.concreteOffsetXRight);
+  const [wallConcreteOffsetXLeft, setWallConcreteOffsetXLeft] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.concreteOffsetXLeft);
+  const [wallConcreteOffsetZBack, setWallConcreteOffsetZBack] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.concreteOffsetZBack);
+  const [wallConcreteOffsetZFront, setWallConcreteOffsetZFront] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.concreteOffsetZFront);
 
   // End Anchorage parameters
   const [anchorageBeamWidth, setAnchorageBeamWidth] = useState(DEFAULT_END_ANCHORAGE_PARAMS.beamWidth);
@@ -713,230 +729,459 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   // Slab parameter change handlers
-  const handleSlabIsFiniteConcreteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLapspliceSlabIsFiniteConcreteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.checked;
-    setSlabIsFiniteConcrete(value);
-    onSlabParamsChange({
+    setLapspliceSlabIsFiniteConcrete(value);
+    onLapspliceSlabParamsChange({
       isFiniteConcrete: value,
-      concreteThickness: slabConcreteThickness,
-      slabWidth: slabWidth,
-      slabDepth: slabDepth,
-      postCountX: slabPostCountX,
-      postCountZ: slabPostCountZ,
-      postDiameter: slabPostDiameter,
-      postOffset: slabPostOffset,
-      concreteOffsetXRight: slabConcreteOffsetXRight,
-      concreteOffsetXLeft: slabConcreteOffsetXLeft,
-      concreteOffsetZBack: slabConcreteOffsetZBack,
-      concreteOffsetZFront: slabConcreteOffsetZFront,
+      concreteThickness: lapspliceSlabConcreteThickness,
+      slabWidth: lapspliceSlabWidth,
+      slabDepth: lapspliceSlabDepth,
+      postCountX: lapspliceSlabPostCountX,
+      postCountZ: lapspliceSlabPostCountZ,
+      postDiameter: lapspliceSlabPostDiameter,
+      postOffset: lapspliceSlabPostOffset,
+      concreteOffsetXRight: lapspliceSlabConcreteOffsetXRight,
+      concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
+      concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
+      concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
     });
   };
 
-  const handleSlabConcreteThicknessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLapspliceSlabConcreteThicknessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setSlabConcreteThickness(value);
-    onSlabParamsChange({
-      isFiniteConcrete: slabIsFiniteConcrete,
+    setLapspliceSlabConcreteThickness(value);
+    onLapspliceSlabParamsChange({
+      isFiniteConcrete: lapspliceSlabIsFiniteConcrete,
       concreteThickness: value,
-      slabWidth: slabWidth,
-      slabDepth: slabDepth,
-      postCountX: slabPostCountX,
-      postCountZ: slabPostCountZ,
-      postDiameter: slabPostDiameter,
-      postOffset: slabPostOffset,
-      concreteOffsetXRight: slabConcreteOffsetXRight,
-      concreteOffsetXLeft: slabConcreteOffsetXLeft,
-      concreteOffsetZBack: slabConcreteOffsetZBack,
-      concreteOffsetZFront: slabConcreteOffsetZFront,
+      slabWidth: lapspliceSlabWidth,
+      slabDepth: lapspliceSlabDepth,
+      postCountX: lapspliceSlabPostCountX,
+      postCountZ: lapspliceSlabPostCountZ,
+      postDiameter: lapspliceSlabPostDiameter,
+      postOffset: lapspliceSlabPostOffset,
+      concreteOffsetXRight: lapspliceSlabConcreteOffsetXRight,
+      concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
+      concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
+      concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
     });
   };
 
-  const handleSlabWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLapspliceSlabWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setSlabWidth(value);
-    onSlabParamsChange({
-      isFiniteConcrete: slabIsFiniteConcrete,
-      concreteThickness: slabConcreteThickness,
+    setLapspliceSlabWidth(value);
+    onLapspliceSlabParamsChange({
+      isFiniteConcrete: lapspliceSlabIsFiniteConcrete,
+      concreteThickness: lapspliceSlabConcreteThickness,
       slabWidth: value,
-      slabDepth: slabDepth,
-      postCountX: slabPostCountX,
-      postCountZ: slabPostCountZ,
-      postDiameter: slabPostDiameter,
-      postOffset: slabPostOffset,
-      concreteOffsetXRight: slabConcreteOffsetXRight,
-      concreteOffsetXLeft: slabConcreteOffsetXLeft,
-      concreteOffsetZBack: slabConcreteOffsetZBack,
-      concreteOffsetZFront: slabConcreteOffsetZFront,
+      slabDepth: lapspliceSlabDepth,
+      postCountX: lapspliceSlabPostCountX,
+      postCountZ: lapspliceSlabPostCountZ,
+      postDiameter: lapspliceSlabPostDiameter,
+      postOffset: lapspliceSlabPostOffset,
+      concreteOffsetXRight: lapspliceSlabConcreteOffsetXRight,
+      concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
+      concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
+      concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
     });
   };
 
-  const handleSlabDepthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLapspliceSlabDepthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setSlabDepth(value);
-    onSlabParamsChange({
-      isFiniteConcrete: slabIsFiniteConcrete,
-      concreteThickness: slabConcreteThickness,
-      slabWidth: slabWidth,
+    setLapspliceSlabDepth(value);
+    onLapspliceSlabParamsChange({
+      isFiniteConcrete: lapspliceSlabIsFiniteConcrete,
+      concreteThickness: lapspliceSlabConcreteThickness,
+      slabWidth: lapspliceSlabWidth,
       slabDepth: value,
-      postCountX: slabPostCountX,
-      postCountZ: slabPostCountZ,
-      postDiameter: slabPostDiameter,
-      postOffset: slabPostOffset,
-      concreteOffsetXRight: slabConcreteOffsetXRight,
-      concreteOffsetXLeft: slabConcreteOffsetXLeft,
-      concreteOffsetZBack: slabConcreteOffsetZBack,
-      concreteOffsetZFront: slabConcreteOffsetZFront,
+      postCountX: lapspliceSlabPostCountX,
+      postCountZ: lapspliceSlabPostCountZ,
+      postDiameter: lapspliceSlabPostDiameter,
+      postOffset: lapspliceSlabPostOffset,
+      concreteOffsetXRight: lapspliceSlabConcreteOffsetXRight,
+      concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
+      concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
+      concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
     });
   };
 
-  const handleSlabPostCountXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLapspliceSlabPostCountXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value) || 1;
-    setSlabPostCountX(value);
-    onSlabParamsChange({
-      isFiniteConcrete: slabIsFiniteConcrete,
-      concreteThickness: slabConcreteThickness,
-      slabWidth: slabWidth,
-      slabDepth: slabDepth,
+    setLapspliceSlabPostCountX(value);
+    onLapspliceSlabParamsChange({
+      isFiniteConcrete: lapspliceSlabIsFiniteConcrete,
+      concreteThickness: lapspliceSlabConcreteThickness,
+      slabWidth: lapspliceSlabWidth,
+      slabDepth: lapspliceSlabDepth,
       postCountX: value,
-      postCountZ: slabPostCountZ,
-      postDiameter: slabPostDiameter,
-      postOffset: slabPostOffset,
-      concreteOffsetXRight: slabConcreteOffsetXRight,
-      concreteOffsetXLeft: slabConcreteOffsetXLeft,
-      concreteOffsetZBack: slabConcreteOffsetZBack,
-      concreteOffsetZFront: slabConcreteOffsetZFront,
+      postCountZ: lapspliceSlabPostCountZ,
+      postDiameter: lapspliceSlabPostDiameter,
+      postOffset: lapspliceSlabPostOffset,
+      concreteOffsetXRight: lapspliceSlabConcreteOffsetXRight,
+      concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
+      concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
+      concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
     });
   };
 
-  const handleSlabPostCountZChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLapspliceSlabPostCountZChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value) || 1;
-    setSlabPostCountZ(value);
-    onSlabParamsChange({
-      isFiniteConcrete: slabIsFiniteConcrete,
-      concreteThickness: slabConcreteThickness,
-      slabWidth: slabWidth,
-      slabDepth: slabDepth,
-      postCountX: slabPostCountX,
+    setLapspliceSlabPostCountZ(value);
+    onLapspliceSlabParamsChange({
+      isFiniteConcrete: lapspliceSlabIsFiniteConcrete,
+      concreteThickness: lapspliceSlabConcreteThickness,
+      slabWidth: lapspliceSlabWidth,
+      slabDepth: lapspliceSlabDepth,
+      postCountX: lapspliceSlabPostCountX,
       postCountZ: value,
-      postDiameter: slabPostDiameter,
-      postOffset: slabPostOffset,
-      concreteOffsetXRight: slabConcreteOffsetXRight,
-      concreteOffsetXLeft: slabConcreteOffsetXLeft,
-      concreteOffsetZBack: slabConcreteOffsetZBack,
-      concreteOffsetZFront: slabConcreteOffsetZFront,
+      postDiameter: lapspliceSlabPostDiameter,
+      postOffset: lapspliceSlabPostOffset,
+      concreteOffsetXRight: lapspliceSlabConcreteOffsetXRight,
+      concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
+      concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
+      concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
     });
   };
 
-  const handleSlabPostDiameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLapspliceSlabPostDiameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setSlabPostDiameter(value);
-    onSlabParamsChange({
-      isFiniteConcrete: slabIsFiniteConcrete,
-      concreteThickness: slabConcreteThickness,
-      slabWidth: slabWidth,
-      slabDepth: slabDepth,
-      postCountX: slabPostCountX,
-      postCountZ: slabPostCountZ,
+    setLapspliceSlabPostDiameter(value);
+    onLapspliceSlabParamsChange({
+      isFiniteConcrete: lapspliceSlabIsFiniteConcrete,
+      concreteThickness: lapspliceSlabConcreteThickness,
+      slabWidth: lapspliceSlabWidth,
+      slabDepth: lapspliceSlabDepth,
+      postCountX: lapspliceSlabPostCountX,
+      postCountZ: lapspliceSlabPostCountZ,
       postDiameter: value,
-      postOffset: slabPostOffset,
-      concreteOffsetXRight: slabConcreteOffsetXRight,
-      concreteOffsetXLeft: slabConcreteOffsetXLeft,
-      concreteOffsetZBack: slabConcreteOffsetZBack,
-      concreteOffsetZFront: slabConcreteOffsetZFront,
+      postOffset: lapspliceSlabPostOffset,
+      concreteOffsetXRight: lapspliceSlabConcreteOffsetXRight,
+      concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
+      concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
+      concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
     });
   };
 
-  const handleSlabPostOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLapspliceSlabPostOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setSlabPostOffset(value);
-    onSlabParamsChange({
-      isFiniteConcrete: slabIsFiniteConcrete,
-      concreteThickness: slabConcreteThickness,
-      slabWidth: slabWidth,
-      slabDepth: slabDepth,
-      postCountX: slabPostCountX,
-      postCountZ: slabPostCountZ,
-      postDiameter: slabPostDiameter,
+    setLapspliceSlabPostOffset(value);
+    onLapspliceSlabParamsChange({
+      isFiniteConcrete: lapspliceSlabIsFiniteConcrete,
+      concreteThickness: lapspliceSlabConcreteThickness,
+      slabWidth: lapspliceSlabWidth,
+      slabDepth: lapspliceSlabDepth,
+      postCountX: lapspliceSlabPostCountX,
+      postCountZ: lapspliceSlabPostCountZ,
+      postDiameter: lapspliceSlabPostDiameter,
       postOffset: value,
-      concreteOffsetXRight: slabConcreteOffsetXRight,
-      concreteOffsetXLeft: slabConcreteOffsetXLeft,
-      concreteOffsetZBack: slabConcreteOffsetZBack,
-      concreteOffsetZFront: slabConcreteOffsetZFront,
+      concreteOffsetXRight: lapspliceSlabConcreteOffsetXRight,
+      concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
+      concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
+      concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
     });
   };
 
-  const handleSlabConcreteOffsetXRightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLapspliceSlabConcreteOffsetXRightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setSlabConcreteOffsetXRight(value);
-    onSlabParamsChange({
-      isFiniteConcrete: slabIsFiniteConcrete,
-      concreteThickness: slabConcreteThickness,
-      slabWidth: slabWidth,
-      slabDepth: slabDepth,
-      postCountX: slabPostCountX,
-      postCountZ: slabPostCountZ,
-      postDiameter: slabPostDiameter,
-      postOffset: slabPostOffset,
+    setLapspliceSlabConcreteOffsetXRight(value);
+    onLapspliceSlabParamsChange({
+      isFiniteConcrete: lapspliceSlabIsFiniteConcrete,
+      concreteThickness: lapspliceSlabConcreteThickness,
+      slabWidth: lapspliceSlabWidth,
+      slabDepth: lapspliceSlabDepth,
+      postCountX: lapspliceSlabPostCountX,
+      postCountZ: lapspliceSlabPostCountZ,
+      postDiameter: lapspliceSlabPostDiameter,
+      postOffset: lapspliceSlabPostOffset,
       concreteOffsetXRight: value,
-      concreteOffsetXLeft: slabConcreteOffsetXLeft,
-      concreteOffsetZBack: slabConcreteOffsetZBack,
-      concreteOffsetZFront: slabConcreteOffsetZFront,
+      concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
+      concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
+      concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
     });
   };
 
-  const handleSlabConcreteOffsetXLeftChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLapspliceSlabConcreteOffsetXLeftChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setSlabConcreteOffsetXLeft(value);
-    onSlabParamsChange({
-      isFiniteConcrete: slabIsFiniteConcrete,
-      concreteThickness: slabConcreteThickness,
-      slabWidth: slabWidth,
-      slabDepth: slabDepth,
-      postCountX: slabPostCountX,
-      postCountZ: slabPostCountZ,
-      postDiameter: slabPostDiameter,
-      postOffset: slabPostOffset,
-      concreteOffsetXRight: slabConcreteOffsetXRight,
+    setLapspliceSlabConcreteOffsetXLeft(value);
+    onLapspliceSlabParamsChange({
+      isFiniteConcrete: lapspliceSlabIsFiniteConcrete,
+      concreteThickness: lapspliceSlabConcreteThickness,
+      slabWidth: lapspliceSlabWidth,
+      slabDepth: lapspliceSlabDepth,
+      postCountX: lapspliceSlabPostCountX,
+      postCountZ: lapspliceSlabPostCountZ,
+      postDiameter: lapspliceSlabPostDiameter,
+      postOffset: lapspliceSlabPostOffset,
+      concreteOffsetXRight: lapspliceSlabConcreteOffsetXRight,
       concreteOffsetXLeft: value,
-      concreteOffsetZBack: slabConcreteOffsetZBack,
-      concreteOffsetZFront: slabConcreteOffsetZFront,
+      concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
+      concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
     });
   };
 
-  const handleSlabConcreteOffsetZBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLapspliceSlabConcreteOffsetZBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setSlabConcreteOffsetZBack(value);
-    onSlabParamsChange({
-      isFiniteConcrete: slabIsFiniteConcrete,
-      concreteThickness: slabConcreteThickness,
-      slabWidth: slabWidth,
-      slabDepth: slabDepth,
-      postCountX: slabPostCountX,
-      postCountZ: slabPostCountZ,
-      postDiameter: slabPostDiameter,
-      postOffset: slabPostOffset,
-      concreteOffsetXRight: slabConcreteOffsetXRight,
-      concreteOffsetXLeft: slabConcreteOffsetXLeft,
+    setLapspliceSlabConcreteOffsetZBack(value);
+    onLapspliceSlabParamsChange({
+      isFiniteConcrete: lapspliceSlabIsFiniteConcrete,
+      concreteThickness: lapspliceSlabConcreteThickness,
+      slabWidth: lapspliceSlabWidth,
+      slabDepth: lapspliceSlabDepth,
+      postCountX: lapspliceSlabPostCountX,
+      postCountZ: lapspliceSlabPostCountZ,
+      postDiameter: lapspliceSlabPostDiameter,
+      postOffset: lapspliceSlabPostOffset,
+      concreteOffsetXRight: lapspliceSlabConcreteOffsetXRight,
+      concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
       concreteOffsetZBack: value,
-      concreteOffsetZFront: slabConcreteOffsetZFront,
+      concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
     });
   };
 
-  const handleSlabConcreteOffsetZFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLapspliceSlabConcreteOffsetZFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setSlabConcreteOffsetZFront(value);
-    onSlabParamsChange({
-      isFiniteConcrete: slabIsFiniteConcrete,
-      concreteThickness: slabConcreteThickness,
-      slabWidth: slabWidth,
-      slabDepth: slabDepth,
-      postCountX: slabPostCountX,
-      postCountZ: slabPostCountZ,
-      postDiameter: slabPostDiameter,
-      postOffset: slabPostOffset,
-      concreteOffsetXRight: slabConcreteOffsetXRight,
-      concreteOffsetXLeft: slabConcreteOffsetXLeft,
-      concreteOffsetZBack: slabConcreteOffsetZBack,
+    setLapspliceSlabConcreteOffsetZFront(value);
+    onLapspliceSlabParamsChange({
+      isFiniteConcrete: lapspliceSlabIsFiniteConcrete,
+      concreteThickness: lapspliceSlabConcreteThickness,
+      slabWidth: lapspliceSlabWidth,
+      slabDepth: lapspliceSlabDepth,
+      postCountX: lapspliceSlabPostCountX,
+      postCountZ: lapspliceSlabPostCountZ,
+      postDiameter: lapspliceSlabPostDiameter,
+      postOffset: lapspliceSlabPostOffset,
+      concreteOffsetXRight: lapspliceSlabConcreteOffsetXRight,
+      concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
+      concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
+      concreteOffsetZFront: value,
+    });
+  };
+
+  // Lapsplice Wall parameter change handlers
+  const handleWallIsFiniteConcreteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.checked;
+    setWallIsFiniteConcrete(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: value,
+      concreteThickness: wallConcreteThickness,
+      slabWidth: wallWidth,
+      slabDepth: wallDepth,
+      postCountX: wallPostCountX,
+      postCountZ: wallPostCountZ,
+      postDiameter: wallPostDiameter,
+      postOffset: wallPostOffset,
+      concreteOffsetXRight: wallConcreteOffsetXRight,
+      concreteOffsetXLeft: wallConcreteOffsetXLeft,
+      concreteOffsetZBack: wallConcreteOffsetZBack,
+      concreteOffsetZFront: wallConcreteOffsetZFront,
+    });
+  };
+
+  const handleWallConcreteThicknessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setWallConcreteThickness(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: wallIsFiniteConcrete,
+      concreteThickness: value,
+      slabWidth: wallWidth,
+      slabDepth: wallDepth,
+      postCountX: wallPostCountX,
+      postCountZ: wallPostCountZ,
+      postDiameter: wallPostDiameter,
+      postOffset: wallPostOffset,
+      concreteOffsetXRight: wallConcreteOffsetXRight,
+      concreteOffsetXLeft: wallConcreteOffsetXLeft,
+      concreteOffsetZBack: wallConcreteOffsetZBack,
+      concreteOffsetZFront: wallConcreteOffsetZFront,
+    });
+  };
+
+  const handleWallWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setWallWidth(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: wallIsFiniteConcrete,
+      concreteThickness: wallConcreteThickness,
+      slabWidth: value,
+      slabDepth: wallDepth,
+      postCountX: wallPostCountX,
+      postCountZ: wallPostCountZ,
+      postDiameter: wallPostDiameter,
+      postOffset: wallPostOffset,
+      concreteOffsetXRight: wallConcreteOffsetXRight,
+      concreteOffsetXLeft: wallConcreteOffsetXLeft,
+      concreteOffsetZBack: wallConcreteOffsetZBack,
+      concreteOffsetZFront: wallConcreteOffsetZFront,
+    });
+  };
+
+  const handleWallDepthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setWallDepth(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: wallIsFiniteConcrete,
+      concreteThickness: wallConcreteThickness,
+      slabWidth: wallWidth,
+      slabDepth: value,
+      postCountX: wallPostCountX,
+      postCountZ: wallPostCountZ,
+      postDiameter: wallPostDiameter,
+      postOffset: wallPostOffset,
+      concreteOffsetXRight: wallConcreteOffsetXRight,
+      concreteOffsetXLeft: wallConcreteOffsetXLeft,
+      concreteOffsetZBack: wallConcreteOffsetZBack,
+      concreteOffsetZFront: wallConcreteOffsetZFront,
+    });
+  };
+
+  const handleWallPostCountXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 1;
+    setWallPostCountX(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: wallIsFiniteConcrete,
+      concreteThickness: wallConcreteThickness,
+      slabWidth: wallWidth,
+      slabDepth: wallDepth,
+      postCountX: value,
+      postCountZ: wallPostCountZ,
+      postDiameter: wallPostDiameter,
+      postOffset: wallPostOffset,
+      concreteOffsetXRight: wallConcreteOffsetXRight,
+      concreteOffsetXLeft: wallConcreteOffsetXLeft,
+      concreteOffsetZBack: wallConcreteOffsetZBack,
+      concreteOffsetZFront: wallConcreteOffsetZFront,
+    });
+  };
+
+  const handleWallPostCountZChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 1;
+    setWallPostCountZ(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: wallIsFiniteConcrete,
+      concreteThickness: wallConcreteThickness,
+      slabWidth: wallWidth,
+      slabDepth: wallDepth,
+      postCountX: wallPostCountX,
+      postCountZ: value,
+      postDiameter: wallPostDiameter,
+      postOffset: wallPostOffset,
+      concreteOffsetXRight: wallConcreteOffsetXRight,
+      concreteOffsetXLeft: wallConcreteOffsetXLeft,
+      concreteOffsetZBack: wallConcreteOffsetZBack,
+      concreteOffsetZFront: wallConcreteOffsetZFront,
+    });
+  };
+
+  const handleWallPostDiameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setWallPostDiameter(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: wallIsFiniteConcrete,
+      concreteThickness: wallConcreteThickness,
+      slabWidth: wallWidth,
+      slabDepth: wallDepth,
+      postCountX: wallPostCountX,
+      postCountZ: wallPostCountZ,
+      postDiameter: value,
+      postOffset: wallPostOffset,
+      concreteOffsetXRight: wallConcreteOffsetXRight,
+      concreteOffsetXLeft: wallConcreteOffsetXLeft,
+      concreteOffsetZBack: wallConcreteOffsetZBack,
+      concreteOffsetZFront: wallConcreteOffsetZFront,
+    });
+  };
+
+  const handleWallPostOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setWallPostOffset(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: wallIsFiniteConcrete,
+      concreteThickness: wallConcreteThickness,
+      slabWidth: wallWidth,
+      slabDepth: wallDepth,
+      postCountX: wallPostCountX,
+      postCountZ: wallPostCountZ,
+      postDiameter: wallPostDiameter,
+      postOffset: value,
+      concreteOffsetXRight: wallConcreteOffsetXRight,
+      concreteOffsetXLeft: wallConcreteOffsetXLeft,
+      concreteOffsetZBack: wallConcreteOffsetZBack,
+      concreteOffsetZFront: wallConcreteOffsetZFront,
+    });
+  };
+
+  const handleWallConcreteOffsetXRightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setWallConcreteOffsetXRight(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: wallIsFiniteConcrete,
+      concreteThickness: wallConcreteThickness,
+      slabWidth: wallWidth,
+      slabDepth: wallDepth,
+      postCountX: wallPostCountX,
+      postCountZ: wallPostCountZ,
+      postDiameter: wallPostDiameter,
+      postOffset: wallPostOffset,
+      concreteOffsetXRight: value,
+      concreteOffsetXLeft: wallConcreteOffsetXLeft,
+      concreteOffsetZBack: wallConcreteOffsetZBack,
+      concreteOffsetZFront: wallConcreteOffsetZFront,
+    });
+  };
+
+  const handleWallConcreteOffsetXLeftChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setWallConcreteOffsetXLeft(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: wallIsFiniteConcrete,
+      concreteThickness: wallConcreteThickness,
+      slabWidth: wallWidth,
+      slabDepth: wallDepth,
+      postCountX: wallPostCountX,
+      postCountZ: wallPostCountZ,
+      postDiameter: wallPostDiameter,
+      postOffset: wallPostOffset,
+      concreteOffsetXRight: wallConcreteOffsetXRight,
+      concreteOffsetXLeft: value,
+      concreteOffsetZBack: wallConcreteOffsetZBack,
+      concreteOffsetZFront: wallConcreteOffsetZFront,
+    });
+  };
+
+  const handleWallConcreteOffsetZBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setWallConcreteOffsetZBack(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: wallIsFiniteConcrete,
+      concreteThickness: wallConcreteThickness,
+      slabWidth: wallWidth,
+      slabDepth: wallDepth,
+      postCountX: wallPostCountX,
+      postCountZ: wallPostCountZ,
+      postDiameter: wallPostDiameter,
+      postOffset: wallPostOffset,
+      concreteOffsetXRight: wallConcreteOffsetXRight,
+      concreteOffsetXLeft: wallConcreteOffsetXLeft,
+      concreteOffsetZBack: value,
+      concreteOffsetZFront: wallConcreteOffsetZFront,
+    });
+  };
+
+  const handleWallConcreteOffsetZFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setWallConcreteOffsetZFront(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: wallIsFiniteConcrete,
+      concreteThickness: wallConcreteThickness,
+      slabWidth: wallWidth,
+      slabDepth: wallDepth,
+      postCountX: wallPostCountX,
+      postCountZ: wallPostCountZ,
+      postDiameter: wallPostDiameter,
+      postOffset: wallPostOffset,
+      concreteOffsetXRight: wallConcreteOffsetXRight,
+      concreteOffsetXLeft: wallConcreteOffsetXLeft,
+      concreteOffsetZBack: wallConcreteOffsetZBack,
       concreteOffsetZFront: value,
     });
   };
@@ -1206,7 +1451,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const model = e.target.value as  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'slab' | 'lapspliceBeam' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall';
+    const model = e.target.value as  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'endAnchorage' | 'endAnchorageSlab' | 'endAnchorageWall';
     setCurrentModel(model);
     onModelChange(model);
   };
@@ -1221,8 +1466,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           <option value="circularColumns">Circular Columns</option>
           <option value="complexColumn">Complex Column</option>
           <option value="rectangleColumn">Rectangle Column</option>
-          <option value="slab">Slab</option>
+          <option value="lapspliceSlab">Lapsplice Slab</option>
           <option value="lapspliceBeam">Lapsplice Beam</option>
+          <option value="lapspliceWall">Lapsplice Wall</option>
           <option value="endAnchorage">End Anchorage</option>
           <option value="endAnchorageSlab">End Anchorage Slab</option>
           <option value="endAnchorageWall">End Anchorage Wall</option>
@@ -1752,14 +1998,14 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         </>
       )}
 
-      {currentModel === 'slab' && (
+      {currentModel === 'lapspliceSlab' && (
         <>
           <div className="control-group">
             <label>
               <input
                 type="checkbox"
-                checked={slabIsFiniteConcrete}
-                onChange={handleSlabIsFiniteConcreteChange}
+                checked={lapspliceSlabIsFiniteConcrete}
+                onChange={handleLapspliceSlabIsFiniteConcreteChange}
               />
               Finite Concrete
             </label>
@@ -1769,8 +2015,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Thickness (Floor Height)</label>
             <input
               type="number"
-              value={slabConcreteThickness}
-              onChange={handleSlabConcreteThicknessChange}
+              value={lapspliceSlabConcreteThickness}
+              onChange={handleLapspliceSlabConcreteThicknessChange}
               step="0.1"
               min="0.1"
               placeholder="Enter thickness"
@@ -1781,8 +2027,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Slab Width (X)</label>
             <input
               type="number"
-              value={slabWidth}
-              onChange={handleSlabWidthChange}
+              value={lapspliceSlabWidth}
+              onChange={handleLapspliceSlabWidthChange}
               step="0.1"
               min="0.1"
               placeholder="Enter width"
@@ -1793,8 +2039,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Slab Depth (Z)</label>
             <input
               type="number"
-              value={slabDepth}
-              onChange={handleSlabDepthChange}
+              value={lapspliceSlabDepth}
+              onChange={handleLapspliceSlabDepthChange}
               step="0.1"
               min="0.1"
               placeholder="Enter depth"
@@ -1805,8 +2051,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Post Count X (Width)</label>
             <input
               type="number"
-              value={slabPostCountX}
-              onChange={handleSlabPostCountXChange}
+              value={lapspliceSlabPostCountX}
+              onChange={handleLapspliceSlabPostCountXChange}
               step="1"
               min="1"
               placeholder="Enter post count in X"
@@ -1817,8 +2063,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Post Count Z (Depth)</label>
             <input
               type="number"
-              value={slabPostCountZ}
-              onChange={handleSlabPostCountZChange}
+              value={lapspliceSlabPostCountZ}
+              onChange={handleLapspliceSlabPostCountZChange}
               step="1"
               min="1"
               placeholder="Enter post count in Z"
@@ -1829,8 +2075,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Post Diameter</label>
             <input
               type="number"
-              value={slabPostDiameter}
-              onChange={handleSlabPostDiameterChange}
+              value={lapspliceSlabPostDiameter}
+              onChange={handleLapspliceSlabPostDiameterChange}
               step="0.01"
               min="0.01"
               placeholder="Enter post diameter"
@@ -1841,8 +2087,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Post Offset from Perimeter</label>
             <input
               type="number"
-              value={slabPostOffset}
-              onChange={handleSlabPostOffsetChange}
+              value={lapspliceSlabPostOffset}
+              onChange={handleLapspliceSlabPostOffsetChange}
               step="0.01"
               min="0.01"
               max="0.5"
@@ -1854,8 +2100,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset X+ (Right)</label>
             <input
               type="number"
-              value={slabConcreteOffsetXRight}
-              onChange={handleSlabConcreteOffsetXRightChange}
+              value={lapspliceSlabConcreteOffsetXRight}
+              onChange={handleLapspliceSlabConcreteOffsetXRightChange}
               step="0.1"
               min="0.1"
               placeholder="Enter Concrete Offset X+"
@@ -1866,8 +2112,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset X- (Left)</label>
             <input
               type="number"
-              value={slabConcreteOffsetXLeft}
-              onChange={handleSlabConcreteOffsetXLeftChange}
+              value={lapspliceSlabConcreteOffsetXLeft}
+              onChange={handleLapspliceSlabConcreteOffsetXLeftChange}
               step="0.1"
               min="0.1"
               placeholder="Enter Concrete Offset X-"
@@ -1878,8 +2124,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset Z+ (Back)</label>
             <input
               type="number"
-              value={slabConcreteOffsetZBack}
-              onChange={handleSlabConcreteOffsetZBackChange}
+              value={lapspliceSlabConcreteOffsetZBack}
+              onChange={handleLapspliceSlabConcreteOffsetZBackChange}
               step="0.1"
               min="0.1"
               placeholder="Enter Concrete Offset Z+"
@@ -1890,8 +2136,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <label>Concrete Offset Z- (Front)</label>
             <input
               type="number"
-              value={slabConcreteOffsetZFront}
-              onChange={handleSlabConcreteOffsetZFrontChange}
+              value={lapspliceSlabConcreteOffsetZFront}
+              onChange={handleLapspliceSlabConcreteOffsetZFrontChange}
               step="0.1"
               min="0.1"
               placeholder="Enter Concrete Offset Z-"
@@ -2243,6 +2489,154 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   concreteOffsetZFront: value,
                 });
               }}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter Concrete Offset Z-"
+            />
+          </div>
+        </>
+      )}
+
+      {currentModel === 'lapspliceWall' && (
+        <>
+          <div className="control-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={wallIsFiniteConcrete}
+                onChange={handleWallIsFiniteConcreteChange}
+              />
+              Finite Concrete
+            </label>
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Thickness</label>
+            <input
+              type="number"
+              value={wallConcreteThickness}
+              onChange={handleWallConcreteThicknessChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter thickness"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Wall Width (X)</label>
+            <input
+              type="number"
+              value={wallWidth}
+              onChange={handleWallWidthChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter width"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Wall Depth (Z)</label>
+            <input
+              type="number"
+              value={wallDepth}
+              onChange={handleWallDepthChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter depth"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Count X</label>
+            <input
+              type="number"
+              value={wallPostCountX}
+              onChange={handleWallPostCountXChange}
+              step="1"
+              min="1"
+              placeholder="Enter post count in X"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Count Z</label>
+            <input
+              type="number"
+              value={wallPostCountZ}
+              onChange={handleWallPostCountZChange}
+              step="1"
+              min="1"
+              placeholder="Enter post count in Z"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Diameter</label>
+            <input
+              type="number"
+              value={wallPostDiameter}
+              onChange={handleWallPostDiameterChange}
+              step="0.01"
+              min="0.01"
+              placeholder="Enter post diameter"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Offset from Perimeter</label>
+            <input
+              type="number"
+              value={wallPostOffset}
+              onChange={handleWallPostOffsetChange}
+              step="0.01"
+              min="0.01"
+              max="0.5"
+              placeholder="Enter offset"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset X+ (Right)</label>
+            <input
+              type="number"
+              value={wallConcreteOffsetXRight}
+              onChange={handleWallConcreteOffsetXRightChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter Concrete Offset X+"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset X- (Left)</label>
+            <input
+              type="number"
+              value={wallConcreteOffsetXLeft}
+              onChange={handleWallConcreteOffsetXLeftChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter Concrete Offset X-"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset Z+ (Back)</label>
+            <input
+              type="number"
+              value={wallConcreteOffsetZBack}
+              onChange={handleWallConcreteOffsetZBackChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter Concrete Offset Z+"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset Z- (Front)</label>
+            <input
+              type="number"
+              value={wallConcreteOffsetZFront}
+              onChange={handleWallConcreteOffsetZFrontChange}
               step="0.1"
               min="0.1"
               placeholder="Enter Concrete Offset Z-"
