@@ -109,3 +109,18 @@ export const DEFAULT_END_ANCHORAGE_SLAB_PARAMS: EndAnchorageParams = {
   concreteOffsetZFront: 0.5,
   concreteThickness: 1,
 };
+
+export const DEFAULT_END_ANCHORAGE_WALL_PARAMS: EndAnchorageParams = {
+  beamWidth: 0.25,
+  beamDepth: 1,
+  beamHeight: 0.5,
+  postCountX: 3,
+  postCountZ: 2,
+  postDiameter: 0.01,
+  postOffset: 0.02,
+  concreteOffsetXRight: 0.5,
+  concreteOffsetXLeft: 0.5,
+  concreteOffsetZBack: 0.5,
+  concreteOffsetZFront: 0.5,
+  concreteThickness: 1,
+};
