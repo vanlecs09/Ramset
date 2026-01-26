@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/ControlPanel.css';
 import type { RectangleColumnParams, SlabParams } from '../App';
-import type { EndAnchorageParams } from '../utils/EndAnchorageBeamNode';
+import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
 import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS } from '../constants/defaultParams';
 
 interface ComplexColumnParams {

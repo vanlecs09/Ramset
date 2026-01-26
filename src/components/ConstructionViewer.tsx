@@ -3,17 +3,17 @@ import * as BABYLON from '@babylonjs/core';
 import { createComplexColumn, updateComplexColumn } from '../utils/ComplexColumnNode';
 import { createCircularColumns, updateCircularColumns } from '../utils/CircularColumnsNode';
 import { createRectangleColumn, updateRectangleColumn } from '../utils/RectangleColumnNode';
-import { createLapsplice } from '../utils/SlabNode';
-import { createEndAnchorage } from '../utils/EndAnchorageBeamNode';
+import { createLapsplice } from '../utils/BaseLapSpliceNode';
+import { createEndAnchorage } from '../utils/BaseEndAnchorageNode';
 import { calculateCircularPostPositions } from '../utils/CircularPostPositionCalculator';
 import { calculateRectanglePostPositions } from '../utils/RectanglePostPositionCalculator';
 import type { CircularColumnsNode } from '../utils/CircularColumnsNode';
 import type { ComplexColumnNode } from '../utils/ComplexColumnNode';
 import type { RectangleColumnNode } from '../utils/RectangleColumnNode';
-import type { BaseLapSpliceNode } from '../utils/SlabNode';
-import { BaseEndAnchorageNode } from '../utils/EndAnchorageBeamNode';
+import type { BaseLapSpliceNode } from '../utils/BaseLapSpliceNode';
+import { BaseEndAnchorageNode } from '../utils/BaseEndAnchorageNode';
 import type { RectangleColumnParams, SlabParams } from '../App';
-import type { EndAnchorageParams } from '../utils/EndAnchorageBeamNode';
+import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
 
 interface TowerParams {
   isFiniteConcrete: boolean;
@@ -358,7 +358,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
     const rollCamera = (camera: BABYLON.ArcRotateCamera, angle: BABYLON.float) => {
       const localZ = camera.getDirection(BABYLON.Axis.Z);
-      rotateCamera(camera, localZ, angle); 
+      rotateCamera(camera, localZ, angle);
 
       // camUp.rotate(localZ, angle, BABYLON.Space.WORLD);
     }
@@ -606,6 +606,20 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         slabCenterZ
       );
 
+      let concreteParam = {
+        thickness: slabParams.concreteThickness,
+        width: concreteWidth,
+        depth: concreteDepth,
+        position: concretePosition
+      };
+
+      let slabParam = {
+        slabWidth: slabParams.slabWidth,
+        slabDepth: slabParams.slabDepth,
+        postDiameter: slabParams.postDiameter,
+        isFiniteConcrete: slabParams.isFiniteConcrete
+      };
+
       if (!slabRef.current) {
         disposePreviousStructure();
         adjustCameraForModel('slab');
@@ -615,14 +629,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       slabRef.current = createLapsplice(
         scene,
         postPositions,
-        slabParams.concreteThickness,
-        slabParams.slabWidth,
-        slabParams.slabDepth,
-        slabParams.postDiameter,
-        concreteWidth,
-        concreteDepth,
-        concretePosition,
-        slabParams.isFiniteConcrete
+        concreteParam,
+        slabParam
       );
 
     } else if (model === 'endAnchorage') {

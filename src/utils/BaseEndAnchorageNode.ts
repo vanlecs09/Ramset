@@ -1,12 +1,11 @@
 import * as BABYLON from '@babylonjs/core';
-import * as GUI from '@babylonjs/gui';
-import { createConcrete, updateConcrete, ConcreteNode, getDimensionLabelTexture } from './ConcreteNode';
+import { createConcrete, ConcreteNode, getDimensionLabelTexture } from './ConcreteNode';
 import { createPost } from './PostNode';
 import { createWaveBlock } from './WaveBuilder';
-import { createUnitAxes as createUnitAxes, createDimensionWithLabel, createLine, createLineTwoArrow, DimensionLineNode, SCREEN_TO_WORLD_UNIT } from './GeometryHelper';
+import { createUnitAxes, createLineTwoArrow, createDimensionWithLabel, DimensionLineNode } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
-import { BendingMomentNode, createBendingMomenNode } from './BendingMomenNode';
-import { ArcDirection, TorsionMomentNode, createTorsionMoment as createTorsionMomentNode } from './TorsionMomentNode';
+import { createBendingMomenNode } from './BendingMomenNode';
+import { ArcDirection, createTorsionMoment as createTorsionMomentNode } from './TorsionMomentNode';
 
 export interface EndAnchorageParams {
     beamWidth: number;

@@ -3,7 +3,7 @@ import './App.css';
 import ConstructionViewer from './components/ConstructionViewer';
 import { ControlPanel } from './components/ControlPanel';
 import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS } from './constants/defaultParams';
-import type { EndAnchorageParams } from './utils/EndAnchorageBeamNode';
+import type { EndAnchorageParams } from './utils/BaseEndAnchorageNode';
 
 export interface CircularColumnParams {
   isFiniteConcrete: boolean;
