@@ -52,7 +52,7 @@ interface ComplexColumnParams {
 
 interface ConstructionViewerProps {
   onSceneReady?: (scene: BABYLON.Scene) => void;
-  model?: 'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall';
+  model?: 'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn';
   towerParams?: TowerParams;
   complexColumnParams?: ComplexColumnParams;
   rectangleColumnParams?: RectangleColumnParams;
@@ -63,6 +63,7 @@ interface ConstructionViewerProps {
   endAnchorageBeamParams?: EndAnchorageParams;
   endAnchorageSlabParams?: EndAnchorageParams;
   endAnchorageWallParams?: EndAnchorageParams;
+  endAnchorageRectangularColumnParams?: EndAnchorageParams;
 }
 
 interface ConcreteLayout {
@@ -258,6 +259,20 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     concreteOffsetZFront: 0.5,
     concreteThickness: 1,
   },
+  endAnchorageRectangularColumnParams = {
+    beamWidth: 0.25,
+    beamDepth: 0.25,
+    beamHeight: 0.5,
+    postCountX: 3,
+    postCountZ: 2,
+    postDiameter: 0.03,
+    postOffset: 0.05,
+    concreteOffsetXRight: 0.5,
+    concreteOffsetXLeft: 0.5,
+    concreteOffsetZBack: 0.5,
+    concreteOffsetZFront: 0.5,
+    concreteThickness: 1,
+  },
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<BABYLON.Scene | null>(null);
@@ -272,6 +287,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   const endAnchorageBeamRef = useRef<BaseEndAnchorageNode | null>(null);
   const endAnchorageSlabRef = useRef<BaseEndAnchorageNode | null>(null);
   const endAnchorageWallRef = useRef<BaseEndAnchorageNode | null>(null);
+  const endAnchorageRectangularColumnRef = useRef<BaseEndAnchorageNode | null>(null);
 
   // Initialize scene and engine (once on mount)
   useEffect(() => {
@@ -388,6 +404,10 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       if (endAnchorageWallRef.current) {
         endAnchorageWallRef.current.dispose();
         endAnchorageWallRef.current = null;
+      }
+      if (endAnchorageRectangularColumnRef.current) {
+        endAnchorageRectangularColumnRef.current.dispose();
+        endAnchorageRectangularColumnRef.current = null;
       }
     };
 
@@ -977,6 +997,46 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       endAnchorageWallRef.current = createEndAnchorage(scene, postPos, endAnchorageWallParams, concreteParam, secondaryParams);
       // Rotate the group by 90 degrees on X-axis
       // endAnchorageWallRef.current.group.rotation.x = Math.PI / 2;
+    } else if (model === 'endAnchorageRectangularColumn') {
+      // Calculate concrete dimensions and positions
+      const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
+        concreteOffsetXRight: endAnchorageRectangularColumnParams.concreteOffsetXRight,
+        concreteOffsetXLeft: endAnchorageRectangularColumnParams.concreteOffsetXLeft,
+        concreteOffsetZBack: endAnchorageRectangularColumnParams.concreteOffsetZBack,
+        concreteOffsetZFront: endAnchorageRectangularColumnParams.concreteOffsetZFront,
+        concreteThickness: endAnchorageRectangularColumnParams.concreteThickness,
+      });
+
+      const postPositions = calculateRectanglePostPositions(
+        endAnchorageRectangularColumnParams.beamWidth,
+        endAnchorageRectangularColumnParams.beamDepth,
+        endAnchorageRectangularColumnParams.postCountX,
+        endAnchorageRectangularColumnParams.postCountZ,
+        endAnchorageRectangularColumnParams.postOffset,
+        0
+      );
+      let postPos = postPositions.map(pos => pos.position);
+
+      if (!endAnchorageRectangularColumnRef.current) {
+        disposePreviousStructure();
+        adjustCameraForModel('endAnchorageRectangularColumn');
+      }
+      endAnchorageRectangularColumnRef.current?.dispose();
+      let concreteParam = {
+        thickness: endAnchorageRectangularColumnParams.concreteThickness,
+        width: concreteWidth,
+        depth: concreteDepth,
+        position: concretePosition
+      };
+
+      let secondaryParams = {
+        beamWidth: endAnchorageRectangularColumnParams.beamWidth,
+        beamDepth: endAnchorageRectangularColumnParams.beamDepth,
+        beamHeight: endAnchorageRectangularColumnParams.beamHeight,
+      };
+      endAnchorageRectangularColumnRef.current = createEndAnchorage(scene, postPos, endAnchorageRectangularColumnParams, concreteParam, secondaryParams);
+      // Rotate the group by 90 degrees on X-axis
+      // endAnchorageRectangularColumnRef.current.group.rotation.x = Math.PI / 2;
     }
   }, [
     model,
@@ -1084,6 +1144,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     endAnchorageBeamParams.concreteOffsetZBack,
     endAnchorageBeamParams.concreteOffsetZFront,
     endAnchorageBeamParams.concreteThickness,
+    endAnchorageBeamParams.isBoundlessConcrete,
 
     endAnchorageSlabParams.beamWidth,
     endAnchorageSlabParams.beamDepth,
@@ -1097,6 +1158,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     endAnchorageSlabParams.concreteOffsetZBack,
     endAnchorageSlabParams.concreteOffsetZFront,
     endAnchorageSlabParams.concreteThickness,
+    endAnchorageSlabParams.isBoundlessConcrete,
 
     endAnchorageWallParams.beamWidth,
     endAnchorageWallParams.beamDepth,
@@ -1110,6 +1172,21 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     endAnchorageWallParams.concreteOffsetZBack,
     endAnchorageWallParams.concreteOffsetZFront,
     endAnchorageWallParams.concreteThickness,
+    endAnchorageWallParams.isBoundlessConcrete,
+
+    endAnchorageRectangularColumnParams.beamWidth,
+    endAnchorageRectangularColumnParams.beamDepth,
+    endAnchorageRectangularColumnParams.beamHeight,
+    endAnchorageRectangularColumnParams.postCountX,
+    endAnchorageRectangularColumnParams.postCountZ,
+    endAnchorageRectangularColumnParams.postDiameter,
+    endAnchorageRectangularColumnParams.postOffset,
+    endAnchorageRectangularColumnParams.concreteOffsetXRight,
+    endAnchorageRectangularColumnParams.concreteOffsetXLeft,
+    endAnchorageRectangularColumnParams.concreteOffsetZBack,
+    endAnchorageRectangularColumnParams.concreteOffsetZFront,
+    endAnchorageRectangularColumnParams.concreteThickness,
+    endAnchorageRectangularColumnParams.isBoundlessConcrete,
   ]);
 
   return (

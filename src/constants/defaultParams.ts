@@ -138,6 +138,7 @@ export const DEFAULT_END_ANCHORAGE_PARAMS: EndAnchorageParams = {
   concreteOffsetZBack: 0.5,
   concreteOffsetZFront: 0.5,
   concreteThickness: 1,
+  isBoundlessConcrete: true,
 };
 
 export const DEFAULT_END_ANCHORAGE_SLAB_PARAMS: EndAnchorageParams = {
@@ -153,6 +154,7 @@ export const DEFAULT_END_ANCHORAGE_SLAB_PARAMS: EndAnchorageParams = {
   concreteOffsetZBack: 0.5,
   concreteOffsetZFront: 0.5,
   concreteThickness: 1,
+  isBoundlessConcrete: true,
 };
 
 export const DEFAULT_END_ANCHORAGE_WALL_PARAMS: EndAnchorageParams = {
@@ -168,4 +170,21 @@ export const DEFAULT_END_ANCHORAGE_WALL_PARAMS: EndAnchorageParams = {
   concreteOffsetZBack: 0.5,
   concreteOffsetZFront: 0.5,
   concreteThickness: 1,
+  isBoundlessConcrete: true,
+};
+
+export const DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS: EndAnchorageParams = {
+  beamWidth: 0.25,
+  beamDepth: 0.25,
+  beamHeight: 0.5,
+  postCountX: 3,
+  postCountZ: 2,
+  postDiameter: 0.03,
+  postOffset: 0.05,
+  concreteOffsetXRight: 0.5,
+  concreteOffsetXLeft: 0.5,
+  concreteOffsetZBack: 0.5,
+  concreteOffsetZFront: 0.5,
+  concreteThickness: 1,
+  isBoundlessConcrete: true,
 };

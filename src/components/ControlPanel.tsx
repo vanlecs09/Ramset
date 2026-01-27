@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import '../styles/ControlPanel.css';
 import type { RectangleColumnParams, SlabParams } from '../App';
 import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
-import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_LAPSPLICE_SLAB_PARAMS, DEFAULT_LAPSPLICE_BEAM_PARAMS, DEFAULT_LAPSPLICE_WALL_PARAMS, DEFAULT_LAPSPLICE_COLUMN_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS } from '../constants/defaultParams';
+import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_LAPSPLICE_SLAB_PARAMS, DEFAULT_LAPSPLICE_BEAM_PARAMS, DEFAULT_LAPSPLICE_WALL_PARAMS, DEFAULT_LAPSPLICE_COLUMN_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS, DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS } from '../constants/defaultParams';
 
 interface ComplexColumnParams {
   isFiniteConcrete: boolean;
@@ -26,7 +26,7 @@ interface ComplexColumnParams {
 }
 
 interface ControlPanelProps {
-  onModelChange: (model:  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall') => void;
+  onModelChange: (model:  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn') => void;
   onTowerParamsChange: (params: {
     isFiniteConcrete: boolean;
     concreteThickness: number;
@@ -49,6 +49,7 @@ interface ControlPanelProps {
   onEndAnchorageBeamParamsChange: (params: EndAnchorageParams) => void;
   onEndAnchorageSlabParamsChange: (params: EndAnchorageParams) => void;
   onEndAnchorageWallParamsChange: (params: EndAnchorageParams) => void;
+  onEndAnchorageRectangularColumnParamsChange: (params: EndAnchorageParams) => void;
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -63,8 +64,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onEndAnchorageBeamParamsChange,
   onEndAnchorageSlabParamsChange,
   onEndAnchorageWallParamsChange,
+  onEndAnchorageRectangularColumnParamsChange,
 }) => {
-  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall'>('endAnchorageBeam');
+  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn'>('endAnchorageBeam');
 
   // Tower parameters
   const [towerIsFiniteConcrete, setTowerIsFiniteConcrete] = useState(DEFAULT_TOWER_PARAMS.isFiniteConcrete);
@@ -212,6 +214,26 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [anchorageWallConcreteOffsetZBack, setAnchorageWallConcreteOffsetZBack] = useState(DEFAULT_END_ANCHORAGE_WALL_PARAMS.concreteOffsetZBack);
   const [anchorageWallConcreteOffsetZFront, setAnchorageWallConcreteOffsetZFront] = useState(DEFAULT_END_ANCHORAGE_WALL_PARAMS.concreteOffsetZFront);
   const [anchorageWallConcreteThickness, setAnchorageWallConcreteThickness] = useState(DEFAULT_END_ANCHORAGE_WALL_PARAMS.concreteThickness);
+
+  // End Anchorage Rectangular Column parameters
+  const [endAnchorageRectColBeamWidth, setEndAnchorageRectColBeamWidth] = useState(DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS.beamWidth);
+  const [endAnchorageRectColBeamDepth, setEndAnchorageRectColBeamDepth] = useState(DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS.beamDepth);
+  const [endAnchorageRectColBeamHeight, setEndAnchorageRectColBeamHeight] = useState(DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS.beamHeight);
+  const [endAnchorageRectColPostCountX, setEndAnchorageRectColPostCountX] = useState(DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS.postCountX);
+  const [endAnchorageRectColPostCountZ, setEndAnchorageRectColPostCountZ] = useState(DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS.postCountZ);
+  const [endAnchorageRectColPostDiameter, setEndAnchorageRectColPostDiameter] = useState(DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS.postDiameter);
+  const [endAnchorageRectColPostOffset, setEndAnchorageRectColPostOffset] = useState(DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS.postOffset);
+  const [endAnchorageRectColConcreteOffsetXRight, setEndAnchorageRectColConcreteOffsetXRight] = useState(DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS.concreteOffsetXRight);
+  const [endAnchorageRectColConcreteOffsetXLeft, setEndAnchorageRectColConcreteOffsetXLeft] = useState(DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS.concreteOffsetXLeft);
+  const [endAnchorageRectColConcreteOffsetZBack, setEndAnchorageRectColConcreteOffsetZBack] = useState(DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS.concreteOffsetZBack);
+  const [endAnchorageRectColConcreteOffsetZFront, setEndAnchorageRectColConcreteOffsetZFront] = useState(DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS.concreteOffsetZFront);
+  const [endAnchorageRectColConcreteThickness, setEndAnchorageRectColConcreteThickness] = useState(DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS.concreteThickness);
+
+  // End Anchorage isBoundlessConcrete flags
+  const [anchorageBeamIsBoundless, setAnchorageBeamIsBoundless] = useState(DEFAULT_END_ANCHORAGE_PARAMS.isBoundlessConcrete ?? false);
+  const [anchorageSlabIsBoundless, setAnchorageSlabIsBoundless] = useState(DEFAULT_END_ANCHORAGE_SLAB_PARAMS.isBoundlessConcrete ?? false);
+  const [anchorageWallIsBoundless, setAnchorageWallIsBoundless] = useState(DEFAULT_END_ANCHORAGE_WALL_PARAMS.isBoundlessConcrete ?? false);
+  const [endAnchorageRectColIsBoundless, setEndAnchorageRectColIsBoundless] = useState(DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS.isBoundlessConcrete ?? false);
 
   // Helper function to build complete complex column params
   const getComplexColumnParams = (overrides?: Partial<ComplexColumnParams>): ComplexColumnParams => ({
@@ -1426,6 +1448,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     concreteOffsetZBack: overrides?.concreteOffsetZBack ?? anchorageConcreteOffsetZBack,
     concreteOffsetZFront: overrides?.concreteOffsetZFront ?? anchorageConcreteOffsetZFront,
     concreteThickness: overrides?.concreteThickness ?? anchorageConcreteThickness,
+    isBoundlessConcrete: overrides?.isBoundlessConcrete ?? anchorageBeamIsBoundless,
   });
 
   const handleAnchorageBeamWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1500,6 +1523,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     onEndAnchorageBeamParamsChange(getEndAnchorageParams({ concreteThickness: value }));
   };
 
+  const handleAnchorageBeamIsBoundlessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.checked;
+    setAnchorageBeamIsBoundless(value);
+    onEndAnchorageBeamParamsChange(getEndAnchorageParams({ isBoundlessConcrete: value }));
+  };
+
   // Helper function to build complete end anchorage slab params
   const getEndAnchorageSlabParams = (overrides?: Partial<EndAnchorageParams>): EndAnchorageParams => ({
     beamWidth: overrides?.beamWidth ?? anchorageSlabBeamWidth,
@@ -1514,6 +1543,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     concreteOffsetZBack: overrides?.concreteOffsetZBack ?? anchorageSlabConcreteOffsetZBack,
     concreteOffsetZFront: overrides?.concreteOffsetZFront ?? anchorageSlabConcreteOffsetZFront,
     concreteThickness: overrides?.concreteThickness ?? anchorageSlabConcreteThickness,
+    isBoundlessConcrete: overrides?.isBoundlessConcrete ?? anchorageSlabIsBoundless,
   });
 
   const handleAnchorageSlabBeamWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1588,6 +1618,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     onEndAnchorageSlabParamsChange(getEndAnchorageSlabParams({ concreteThickness: value }));
   };
 
+  const handleAnchorageSlabIsBoundlessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.checked;
+    setAnchorageSlabIsBoundless(value);
+    onEndAnchorageSlabParamsChange(getEndAnchorageSlabParams({ isBoundlessConcrete: value }));
+  };
+
   // Helper function to build complete end anchorage wall params
   const getEndAnchorageWallParams = (overrides?: Partial<EndAnchorageParams>): EndAnchorageParams => ({
     beamWidth: overrides?.beamWidth ?? anchorageWallBeamWidth,
@@ -1602,6 +1638,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     concreteOffsetZBack: overrides?.concreteOffsetZBack ?? anchorageWallConcreteOffsetZBack,
     concreteOffsetZFront: overrides?.concreteOffsetZFront ?? anchorageWallConcreteOffsetZFront,
     concreteThickness: overrides?.concreteThickness ?? anchorageWallConcreteThickness,
+    isBoundlessConcrete: overrides?.isBoundlessConcrete ?? anchorageWallIsBoundless,
   });
 
   const handleAnchorageWallBeamWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1676,8 +1713,109 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     onEndAnchorageWallParamsChange(getEndAnchorageWallParams({ concreteThickness: value }));
   };
 
+  const handleAnchorageWallIsBoundlessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.checked;
+    setAnchorageWallIsBoundless(value);
+    onEndAnchorageWallParamsChange(getEndAnchorageWallParams({ isBoundlessConcrete: value }));
+  };
+
+  // Helper function to build complete end anchorage rectangular column params
+  const getEndAnchorageRectangularColumnParams = (overrides?: Partial<EndAnchorageParams>): EndAnchorageParams => ({
+    beamWidth: overrides?.beamWidth ?? endAnchorageRectColBeamWidth,
+    beamDepth: overrides?.beamDepth ?? endAnchorageRectColBeamDepth,
+    beamHeight: overrides?.beamHeight ?? endAnchorageRectColBeamHeight,
+    postCountX: overrides?.postCountX ?? endAnchorageRectColPostCountX,
+    postCountZ: overrides?.postCountZ ?? endAnchorageRectColPostCountZ,
+    postDiameter: overrides?.postDiameter ?? endAnchorageRectColPostDiameter,
+    postOffset: overrides?.postOffset ?? endAnchorageRectColPostOffset,
+    concreteOffsetXRight: overrides?.concreteOffsetXRight ?? endAnchorageRectColConcreteOffsetXRight,
+    concreteOffsetXLeft: overrides?.concreteOffsetXLeft ?? endAnchorageRectColConcreteOffsetXLeft,
+    concreteOffsetZBack: overrides?.concreteOffsetZBack ?? endAnchorageRectColConcreteOffsetZBack,
+    concreteOffsetZFront: overrides?.concreteOffsetZFront ?? endAnchorageRectColConcreteOffsetZFront,
+    concreteThickness: overrides?.concreteThickness ?? endAnchorageRectColConcreteThickness,
+    isBoundlessConcrete: overrides?.isBoundlessConcrete ?? endAnchorageRectColIsBoundless,
+  });
+
+  const handleEndAnchorageRectColBeamWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setEndAnchorageRectColBeamWidth(value);
+    onEndAnchorageRectangularColumnParamsChange(getEndAnchorageRectangularColumnParams({ beamWidth: value }));
+  };
+
+  const handleEndAnchorageRectColBeamDepthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setEndAnchorageRectColBeamDepth(value);
+    onEndAnchorageRectangularColumnParamsChange(getEndAnchorageRectangularColumnParams({ beamDepth: value }));
+  };
+
+  const handleEndAnchorageRectColBeamHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setEndAnchorageRectColBeamHeight(value);
+    onEndAnchorageRectangularColumnParamsChange(getEndAnchorageRectangularColumnParams({ beamHeight: value }));
+  };
+
+  const handleEndAnchorageRectColPostCountXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 1;
+    setEndAnchorageRectColPostCountX(value);
+    onEndAnchorageRectangularColumnParamsChange(getEndAnchorageRectangularColumnParams({ postCountX: value }));
+  };
+
+  const handleEndAnchorageRectColPostCountZChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 1;
+    setEndAnchorageRectColPostCountZ(value);
+    onEndAnchorageRectangularColumnParamsChange(getEndAnchorageRectangularColumnParams({ postCountZ: value }));
+  };
+
+  const handleEndAnchorageRectColPostDiameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setEndAnchorageRectColPostDiameter(value);
+    onEndAnchorageRectangularColumnParamsChange(getEndAnchorageRectangularColumnParams({ postDiameter: value }));
+  };
+
+  const handleEndAnchorageRectColPostOffsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setEndAnchorageRectColPostOffset(value);
+    onEndAnchorageRectangularColumnParamsChange(getEndAnchorageRectangularColumnParams({ postOffset: value }));
+  };
+
+  const handleEndAnchorageRectColConcreteOffsetXRightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setEndAnchorageRectColConcreteOffsetXRight(value);
+    onEndAnchorageRectangularColumnParamsChange(getEndAnchorageRectangularColumnParams({ concreteOffsetXRight: value }));
+  };
+
+  const handleEndAnchorageRectColConcreteOffsetXLeftChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setEndAnchorageRectColConcreteOffsetXLeft(value);
+    onEndAnchorageRectangularColumnParamsChange(getEndAnchorageRectangularColumnParams({ concreteOffsetXLeft: value }));
+  };
+
+  const handleEndAnchorageRectColConcreteOffsetZBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setEndAnchorageRectColConcreteOffsetZBack(value);
+    onEndAnchorageRectangularColumnParamsChange(getEndAnchorageRectangularColumnParams({ concreteOffsetZBack: value }));
+  };
+
+  const handleEndAnchorageRectColConcreteOffsetZFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setEndAnchorageRectColConcreteOffsetZFront(value);
+    onEndAnchorageRectangularColumnParamsChange(getEndAnchorageRectangularColumnParams({ concreteOffsetZFront: value }));
+  };
+
+  const handleEndAnchorageRectColConcreteThicknessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setEndAnchorageRectColConcreteThickness(value);
+    onEndAnchorageRectangularColumnParamsChange(getEndAnchorageRectangularColumnParams({ concreteThickness: value }));
+  };
+
+  const handleEndAnchorageRectColIsBoundlessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.checked;
+    setEndAnchorageRectColIsBoundless(value);
+    onEndAnchorageRectangularColumnParamsChange(getEndAnchorageRectangularColumnParams({ isBoundlessConcrete: value }));
+  };
+
   const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const model = e.target.value as  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall';
+    const model = e.target.value as  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn';
     setCurrentModel(model);
     onModelChange(model);
   };
@@ -1699,6 +1837,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           <option value="endAnchorageBeam">End Anchorage Beam</option>
           <option value="endAnchorageSlab">End Anchorage Slab</option>
           <option value="endAnchorageWall">End Anchorage Wall</option>
+          <option value="endAnchorageRectangularColumn">End Anchorage Rectangular Column</option>
         </select>
       </div>
       {currentModel === 'circularColumns' && (
@@ -3039,6 +3178,17 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       {currentModel === 'endAnchorageBeam' && (
         <>
           <div className="control-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={anchorageBeamIsBoundless}
+                onChange={handleAnchorageBeamIsBoundlessChange}
+              />
+              Boundless Concrete
+            </label>
+          </div>
+
+          <div className="control-group">
             <label>Beam Width (X)</label>
             <input
               type="number"
@@ -3186,6 +3336,17 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
       {currentModel === 'endAnchorageSlab' && (
         <>
+          <div className="control-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={anchorageSlabIsBoundless}
+                onChange={handleAnchorageSlabIsBoundlessChange}
+              />
+              Boundless Concrete
+            </label>
+          </div>
+
           <div className="control-group">
             <label>Beam Width (X)</label>
             <input
@@ -3335,6 +3496,17 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       {currentModel === 'endAnchorageWall' && (
         <>
           <div className="control-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={anchorageWallIsBoundless}
+                onChange={handleAnchorageWallIsBoundlessChange}
+              />
+              Boundless Concrete
+            </label>
+          </div>
+
+          <div className="control-group">
             <label>Beam Width (X)</label>
             <input
               type="number"
@@ -3472,6 +3644,164 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               type="number"
               value={anchorageWallConcreteThickness}
               onChange={handleAnchorageWallConcreteThicknessChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter concrete thickness"
+            />
+          </div>
+        </>
+      )}
+      {currentModel === 'endAnchorageRectangularColumn' && (
+        <>
+          <div className="control-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={endAnchorageRectColIsBoundless}
+                onChange={handleEndAnchorageRectColIsBoundlessChange}
+              />
+              Boundless Concrete
+            </label>
+          </div>
+
+          <div className="control-group">
+            <label>Beam Width (X)</label>
+            <input
+              type="number"
+              value={endAnchorageRectColBeamWidth}
+              onChange={handleEndAnchorageRectColBeamWidthChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter beam width"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Beam Depth (Z)</label>
+            <input
+              type="number"
+              value={endAnchorageRectColBeamDepth}
+              onChange={handleEndAnchorageRectColBeamDepthChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter beam depth"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Beam Height (Y)</label>
+            <input
+              type="number"
+              value={endAnchorageRectColBeamHeight}
+              onChange={handleEndAnchorageRectColBeamHeightChange}
+              step="0.1"
+              min="0.1"
+              placeholder="Enter beam height"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Count X</label>
+            <input
+              type="number"
+              value={endAnchorageRectColPostCountX}
+              onChange={handleEndAnchorageRectColPostCountXChange}
+              step="1"
+              min="1"
+              placeholder="Enter number of posts in X direction"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Count Z</label>
+            <input
+              type="number"
+              value={endAnchorageRectColPostCountZ}
+              onChange={handleEndAnchorageRectColPostCountZChange}
+              step="1"
+              min="1"
+              placeholder="Enter number of posts in Z direction"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Diameter</label>
+            <input
+              type="number"
+              value={endAnchorageRectColPostDiameter}
+              onChange={handleEndAnchorageRectColPostDiameterChange}
+              step="0.01"
+              min="0.01"
+              placeholder="Enter post diameter"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Post Offset</label>
+            <input
+              type="number"
+              value={endAnchorageRectColPostOffset}
+              onChange={handleEndAnchorageRectColPostOffsetChange}
+              step="0.05"
+              min="0"
+              placeholder="Enter post offset"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset X Right</label>
+            <input
+              type="number"
+              value={endAnchorageRectColConcreteOffsetXRight}
+              onChange={handleEndAnchorageRectColConcreteOffsetXRightChange}
+              step="0.05"
+              min="0"
+              placeholder="Enter concrete offset X right"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset X Left</label>
+            <input
+              type="number"
+              value={endAnchorageRectColConcreteOffsetXLeft}
+              onChange={handleEndAnchorageRectColConcreteOffsetXLeftChange}
+              step="0.05"
+              min="0"
+              placeholder="Enter concrete offset X left"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset Z Back</label>
+            <input
+              type="number"
+              value={endAnchorageRectColConcreteOffsetZBack}
+              onChange={handleEndAnchorageRectColConcreteOffsetZBackChange}
+              step="0.05"
+              min="0"
+              placeholder="Enter concrete offset Z back"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset Z Front</label>
+            <input
+              type="number"
+              value={endAnchorageRectColConcreteOffsetZFront}
+              onChange={handleEndAnchorageRectColConcreteOffsetZFrontChange}
+              step="0.05"
+              min="0"
+              placeholder="Enter concrete offset Z front"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Thickness</label>
+            <input
+              type="number"
+              value={endAnchorageRectColConcreteThickness}
+              onChange={handleEndAnchorageRectColConcreteThicknessChange}
               step="0.1"
               min="0.1"
               placeholder="Enter concrete thickness"

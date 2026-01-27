@@ -20,6 +20,7 @@ export interface EndAnchorageParams {
     concreteOffsetZBack: number;
     concreteOffsetZFront: number;
     concreteThickness: number;
+    isBoundlessConcrete?: boolean;
 }
 
 
@@ -115,6 +116,7 @@ export const createEndAnchorage = (
     const concreteNode = createConcrete(scene,
         concreteParams,
         anchorageTrans,
+        !params.isBoundlessConcrete,
         true);
     mainNode.setConcreteGroup(concreteNode);
 

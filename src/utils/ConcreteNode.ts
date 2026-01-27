@@ -460,8 +460,8 @@ const createSurroundingConcreteMesh = (
     material: BABYLON.StandardMaterial
 ): BABYLON.Mesh => {
     const blockThickness = 0.2;
-    const amp = 0.05;
-    const freq = 10;
+    const amp = 0.02;
+    const freq = 10 * concreteWidth;
     const divU = 50;
     const divV = 10;
 
