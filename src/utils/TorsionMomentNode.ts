@@ -118,7 +118,7 @@ export const TORSION_MOMENT_CONSTANTS = {
  * @param labelText - Optional text for the label
  * @returns TorsionMomentNode containing arc, arrow, label, and all meshes
  */
-export const createTorsionMoment = (
+export const createTorsionMomentNode = (
     name: string,
     scene: BABYLON.Scene,
     centerPosition: BABYLON.Vector3,

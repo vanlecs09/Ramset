@@ -16,7 +16,7 @@ export interface TowerParams {
 }
 
 export const DEFAULT_TOWER_PARAMS: TowerParams = {
-  isFiniteConcrete: true,
+  isFiniteConcrete: false,
   concreteThickness: 1,
   cylinderHeight: 0.3,
   cylinderRadius: 0.2,

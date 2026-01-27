@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react';
 import * as BABYLON from '@babylonjs/core';
 import { createComplexColumn, updateComplexColumn } from '../utils/ComplexColumnNode';
-import { createCircularColumns, updateCircularColumns } from '../utils/CircularColumnsNode';
+import { createCircularColumns } from '../utils/EndAnchorageCircularColumnsNode';
 import { createRectangleColumn, updateRectangleColumn } from '../utils/RectangleColumnNode';
 import { createLapsplice } from '../utils/BaseLapSpliceNode';
 import { createEndAnchorage } from '../utils/BaseEndAnchorageNode';
 import { calculateCircularPostPositions } from '../utils/CircularPostPositionCalculator';
 import { calculateRectanglePostPositions } from '../utils/RectanglePostPositionCalculator';
-import type { CircularColumnsNode } from '../utils/CircularColumnsNode';
+import type { EndAnchorageCircularColumnsNode } from '../utils/EndAnchorageCircularColumnsNode';
 import type { ComplexColumnNode } from '../utils/ComplexColumnNode';
 import type { RectangleColumnNode } from '../utils/RectangleColumnNode';
 import type { BaseLapSpliceNode } from '../utils/BaseLapSpliceNode';
@@ -52,7 +52,7 @@ interface ComplexColumnParams {
 
 interface ConstructionViewerProps {
   onSceneReady?: (scene: BABYLON.Scene) => void;
-  model?: 'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn';
+  model?: 'endAnchorageCircularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn';
   towerParams?: TowerParams;
   complexColumnParams?: ComplexColumnParams;
   rectangleColumnParams?: RectangleColumnParams;
@@ -113,7 +113,7 @@ const calculateConcreteLayout = (offsets: ConcreteOffsets): ConcreteLayout => {
 
 export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   onSceneReady,
-  model = 'circularColumns',
+  model = 'endAnchorageCircularColumns',
   towerParams: circleColumns = {
     isFiniteConcrete: false,
     concreteThickness: 3,
@@ -277,7 +277,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<BABYLON.Scene | null>(null);
   const engineRef = useRef<BABYLON.Engine | null>(null);
-  const circularColumnsRef = useRef<CircularColumnsNode | null>(null);
+  const endAnchorageCircularColumnsRef = useRef<EndAnchorageCircularColumnsNode | null>(null);
   const complexColumnRef = useRef<ComplexColumnNode | null>(null);
   const rectangleColumnRef = useRef<RectangleColumnNode | null>(null);
   const lapspliceSlabRef = useRef<BaseLapSpliceNode | null>(null);
@@ -365,9 +365,9 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     // Helper function to dispose current structure
     const disposePreviousStructure = () => {
       // return;
-      if (circularColumnsRef.current) {
-        circularColumnsRef.current.dispose();
-        circularColumnsRef.current = null;
+      if (endAnchorageCircularColumnsRef.current) {
+        endAnchorageCircularColumnsRef.current.dispose();
+        endAnchorageCircularColumnsRef.current = null;
       }
       if (complexColumnRef.current) {
         complexColumnRef.current.dispose();
@@ -458,56 +458,16 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       const camera = scene.activeCamera as BABYLON.ArcRotateCamera;
       if (!camera) return;
       resetScene(camera);
-      switch (modelType) {
-        // case 'circularColumns':
-        //   camera.target = BABYLON.Vector3.Zero();
-        //   camera.radius = 6;
-        //   camera.alpha = Math.PI / 2;
-        //   camera.beta = Math.PI / 4;
-        //   break;
-        // case 'complexColumn':
-        //   camera.target = BABYLON.Vector3.Zero();
-        //   camera.radius = 5;
-        //   camera.alpha = Math.PI / 3;
-        //   camera.beta = Math.PI / 3.5;
-        //   break;
-        // case 'rectangleColumn':
-        //   camera.target = BABYLON.Vector3.Zero();
-        //   camera.radius = 4;
-        //   camera.alpha = Math.PI / 2.5;
-        //   camera.beta = Math.PI / 3;
-        //   break;
-  
-        // case 'lapspliceSlab':
-        // case 'lapspliceBeam':
 
-        //   camera.target = BABYLON.Vector3.Zero();
-        //   camera.radius = 3.0;
-        //   camera.alpha = Math.PI * (-20 / 180);
-        //   camera.beta = Math.PI / 2 + Math.PI * (-20 / 180);
-        //   rollCamera(camera, Math.PI / 2 + Math.PI * (10 / 180));
-        //   break;
-        // // case 'lapspliceWall':
-        // case 'endAnchorage':
-        // // case 'endAnchorageSlab':
-        // case 'endAnchorageWall':
-        //   camera.target = BABYLON.Vector3.Zero();
-        //   camera.radius = 3.0;
-        //   camera.alpha = Math.PI * (-45 / 180);
-        //   camera.beta = Math.PI / 2 + Math.PI * (-45 / 180); 
-        //   rollCamera(camera, Math.PI / 2 + Math.PI * ((45/2) / 180));
-        //   // rollCamera(camera, Math.PI / 2);
-        //   break;
-        default:
-          camera.target = BABYLON.Vector3.Zero();
-          camera.radius = 3;
-          camera.alpha = Math.PI * (20 / 180);
-          camera.beta = Math.PI / 2 + Math.PI * (-20 / 180);
-          camera.upVector = new BABYLON.Vector3(0, 1, 0);
-      }
+      camera.target = BABYLON.Vector3.Zero();
+      camera.radius = 3;
+      camera.alpha = Math.PI * (20 / 180);
+      camera.beta = Math.PI / 2 + Math.PI * (-20 / 180);
+      camera.upVector = new BABYLON.Vector3(0, 1, 0);
+
     };
 
-    if (model === 'circularColumns') {
+    if (model === 'endAnchorageCircularColumns') {
 
       // Calculate post positions first
       const gapDistance = 0.5;
@@ -528,36 +488,37 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       });
 
 
-      if (!circularColumnsRef.current) {
+      if (!endAnchorageCircularColumnsRef.current) {
         disposePreviousStructure();
-        circularColumnsRef.current = createCircularColumns(
-          scene,
-          circleColumns.concreteThickness,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          finiteBlockPositions,
-          circleColumns.isFiniteConcrete,
-          circleColumns.cylinderHeight,
-          circleColumns.cylinderRadius,
-          circleColumns.postRadius,
-          postPositions,
-        );
-        adjustCameraForModel('circularColumns');
-      } else {
-        updateCircularColumns(
-          circularColumnsRef.current,
-          circleColumns.concreteThickness,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          circleColumns.isFiniteConcrete,
-          circleColumns.cylinderHeight,
-          circleColumns.cylinderRadius,
-          circleColumns.postRadius,
-          postPositions,
-        );
+
+        adjustCameraForModel('endAnchorageCircularColumns');
       }
+
+      let concreteParam = {
+        thickness: circleColumns.concreteThickness,
+        width: concreteWidth,
+        depth: concreteDepth,
+        position: concretePosition,
+        isBoundless: circleColumns.isFiniteConcrete,
+      };
+
+      let circleColumnsParam = {
+        columnHeight: circleColumns.cylinderHeight,
+        columnRadius: circleColumns.cylinderRadius,
+      };
+
+      let postParam = {
+        postRadius: circleColumns.postRadius,
+        postPositions: postPositions,
+      };
+
+      endAnchorageCircularColumnsRef.current?.dispose();
+      endAnchorageCircularColumnsRef.current = createCircularColumns(scene, {
+        concreteParam,
+        circleColumnsParam,
+        postParam,
+      });
+
 
 
     } else if (model === 'complexColumn') {

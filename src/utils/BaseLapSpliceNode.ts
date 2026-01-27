@@ -5,7 +5,7 @@ import { createUnitAxes } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 import { createBendingMomenNode } from './BendingMomenNode';
-import { ArcDirection, createTorsionMoment as createTorsionMomentNode } from './TorsionMomentNode';
+import { ArcDirection, createTorsionMomentNode as createTorsionMomentNode } from './TorsionMomentNode';
 import { createWaveBlockTop } from './BaseEndAnchorageNode';
 
 export class BaseLapSpliceNode extends BaseStructNodeImpl {

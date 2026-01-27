@@ -26,7 +26,7 @@ interface ComplexColumnParams {
 }
 
 interface ControlPanelProps {
-  onModelChange: (model:  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn') => void;
+  onModelChange: (model:  'endAnchorageCircularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn') => void;
   onTowerParamsChange: (params: {
     isFiniteConcrete: boolean;
     concreteThickness: number;
@@ -66,7 +66,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onEndAnchorageWallParamsChange,
   onEndAnchorageRectangularColumnParamsChange,
 }) => {
-  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn'>('endAnchorageBeam');
+  const [currentModel, setCurrentModel] = useState<'endAnchorageCircularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn'>('endAnchorageBeam');
 
   // Tower parameters
   const [towerIsFiniteConcrete, setTowerIsFiniteConcrete] = useState(DEFAULT_TOWER_PARAMS.isFiniteConcrete);
@@ -1815,7 +1815,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const model = e.target.value as  'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn';
+    const model = e.target.value as  'endAnchorageCircularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn';
     setCurrentModel(model);
     onModelChange(model);
   };
@@ -1827,7 +1827,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       <div className="control-group">
         <label>Select Model</label>
         <select value={currentModel} onChange={handleModelChange}>
-          <option value="circularColumns">Circular Columns</option>
+          <option value="endAnchorageCircularColumns">End Anchorage Circular Columns</option>
           <option value="complexColumn">Complex Column</option>
           <option value="rectangleColumn">Rectangle Column</option>
           <option value="lapspliceSlab">Lapsplice Slab</option>
@@ -1840,7 +1840,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           <option value="endAnchorageRectangularColumn">End Anchorage Rectangular Column</option>
         </select>
       </div>
-      {currentModel === 'circularColumns' && (
+      {currentModel === 'endAnchorageCircularColumns' && (
         <>
           <div className="control-group">
             <label>

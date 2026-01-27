@@ -5,7 +5,7 @@ import { createWaveBlock } from './WaveBuilder';
 import { createUnitAxes, createLineTwoArrow, createDimensionWithLabel, DimensionLineNode } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
 import { createBendingMomenNode } from './BendingMomenNode';
-import { ArcDirection, createTorsionMoment as createTorsionMomentNode } from './TorsionMomentNode';
+import { ArcDirection, createTorsionMomentNode as createTorsionMomentNode } from './TorsionMomentNode';
 
 export interface EndAnchorageParams {
     beamWidth: number;
