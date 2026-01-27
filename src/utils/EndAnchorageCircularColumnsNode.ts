@@ -160,23 +160,23 @@ export const createCircularColumns = (
   // Create standing wave on top of cylinder
   const wavePosition = new BABYLON.Vector3(
     params.concreteParam.position.x,
-    concreteTopY + gapDistance + params.circleColumnsParam.columnHeight + 0.15,
+    concreteTopY + gapDistance + params.circleColumnsParam.columnHeight + 0.05,
     params.concreteParam.position.z
   );
 
   const waveWaveMaterial = new BABYLON.StandardMaterial('waveWaveMaterial', scene);
   waveWaveMaterial.diffuseColor = new BABYLON.Color3(214 / 255, 217 / 255, 200 / 255);   // tan/beige color
   waveWaveMaterial.specularColor = new BABYLON.Color3(1, 1, 1);// semi-transparent
-  waveWaveMaterial.alpha = 0.2;
+  waveWaveMaterial.alpha = 0.4;
   waveWaveMaterial.backFaceCulling = false;
 
   const standingWave = createCircularStandingWave(
     scene,
     wavePosition,
     params.circleColumnsParam.columnRadius,
-    0.3,
+    0.1,
     waveWaveMaterial,
-    0.08,
+    0.02,
     4
   );
   standingWave.parent = towerGroup;
