@@ -1,5 +1,9 @@
 import * as BABYLON from '@babylonjs/core';
-import type { DimensionLabelNode, AxisLabelNode, DimensionLineNode } from './GeometryHelper';
+import type {
+  DimensionLabelNode,
+  AxisLabelNode,
+  DimensionLineNode,
+} from './GeometryHelper';
 import type { BendingMomentNode } from './BendingMomenNode';
 import type { TorsionMomentNode } from './TorsionMomentNode';
 
@@ -17,7 +21,6 @@ export interface BaseNode {
   group: BABYLON.TransformNode;
   dispose(): void;
 }
-
 
 export abstract class BaseNodeImpl implements BaseNode {
   group: BABYLON.TransformNode;

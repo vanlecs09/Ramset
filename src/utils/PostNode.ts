@@ -1,111 +1,128 @@
 import * as BABYLON from '@babylonjs/core';
 
 export interface PostNode {
-    mesh?: BABYLON.Mesh;
-    material?: BABYLON.StandardMaterial;
+  mesh?: BABYLON.Mesh;
+  material?: BABYLON.StandardMaterial;
 }
 
 // Global post material - shared across all post instances
 let postMaterial: BABYLON.StandardMaterial | null = null;
 
 const initializePostMaterial = (scene: BABYLON.Scene) => {
-    if (!postMaterial) {
-        postMaterial = new BABYLON.StandardMaterial('postMaterial', scene);
-        postMaterial.diffuseColor = new BABYLON.Color3(255, 103, 38).scale(1 / 255); // reddish
-        postMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
-    }
-    return postMaterial;
+  // Check if existing material belongs to a different/disposed scene
+  if (postMaterial && postMaterial.getScene() !== scene) {
+    postMaterial = null;
+  }
+  if (!postMaterial) {
+    postMaterial = new BABYLON.StandardMaterial('postMaterial', scene);
+    postMaterial.diffuseColor = new BABYLON.Color3(255, 103, 38).scale(1 / 255); // reddish
+    postMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+  }
+  return postMaterial;
 };
 
 export const createPost = (
-    scene: BABYLON.Scene,
-    height: number = 1,
-    diameter: number = 0.2,
-    position?: BABYLON.Vector3,
-    rotation?: BABYLON.Vector3,
-    parent?: BABYLON.TransformNode,
-    name: string = 'post'
+  scene: BABYLON.Scene,
+  height: number = 1,
+  diameter: number = 0.2,
+  position?: BABYLON.Vector3,
+  rotation?: BABYLON.Vector3,
+  parent?: BABYLON.TransformNode,
+  name: string = 'post',
 ): PostNode => {
-    const material = initializePostMaterial(scene);
+  const material = initializePostMaterial(scene);
 
-    const post = BABYLON.MeshBuilder.CreateCylinder(
-        name,
-        { height: height + 0.1, diameter: diameter },
-        scene
-    );
+  const post = BABYLON.MeshBuilder.CreateCylinder(
+    name,
+    { height: height + 0.1, diameter: diameter },
+    scene,
+  );
 
-    if (position) {
-        post.position = position;
-    }
+  if (position) {
+    post.position = position;
+  }
 
-    if (rotation) {
-        post.rotation = rotation;
-    }
+  if (rotation) {
+    post.rotation = rotation;
+  }
 
-    post.material = material;
-    post.receiveShadows = true;
+  post.material = material;
+  post.receiveShadows = true;
 
-    if (parent) {
-        post.parent = parent;
-    }
+  if (parent) {
+    post.parent = parent;
+  }
 
-    return {
-        mesh: post,
-        material: material,
-    };
+  return {
+    mesh: post,
+    material: material,
+  };
 };
 
 export const updatePost = (
-    postGroup: PostNode,
-    scene: BABYLON.Scene,
-    height: number = 1,
-    diameter: number = 0.2,
-    position?: BABYLON.Vector3,
-    rotation?: BABYLON.Vector3,
-    parent?: BABYLON.TransformNode,
-    name: string = 'post'
+  postGroup: PostNode,
+  scene: BABYLON.Scene,
+  height: number = 1,
+  diameter: number = 0.2,
+  position?: BABYLON.Vector3,
+  rotation?: BABYLON.Vector3,
+  parent?: BABYLON.TransformNode,
+  name: string = 'post',
 ) => {
-    if (postGroup.mesh) {
-        postGroup.mesh.dispose();
-    }
+  if (postGroup.mesh) {
+    postGroup.mesh.dispose();
+  }
 
-    const material = initializePostMaterial(scene);
+  const material = initializePostMaterial(scene);
 
-    const post = BABYLON.MeshBuilder.CreateCylinder(
-        name,
-        { height: height + 0.1, diameter: diameter },
-        scene
-    );
+  const post = BABYLON.MeshBuilder.CreateCylinder(
+    name,
+    { height: height + 0.1, diameter: diameter },
+    scene,
+  );
 
-    if (position) {
-        post.position = position;
-    }
+  if (position) {
+    post.position = position;
+  }
 
-    if (rotation) {
-        post.rotation = rotation;
-    }
+  if (rotation) {
+    post.rotation = rotation;
+  }
 
-    post.material = material;
-    post.receiveShadows = true;
+  post.material = material;
+  post.receiveShadows = true;
 
-    if (parent) {
-        post.parent = parent;
-    }
+  if (parent) {
+    post.parent = parent;
+  }
 
-    postGroup.mesh = post;
-    postGroup.material = material;
+  postGroup.mesh = post;
+  postGroup.material = material;
 };
 
 export const getPostMaterial = (): BABYLON.StandardMaterial | null => {
-    return postMaterial;
+  return postMaterial;
 };
 
 export const createPostBatch = (
-    scene: BABYLON.Scene,
-    posts: Array<{ height: number; diameter: number; position?: BABYLON.Vector3; name: string }>,
-    parent?: BABYLON.TransformNode
+  scene: BABYLON.Scene,
+  posts: Array<{
+    height: number;
+    diameter: number;
+    position?: BABYLON.Vector3;
+    name: string;
+  }>,
+  parent?: BABYLON.TransformNode,
 ): PostNode[] => {
-    return posts.map(post =>
-        createPost(scene, post.height, post.diameter, post.position, undefined,  parent, post.name)
-    );
+  return posts.map(post =>
+    createPost(
+      scene,
+      post.height,
+      post.diameter,
+      post.position,
+      undefined,
+      parent,
+      post.name,
+    ),
+  );
 };

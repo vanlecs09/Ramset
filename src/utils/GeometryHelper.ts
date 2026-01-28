@@ -24,12 +24,11 @@ export const AXIS_CONSTANTS = {
   DEFAULT_AXIS_LENGTH: 0.2,
 } as const;
 
-
 /** Standard axis colors */
 export const AXIS_COLORS = {
-  X: new BABYLON.Color3(1, 0, 0),   // Red
-  Y: new BABYLON.Color3(0, 1, 0),   // Green
-  Z: new BABYLON.Color3(0, 0, 1),   // Blue
+  X: new BABYLON.Color3(1, 0, 0), // Red
+  Y: new BABYLON.Color3(0, 1, 0), // Green
+  Z: new BABYLON.Color3(0, 0, 1), // Blue
 } as const;
 
 export const SCREEN_TO_WORLD_UNIT = 1000;
@@ -152,7 +151,6 @@ export class AxisLineNode extends BaseNodeImpl {
   }
 }
 
-
 /**
  * Creates a dimension line with arrows, connectors, and optional label.
  * Constructs a complete dimension visualization showing distance between two points.
@@ -167,8 +165,12 @@ export const createDimensionLine = (
   lineMat: BABYLON.Material,
   showLabel: boolean = true,
   labelValue?: number,
-  advancedTexture?: GUI.AdvancedDynamicTexture
-): { meshes: BABYLON.Mesh[]; lineMesh: BABYLON.Mesh; label?: GUI.TextBlock } => {
+  advancedTexture?: GUI.AdvancedDynamicTexture,
+): {
+  meshes: BABYLON.Mesh[];
+  lineMesh: BABYLON.Mesh;
+  label?: GUI.TextBlock;
+} => {
   const texture = advancedTexture || getDimensionLabelTexture();
   const meshes: BABYLON.Mesh[] = [];
 
@@ -178,16 +180,28 @@ export const createDimensionLine = (
     name,
     DIMENSION_LINE_CONSTANTS.LINE_THICKNESS,
     scene,
-    lineMat
+    lineMat,
   );
   meshes.push(line);
   // Create main dimension line
-  const lineArrow1 = createLineArrow(beginPoint01, endPoint01, name, scene, lineMat);
+  const lineArrow1 = createLineArrow(
+    beginPoint01,
+    endPoint01,
+    name,
+    scene,
+    lineMat,
+  );
   meshes.push(lineArrow1.line);
   meshes.push(lineArrow1.arrow);
 
   // Create connector lines from dimension line to measurement points
-  const lineArrow2 = createLineArrow(beginPoint02, endPoint02, name, scene, lineMat);
+  const lineArrow2 = createLineArrow(
+    beginPoint02,
+    endPoint02,
+    name,
+    scene,
+    lineMat,
+  );
   meshes.push(lineArrow2.line);
   meshes.push(lineArrow2.arrow);
 
@@ -221,9 +235,13 @@ export const createDimensionWithLabel = (
   advancedTexture?: GUI.AdvancedDynamicTexture,
   labelOffsetX: number = 0,
   labelOffsetY: number = 0,
-  showLabel: boolean = true
+  showLabel: boolean = true,
 ): DimensionLabelNode | null => {
-  const linePosition = BABYLON.Vector3.Lerp(arrow1Position, arrow2Position, 0.5);
+  const linePosition = BABYLON.Vector3.Lerp(
+    arrow1Position,
+    arrow2Position,
+    0.5,
+  );
   const texture = advancedTexture || getDimensionLabelTexture();
 
   const result = createDimensionLine(
@@ -236,7 +254,7 @@ export const createDimensionWithLabel = (
     material,
     showLabel,
     dimensionValue,
-    texture
+    texture,
   );
 
   // Parent all meshes to the group
@@ -255,14 +273,12 @@ export const createDimensionWithLabel = (
       lineMesh: result.lineMesh,
       linePosition: linePosition.clone(),
       offsetX: labelOffsetX,
-      offsetY: labelOffsetY
+      offsetY: labelOffsetY,
     };
   }
 
   return null;
 };
-
-
 
 /**
  * Helper function to create a single arrow head cone.
@@ -275,7 +291,7 @@ export const createArrow = (
   scene: BABYLON.Scene,
   position: BABYLON.Vector3,
   direction: BABYLON.Vector3,
-  material: BABYLON.Material
+  material: BABYLON.Material,
 ): BABYLON.Mesh => {
   const yAxis = new BABYLON.Vector3(0, 1, 0);
   // const direction = position.subtract(position).normalize(); // Results in zero vector
@@ -283,14 +299,18 @@ export const createArrow = (
   const quaternion = BABYLON.Quaternion.FromUnitVectorsToRef(
     yAxis,
     direction,
-    new BABYLON.Quaternion()
+    new BABYLON.Quaternion(),
   );
 
-  const arrow = BABYLON.MeshBuilder.CreateCylinder(name + 'Arrow1', {
-    diameterTop: 0,
-    diameterBottom: arrowDiameter,
-    height: arrowSize,
-  }, scene);
+  const arrow = BABYLON.MeshBuilder.CreateCylinder(
+    name + 'Arrow1',
+    {
+      diameterTop: 0,
+      diameterBottom: arrowDiameter,
+      height: arrowSize,
+    },
+    scene,
+  );
 
   arrow.position = position;
   arrow.rotationQuaternion = quaternion;
@@ -298,7 +318,6 @@ export const createArrow = (
 
   return arrow;
 };
-
 
 /**
  * Creates a visual helper displaying X, Y, Z coordinate axes with arrows and labels.
@@ -312,7 +331,7 @@ export const createUnitAxes = (
   zDirection: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 1),
   axisLength: number = AXIS_CONSTANTS.DEFAULT_AXIS_LENGTH,
   showLabels: boolean = false,
-  advancedTexture?: GUI.AdvancedDynamicTexture
+  advancedTexture?: GUI.AdvancedDynamicTexture,
 ): { meshes: BABYLON.Mesh[]; labels: AxisLabelNode[] } => {
   const meshes: BABYLON.Mesh[] = [];
   const axisLabels: AxisLabelNode[] = [];
@@ -327,7 +346,7 @@ export const createUnitAxes = (
   const axes = [
     { direction: xDir, color: AXIS_COLORS.X, name: 'X', baseName: 'xAxis' },
     { direction: yDir, color: AXIS_COLORS.Y, name: 'Y', baseName: 'yAxis' },
-    { direction: zDir, color: AXIS_COLORS.Z, name: 'Z', baseName: 'zAxis' }
+    { direction: zDir, color: AXIS_COLORS.Z, name: 'Z', baseName: 'zAxis' },
   ];
 
   axes.forEach(axis => {
@@ -339,18 +358,20 @@ export const createUnitAxes = (
       origin,
       end,
       AXIS_CONSTANTS.AXIS_RADIUS,
-      axis.color
+      axis.color,
     );
     meshes.push(line);
 
     // Create arrow at end of axis
-    const arrowPos = origin.add(axis.direction.scale(axisLength + AXIS_CONSTANTS.ARROW_SIZE));
+    const arrowPos = origin.add(
+      axis.direction.scale(axisLength + AXIS_CONSTANTS.ARROW_SIZE),
+    );
     const arrow = createAxisArrow(
       axis.baseName,
       scene,
       arrowPos,
       axis.direction,
-      axis.color
+      axis.color,
     );
     meshes.push(arrow);
 
@@ -360,7 +381,7 @@ export const createUnitAxes = (
         arrow,
         axis.name,
         axis.color,
-        axisTexture
+        axisTexture,
       );
       if (label) axisLabels.push(label);
     }
@@ -379,12 +400,16 @@ const createAxisLine = (
   start: BABYLON.Vector3,
   end: BABYLON.Vector3,
   radius: number,
-  color: BABYLON.Color3
+  color: BABYLON.Color3,
 ): BABYLON.Mesh => {
-  const line = BABYLON.MeshBuilder.CreateTube(name, {
-    path: [start, end],
-    radius: radius,
-  }, scene);
+  const line = BABYLON.MeshBuilder.CreateTube(
+    name,
+    {
+      path: [start, end],
+      radius: radius,
+    },
+    scene,
+  );
 
   const material = new BABYLON.StandardMaterial(name + 'Material', scene);
   material.diffuseColor = color;
@@ -402,9 +427,12 @@ const createAxisArrow = (
   scene: BABYLON.Scene,
   position: BABYLON.Vector3,
   direction: BABYLON.Vector3,
-  color: BABYLON.Color3
+  color: BABYLON.Color3,
 ): BABYLON.Mesh => {
-  const arrowMaterial = new BABYLON.StandardMaterial(name + 'ArrowMaterial', scene);
+  const arrowMaterial = new BABYLON.StandardMaterial(
+    name + 'ArrowMaterial',
+    scene,
+  );
   arrowMaterial.diffuseColor = color;
 
   return createArrow(
@@ -414,7 +442,7 @@ const createAxisArrow = (
     scene,
     position,
     direction,
-    arrowMaterial
+    arrowMaterial,
   );
 };
 
@@ -426,7 +454,7 @@ const createAxisLabelNode = (
   arrowMesh: BABYLON.Mesh,
   labelText: string,
   color: BABYLON.Color3,
-  texture: GUI.AdvancedDynamicTexture
+  texture: GUI.AdvancedDynamicTexture,
 ): AxisLabelNode | null => {
   const label = new GUI.TextBlock();
   label.text = labelText;
@@ -441,7 +469,7 @@ const createAxisLabelNode = (
   return {
     label: label,
     arrowMesh: arrowMesh,
-    axisName: labelText
+    axisName: labelText,
   };
 };
 
@@ -454,32 +482,37 @@ export const createLine = (
   name: string,
   lineThickness: number,
   scene: BABYLON.Scene,
-  lineMat: BABYLON.Material
+  lineMat: BABYLON.Material,
 ): BABYLON.Mesh => {
   const yAxis = new BABYLON.Vector3(0, 1, 0);
   const distance = BABYLON.Vector3.Distance(beginPoint, endPoint);
   const direction = endPoint.subtract(beginPoint).normalize();
 
-  const line = BABYLON.MeshBuilder.CreateCylinder(name + '_line', {
-    diameter: lineThickness,
-    height: distance,
-  }, scene);
+  const line = BABYLON.MeshBuilder.CreateCylinder(
+    name + '_line',
+    {
+      diameter: lineThickness,
+      height: distance,
+    },
+    scene,
+  );
 
   line.position = BABYLON.Vector3.Lerp(beginPoint, endPoint, 0.5);
   line.rotationQuaternion = BABYLON.Quaternion.FromUnitVectorsToRef(
     yAxis,
     direction,
-    new BABYLON.Quaternion()
+    new BABYLON.Quaternion(),
   );
   line.material = lineMat;
 
   return line;
 };
 
-
-export const createLineArrow = (beginPoint01: BABYLON.Vector3,
+export const createLineArrow = (
+  beginPoint01: BABYLON.Vector3,
   endPoint01: BABYLON.Vector3,
-  name: string, scene: BABYLON.Scene,
+  name: string,
+  scene: BABYLON.Scene,
   lineMat: BABYLON.Material,
 ) => {
   const line = createLine(
@@ -488,7 +521,7 @@ export const createLineArrow = (beginPoint01: BABYLON.Vector3,
     name,
     DIMENSION_LINE_CONSTANTS.LINE_THICKNESS,
     scene,
-    lineMat
+    lineMat,
   );
   const direction = endPoint01.subtract(beginPoint01).normalize();
   // Create arrows at measurement points
@@ -499,14 +532,14 @@ export const createLineArrow = (beginPoint01: BABYLON.Vector3,
     scene,
     endPoint01,
     direction,
-    lineMat
+    lineMat,
   );
 
   return {
     line: line,
-    arrow: arrow
+    arrow: arrow,
   };
-}
+};
 
 export const createLineTwoArrow = (
   beginPoint01: BABYLON.Vector3,
@@ -524,15 +557,14 @@ export const createLineTwoArrow = (
     name,
     DIMENSION_LINE_CONSTANTS.LINE_THICKNESS,
     scene,
-    lineMat
+    lineMat,
   );
   line.parent = parent;
 
-
-  let texture = getDimensionLabelTexture();
+  const texture = getDimensionLabelTexture();
   line.parent = parent;
   const label = new GUI.TextBlock();
-  label.text = `${length * SCREEN_TO_WORLD_UNIT}mm`
+  label.text = `${length * SCREEN_TO_WORLD_UNIT}mm`;
   label.fontSize = 20;
   label.color = BABYLON.Color3.Black().toHexString();
 
@@ -541,7 +573,7 @@ export const createLineTwoArrow = (
   // label.linkOffsetY = 20
   // label.linkOffsetX = 20
 
-  let direction = endPoint01.subtract(beginPoint01).normalize();
+  const direction = endPoint01.subtract(beginPoint01).normalize();
   // Create arrows at measurement points
   const arrow = createArrow(
     name,
@@ -550,7 +582,7 @@ export const createLineTwoArrow = (
     scene,
     endPoint01,
     direction,
-    lineMat
+    lineMat,
   );
   arrow.parent = parent;
 
@@ -561,15 +593,13 @@ export const createLineTwoArrow = (
     scene,
     beginPoint01,
     direction.scale(-1),
-    lineMat
+    lineMat,
   );
   arrow2.parent = parent;
 
   return {
     line: line,
     arrow: [arrow, arrow2],
-    label: label
+    label: label,
   };
-}
-
-
+};
