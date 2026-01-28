@@ -136,8 +136,14 @@ export const createBendingMomenNode = (
   direction: BABYLON.Vector3 = new BABYLON.Vector3(1, 0, 0),
   color: BABYLON.Color3 = BENDING_MOMENT_CONSTANTS.MATERIAL_COLOR,
   momenValue: number,
+  parent: BABYLON.TransformNode,
 ): BendingMomentNode => {
-  const group = new BABYLON.TransformNode('BendingMomentGroup', scene);
+  // Create group for bending moment with optional parent
+  // const group = new BABYLON.TransformNode('BendingMomentGroup', scene);
+  // if (parent) {
+  //   group.parent = parent;
+  // }
+
   const dottedLineMeshes: BABYLON.Mesh[] = [];
   const labels: GUI.TextBlock[] = [];
 
@@ -167,7 +173,7 @@ export const createBendingMomenNode = (
       scene,
       material,
     );
-    dot.parent = group;
+    dot.parent = parent;
     dottedLineMeshes.push(dot);
   }
 
@@ -190,7 +196,7 @@ export const createBendingMomenNode = (
     scene,
     material,
   );
-  arrowNode.group.parent = group;
+  arrowNode.group.parent = parent;
 
   // Create label if text is provided
   let label: GUI.TextBlock | null = null;
@@ -203,7 +209,7 @@ export const createBendingMomenNode = (
   }
 
   return new BendingMomentNode(
-    group,
+    parent,
     dottedLineMeshes,
     arrowNode,
     label,

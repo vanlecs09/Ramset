@@ -6,6 +6,7 @@ import { createLapsplice } from '../utils/BaseLapSpliceNode';
 import { createEndAnchorage } from '../utils/BaseEndAnchorageNode';
 import { calculateCircularPostPositions } from '../utils/CircularPostPositionCalculator';
 import { calculateRectanglePostPositions } from '../utils/RectanglePostPositionCalculator';
+import { createUnitAxes } from '../utils/GeometryHelper';
 import type { EndAnchorageCircularColumnsNode } from '../utils/EndAnchorageCircularColumnsNode';
 import type { ComplexColumnNode } from '../utils/ComplexColumnNode';
 import type { BaseLapSpliceNode } from '../utils/BaseLapSpliceNode';
@@ -270,6 +271,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   const endAnchorageSlabRef = useRef<BaseEndAnchorageNode | null>(null);
   const endAnchorageWallRef = useRef<BaseEndAnchorageNode | null>(null);
   const endAnchorageRectangularColumnRef = useRef<BaseEndAnchorageNode | null>(null);
+  const unitAxesGroupRef = useRef<BABYLON.TransformNode | null>(null);
+  const unitAxesMeshesRef = useRef<BABYLON.Mesh[]>([]);
 
   // Initialize scene and engine (once on mount)
   useEffect(() => {
@@ -313,8 +316,59 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     );
     light.intensity = 0.9;
 
+    // Create a group to hold unit axes for positioning
+    const unitAxesGroup = new BABYLON.TransformNode('unitAxesGroup', scene);
+    
+    // Create unit axes at bottom-left corner
+    const { meshes: axisMeshes } = createUnitAxes(
+      scene,
+      unitAxesGroup,
+      new BABYLON.Vector3(0, 0, 0),
+      new BABYLON.Vector3(1, 0, 0),
+      new BABYLON.Vector3(0, 0, 1),
+      new BABYLON.Vector3(0, 1, 0),
+      0.1,
+      true, // Show labels
+    );
+    
+    // Parent axis meshes to the group
+    axisMeshes.forEach(mesh => {
+      mesh.parent = unitAxesGroup;
+    });
+    unitAxesGroupRef.current = unitAxesGroup;
+    unitAxesMeshesRef.current = axisMeshes;
+
+    // Update unit axes position based on camera
+    scene.registerBeforeRender(() => {
+      if (!unitAxesGroupRef.current || !camera) return;
+
+      // Get camera vectors for positioning
+      const forward = camera.getForwardRay(1).direction;
+      const right = BABYLON.Vector3.Cross(camera.upVector, forward).normalize();
+      const up = BABYLON.Vector3.Cross(forward, right).normalize();
+
+      // Position in bottom-left corner relative to camera
+      const distance = 1.2; // distance from camera
+      const offsetRight = -0.8; // left
+      const offsetUp = -0.4; // bottom
+
+      // Calculate position
+      const newPos = camera.position
+        .add(forward.scale(distance))
+        .add(right.scale(offsetRight))
+        .add(up.scale(offsetUp));
+
+      unitAxesGroupRef.current.position = newPos;
+
+      // Keep axis aligned to world space (don't rotate with camera)
+      // This shows the world orientation - X, Y, Z always point in world directions
+      unitAxesGroupRef.current.rotation = BABYLON.Vector3.Zero();
+      unitAxesGroupRef.current.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+    });
+
     // Render loop
     engine.runRenderLoop(() => {
+      // updateUnitAxesPosition();
       scene.render();
     });
 

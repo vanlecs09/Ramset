@@ -146,13 +146,12 @@ export const createLapsplice = (
   const slabPosition = new BABYLON.Vector3(
     concreteParam.position.x,
     concreteParam.position.y +
-      slabHeigth / 2 +
-      concreteNode.getConcreteHeight() / 2,
+    slabHeigth / 2 +
+    concreteNode.getConcreteHeight() / 2,
     concreteParam.position.z,
   );
 
-  // let slabPosition = new BABYLON.Vector3(concretePosition.x, concretePosition.y, concretePosition.z + (concreteDepth / 2 + slabHeigth / 2));
-  // addWaveBlocksFromRightFace(slabNode, slabWidth, slabDepth, concreteWidth, slabPosition);
+
   createWaveBlockTop(
     mainNode as unknown as BaseStructNodeImpl,
     slabParam.slabWidth,
@@ -187,6 +186,7 @@ export const createLapsplice = (
   // 5. Create and cache axis meshes and labels for visualization
   const axesResult = createUnitAxes(
     scene,
+    mainNode.group,
     new BABYLON.Vector3(concretePosition.x, 0, concretePosition.z),
     new BABYLON.Vector3(1, 0, 0),
     new BABYLON.Vector3(0, 0, 1),
@@ -195,27 +195,24 @@ export const createLapsplice = (
   mainNode.setAxisMeshes(axesResult.meshes);
   mainNode.setLabels(axesResult.labels);
 
-
-  const bendingMoment1 = createBendingMomenNode(
-    scene,
-    new BABYLON.Vector3(
-      concretePosition.x,
-      concretePosition.y + concreteParam.thickness / 2,
-      concretePosition.z,
-    ),
-    1,
-    new BABYLON.Vector3(1, 0, 0),
-    BABYLON.Color3.Black(),
-    -200,
-  );
-  bendingMoment1.setLineAndArrowVisible(false);
-  mainNode.addBendingMomentNode(bendingMoment1);
-
   const basePosition = new BABYLON.Vector3(
     concretePosition.x,
     concretePosition.y + concreteParam.thickness / 2,
     concretePosition.z,
   );
+  const bendingMoment1 = createBendingMomenNode(
+    scene,
+    basePosition,
+    1,
+    new BABYLON.Vector3(1, 0, 0),
+    BABYLON.Color3.Black(),
+    -200,
+    mainNode.group,
+  );
+  bendingMoment1.setLineAndArrowVisible(false);
+  mainNode.addBendingMomentNode(bendingMoment1);
+
+
   const bendingMoment2 = createBendingMomenNode(
     scene,
     basePosition,
@@ -223,6 +220,7 @@ export const createLapsplice = (
     new BABYLON.Vector3(0, 0, 1),
     BABYLON.Color3.Black(),
     -200,
+    mainNode.group,
   );
   bendingMoment2.setLineAndArrowVisible(false);
   mainNode.addBendingMomentNode(bendingMoment2);
@@ -234,6 +232,7 @@ export const createLapsplice = (
     new BABYLON.Vector3(0, 1, 0),
     BABYLON.Color3.Black(),
     200,
+    mainNode.group,
   );
   mainNode.addBendingMomentNode(bendingMoment3);
 

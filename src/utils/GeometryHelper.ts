@@ -326,6 +326,7 @@ export const createArrow = (
  */
 export const createUnitAxes = (
   scene: BABYLON.Scene,
+  parent: BABYLON.TransformNode,
   origin: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
   xDirection: BABYLON.Vector3 = new BABYLON.Vector3(1, 0, 0),
   yDirection: BABYLON.Vector3 = new BABYLON.Vector3(0, 1, 0),
@@ -375,6 +376,8 @@ export const createUnitAxes = (
       axis.color,
     );
     meshes.push(arrow);
+    arrow.parent = parent;
+    line.parent = parent;
 
     // Create label
     if (showLabels) {
@@ -385,6 +388,7 @@ export const createUnitAxes = (
         axisTexture,
       );
       if (label) axisLabels.push(label);
+      // label!.label.parent = parent;
     }
   });
 

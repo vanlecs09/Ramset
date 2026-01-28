@@ -243,18 +243,18 @@ export const updateComplexColumn = (
   // 1. Update concrete using ConcreteBuilder
   const concreteGroup = complexColumnGroup.getConcreteGroup();
   if (concreteGroup) {
-    updateConcrete(
-      concreteGroup,
-      scene,
-      {
-        thickness: concreteThickness,
-        width: concreteWidth,
-        depth: concreteDepth,
-        position: concretePosition,
-      },
-      complexColumnGroup.group,
-      isFiniteConcrete,
-    );
+    // updateConcrete(
+    //   concreteGroup,
+    //   scene,
+    //   {
+    //     thickness: concreteThickness,
+    //     width: concreteWidth,
+    //     depth: concreteDepth,
+    //     position: concretePosition,
+    //   },
+    //   complexColumnGroup.group,
+    //   isFiniteConcrete,
+    // );
   }
   console.log('_infiniteBlockPositions', _infiniteBlockPositions);
 

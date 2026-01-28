@@ -185,6 +185,7 @@ export const createEndAnchorage = (
   // Update and cache axis meshes and labels
   const axisNode = createUnitAxes(
     scene,
+    mainNode.group,
     new BABYLON.Vector3(concretePosition.x, 0, concretePosition.z),
     new BABYLON.Vector3(1, 0, 0),
     new BABYLON.Vector3(0, 0, 1),
@@ -204,6 +205,7 @@ export const createEndAnchorage = (
     new BABYLON.Vector3(1, 0, 0),
     BABYLON.Color3.Black(),
     200,
+    mainNode.group,
   );
   bendingMoment1.setLineAndArrowVisible(false);
   mainNode.addBendingMomentNode(bendingMoment1);
@@ -220,6 +222,7 @@ export const createEndAnchorage = (
     new BABYLON.Vector3(0, 0, 1),
     BABYLON.Color3.Black(),
     200,
+    mainNode.group,
   );
   bendingMoment2.setLineAndArrowVisible(false);
   mainNode.addBendingMomentNode(bendingMoment2);
@@ -231,6 +234,7 @@ export const createEndAnchorage = (
     new BABYLON.Vector3(0, 1, 0),
     BABYLON.Color3.Black(),
     200,
+    mainNode.group,
   );
   mainNode.addBendingMomentNode(bendingMoment3);
 
