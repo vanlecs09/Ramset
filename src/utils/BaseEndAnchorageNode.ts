@@ -42,7 +42,7 @@ export interface SecondaryEndAnchorageParams {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface postParams {}
+export interface postParams { }
 
 export interface ConcreteParams {
   thickness: number;
@@ -144,8 +144,8 @@ export const createEndAnchorage = (
   const beamPosition = new BABYLON.Vector3(
     0,
     concretePosition.y +
-      beamParams.beamHeight / 2 +
-      concreteNode.getConcreteHeight() / 2,
+    beamParams.beamHeight / 2 +
+    concreteNode.getConcreteHeight() / 2,
     0,
   );
 
@@ -205,6 +205,7 @@ export const createEndAnchorage = (
     BABYLON.Color3.Black(),
     '200',
   );
+  bendingMoment1.setLineAndArrowVisible(false);
   mainNode.addBendingMomentNode(bendingMoment1);
 
   const basePosition = new BABYLON.Vector3(
@@ -220,6 +221,7 @@ export const createEndAnchorage = (
     BABYLON.Color3.Black(),
     '200',
   );
+  bendingMoment2.setLineAndArrowVisible(false);
   mainNode.addBendingMomentNode(bendingMoment2);
 
   const bendingMoment3 = createBendingMomenNode(

@@ -208,6 +208,7 @@ export const createLapsplice = (
     BABYLON.Color3.Black(),
     '200',
   );
+  bendingMoment1.setLineAndArrowVisible(false);
   mainNode.addBendingMomentNode(bendingMoment1);
 
   const basePosition = new BABYLON.Vector3(
@@ -223,6 +224,7 @@ export const createLapsplice = (
     BABYLON.Color3.Black(),
     '200',
   );
+  bendingMoment2.setLineAndArrowVisible(false);
   mainNode.addBendingMomentNode(bendingMoment2);
 
   const bendingMoment3 = createBendingMomenNode(

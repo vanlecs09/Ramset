@@ -2,6 +2,7 @@ import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
 import { getDimensionLabelTexture } from './ConcreteNode';
 import { BaseNodeImpl } from './BaseNode';
+import { createLineArrowNode, LineArrowNode } from './LineArrowNode';
 
 // ==================== Constants ====================
 
@@ -184,7 +185,7 @@ export const createDimensionLine = (
   );
   meshes.push(line);
   // Create main dimension line
-  const lineArrow1 = createLineArrow(
+  const lineArrow1 = createLineArrowNode(
     beginPoint01,
     endPoint01,
     name,
@@ -195,7 +196,7 @@ export const createDimensionLine = (
   meshes.push(lineArrow1.arrow);
 
   // Create connector lines from dimension line to measurement points
-  const lineArrow2 = createLineArrow(
+  const lineArrow2 = createLineArrowNode(
     beginPoint02,
     endPoint02,
     name,
@@ -508,38 +509,6 @@ export const createLine = (
   return line;
 };
 
-export const createLineArrow = (
-  beginPoint01: BABYLON.Vector3,
-  endPoint01: BABYLON.Vector3,
-  name: string,
-  scene: BABYLON.Scene,
-  lineMat: BABYLON.Material,
-) => {
-  const line = createLine(
-    beginPoint01,
-    endPoint01,
-    name,
-    DIMENSION_LINE_CONSTANTS.LINE_THICKNESS,
-    scene,
-    lineMat,
-  );
-  const direction = endPoint01.subtract(beginPoint01).normalize();
-  // Create arrows at measurement points
-  const arrow = createArrow(
-    name,
-    DIMENSION_LINE_CONSTANTS.ARROW_DIAMETER,
-    DIMENSION_LINE_CONSTANTS.ARROW_SIZE,
-    scene,
-    endPoint01,
-    direction,
-    lineMat,
-  );
-
-  return {
-    line: line,
-    arrow: arrow,
-  };
-};
 
 export const createLineTwoArrow = (
   beginPoint01: BABYLON.Vector3,

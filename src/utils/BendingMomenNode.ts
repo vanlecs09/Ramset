@@ -1,7 +1,8 @@
 import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
-import { createLine, createLineArrow } from './GeometryHelper';
+import { createLine } from './GeometryHelper';
 import { getDimensionLabelTexture } from './ConcreteNode';
+import { createLineArrowNode, LineArrowNode } from './LineArrowNode';
 
 /**
  * Class representing a bending moment visualization node.
@@ -10,9 +11,8 @@ import { getDimensionLabelTexture } from './ConcreteNode';
  */
 export class BendingMomentNode {
   readonly group: BABYLON.TransformNode;
-  readonly meshes: BABYLON.Mesh[];
-  readonly dottedLine: BABYLON.Mesh[];
-  readonly arrow: BABYLON.Mesh;
+  readonly dottedLineMeshes: BABYLON.Mesh[];
+  readonly arrowNode: LineArrowNode;
   readonly label?: GUI.TextBlock | null;
   readonly labels: GUI.TextBlock[];
 
@@ -21,18 +21,67 @@ export class BendingMomentNode {
    */
   constructor(
     group: BABYLON.TransformNode,
-    meshes: BABYLON.Mesh[],
-    dottedLine: BABYLON.Mesh[],
-    arrow: BABYLON.Mesh,
+    dottedLineMeshes: BABYLON.Mesh[],
+    arrowNode: LineArrowNode,
     label?: GUI.TextBlock | null,
     labels?: GUI.TextBlock[],
   ) {
     this.group = group;
-    this.meshes = meshes;
-    this.dottedLine = dottedLine;
-    this.arrow = arrow;
+    this.dottedLineMeshes = dottedLineMeshes;
+    this.arrowNode = arrowNode;
     this.label = label;
     this.labels = labels || [];
+  }
+
+  /**
+   * Shows or hides the arrow and label elements of the bending moment.
+   * Keeps the dotted line visible while toggling arrow and label visibility.
+   * @param visible - True to show arrow and label, false to hide
+   */
+  setLineAndArrowVisible(visible: boolean): void {
+    // Delegate arrow visibility to arrowNode
+    // this.arrowNode.setArrowVisible(visible);
+    this.arrowNode.setLineAndArrowVisible(visible); // Keep line visible
+
+    // Hide/show all labels
+    this.labels.forEach(label => {
+      label.isVisible = visible;
+    });
+
+    // Hide/show single label if it exists
+    if (this.label) {
+      this.label.isVisible = visible;
+    }
+  }
+
+  /**
+   * Shows or hides the dotted line elements while keeping arrow and label visible.
+   * @param visible - True to show dotted line, false to hide
+   */
+  setDottedLineVisible(visible: boolean): void {
+    this.dottedLineMeshes.forEach(mesh => mesh.setEnabled(visible));
+  }
+
+  /**
+   * Shows or hides all elements of the bending moment (dotted line, arrow, and label).
+   * @param visible - True to show all elements, false to hide
+   */
+  setVisible(visible: boolean): void {
+    // Show/hide dotted line
+    this.dottedLineMeshes.forEach(mesh => mesh.setEnabled(visible));
+
+    // Show/hide arrow and label through arrowNode
+    this.arrowNode.setVisible(visible);
+
+    // Show/hide additional labels
+    this.labels.forEach(label => {
+      label.isVisible = visible;
+    });
+
+    // Show/hide single label if it exists
+    if (this.label) {
+      this.label.isVisible = visible;
+    }
   }
 
   /**
@@ -40,10 +89,10 @@ export class BendingMomentNode {
    * Should be called before discarding the instance to prevent memory leaks.
    */
   dispose(): void {
-    // if (this.isDisposed) return;
-
-    // Dispose all meshes
-    this.meshes.forEach(mesh => mesh.dispose());
+    // Dispose dotted line meshes
+    this.dottedLineMeshes.forEach(mesh => mesh.dispose());
+    // Dispose arrow node (which handles its own meshes and group)
+    this.arrowNode.dispose();
     // Dispose labels
     this.labels.forEach(label => label.dispose());
     this.label?.dispose();
@@ -89,7 +138,6 @@ export const createBendingMomenNode = (
   labelText?: string,
 ): BendingMomentNode => {
   const group = new BABYLON.TransformNode('BendingMomentGroup', scene);
-  const meshes: BABYLON.Mesh[] = [];
   const dottedLineMeshes: BABYLON.Mesh[] = [];
   const labels: GUI.TextBlock[] = [];
 
@@ -121,27 +169,25 @@ export const createBendingMomenNode = (
     );
     dot.parent = group;
     dottedLineMeshes.push(dot);
-    meshes.push(dot);
   }
 
-  // Create arrow at the end of the line
+  // Create arrow at the end of the line using createLineArrow
   const arrowPosition = position.add(normalizedDirection.scale(length));
-  const arrowLine = createLineArrow(
+  const arrowEndPosition = arrowPosition.add(normalizedDirection.scale(0.1));
+  
+  const arrowNode = createLineArrowNode(
     arrowPosition,
-    arrowPosition.add(normalizedDirection.scale(0.1)),
+    arrowEndPosition,
     'bendingMoment_arrow',
     scene,
     material,
   );
-  arrowLine.line.parent = group;
-  arrowLine.arrow.parent = group;
-  meshes.push(arrowLine.line);
-  meshes.push(arrowLine.arrow);
+  arrowNode.group.parent = group;
 
   // Create label if text is provided
   let label: GUI.TextBlock | null = null;
   if (labelText) {
-    label = createBendingMomentLabel(arrowLine.arrow, labelText);
+    label = createBendingMomentLabel(arrowNode.arrow, labelText);
     if (label) {
       labels.push(label);
     }
@@ -149,9 +195,8 @@ export const createBendingMomenNode = (
 
   return new BendingMomentNode(
     group,
-    meshes,
     dottedLineMeshes,
-    arrowLine.arrow,
+    arrowNode,
     label,
     labels,
   );
