@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './App.css';
 import ConstructionViewer from './components/ConstructionViewer';
 import { ControlPanel } from './components/ControlPanel';
-import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_RECTANGLE_COLUMN_PARAMS, DEFAULT_LAPSPLICE_SLAB_PARAMS, DEFAULT_LAPSPLICE_BEAM_PARAMS, DEFAULT_LAPSPLICE_WALL_PARAMS, DEFAULT_LAPSPLICE_COLUMN_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS, DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS } from './constants/defaultParams';
+import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_LAPSPLICE_SLAB_PARAMS, DEFAULT_LAPSPLICE_BEAM_PARAMS, DEFAULT_LAPSPLICE_WALL_PARAMS, DEFAULT_LAPSPLICE_COLUMN_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS, DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS } from './constants/defaultParams';
 import type { EndAnchorageParams } from './utils/BaseEndAnchorageNode';
 
 export interface CircularColumnParams {
@@ -40,21 +40,6 @@ export interface ComplexColumnParams {
   postOffset: number;
 }
 
-export interface RectangleColumnParams {
-  isFiniteConcrete: boolean;
-  concreteThickness: number;
-  columnWidth: number;
-  columnDepth: number;
-  postCountX: number;
-  postCountZ: number;
-  postDiameter: number;
-  postOffset: number;
-  concreteOffsetXRight: number;
-  concreteOffsetXLeft: number;
-  concreteOffsetZBack: number;
-  concreteOffsetZFront: number;
-}
-
 export interface SlabParams {
   isFiniteConcrete: boolean;
   concreteThickness: number;
@@ -71,10 +56,9 @@ export interface SlabParams {
 }
 
 function App() {
-  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn'>('endAnchorageWall');
+  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn'>('endAnchorageWall');
   const [towerParams, setTowerParams] = useState<CircularColumnParams>(DEFAULT_TOWER_PARAMS);
   const [complexColumnParams, setComplexColumnParams] = useState<ComplexColumnParams>(DEFAULT_COMPLEX_COLUMN_PARAMS);
-  const [rectangleColumnParams, setRectangleColumnParams] = useState<RectangleColumnParams>(DEFAULT_RECTANGLE_COLUMN_PARAMS);
   const [lapspliceSlabParams, setLapspliceSlabParams] = useState<SlabParams>(DEFAULT_LAPSPLICE_SLAB_PARAMS);
   const [lapspliceBeamParams, setLapspliceBeamParams] = useState<SlabParams>(DEFAULT_LAPSPLICE_BEAM_PARAMS);
   const [lapspliceWallParams, setLapspliceWallParams] = useState<SlabParams>(DEFAULT_LAPSPLICE_WALL_PARAMS);
@@ -90,7 +74,6 @@ function App() {
         onModelChange={setCurrentModel}
         onTowerParamsChange={setTowerParams}
         onComplexColumnParamsChange={setComplexColumnParams}
-        onRectangleColumnParamsChange={setRectangleColumnParams}
         onLapspliceSlabParamsChange={setLapspliceSlabParams}
         onLapspliceBeamParamsChange={setLapspliceBeamParams}
         onLapspliceWallParamsChange={setLapspliceWallParams}
@@ -105,7 +88,6 @@ function App() {
           model={currentModel}
           towerParams={towerParams}
           complexColumnParams={complexColumnParams}
-          rectangleColumnParams={rectangleColumnParams}
           lapspliceSlabParams={lapspliceSlabParams}
           lapspliceBeamParams={lapspliceBeamParams}
           lapspliceWallParams={lapspliceWallParams}

@@ -2,17 +2,15 @@ import { useEffect, useRef } from 'react';
 import * as BABYLON from '@babylonjs/core';
 import { createComplexColumn, updateComplexColumn } from '../utils/ComplexColumnNode';
 import { createCircularColumns } from '../utils/EndAnchorageCircularColumnsNode';
-import { createRectangleColumn, updateRectangleColumn } from '../utils/RectangleColumnNode';
 import { createLapsplice } from '../utils/BaseLapSpliceNode';
 import { createEndAnchorage } from '../utils/BaseEndAnchorageNode';
 import { calculateCircularPostPositions } from '../utils/CircularPostPositionCalculator';
 import { calculateRectanglePostPositions } from '../utils/RectanglePostPositionCalculator';
 import type { EndAnchorageCircularColumnsNode } from '../utils/EndAnchorageCircularColumnsNode';
 import type { ComplexColumnNode } from '../utils/ComplexColumnNode';
-import type { RectangleColumnNode } from '../utils/RectangleColumnNode';
 import type { BaseLapSpliceNode } from '../utils/BaseLapSpliceNode';
 import { BaseEndAnchorageNode } from '../utils/BaseEndAnchorageNode';
-import type { RectangleColumnParams, SlabParams } from '../App';
+import type { SlabParams } from '../App';
 import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
 
 interface TowerParams {
@@ -52,10 +50,9 @@ interface ComplexColumnParams {
 
 interface ConstructionViewerProps {
   onSceneReady?: (scene: BABYLON.Scene) => void;
-  model?: 'endAnchorageCircularColumns' | 'complexColumn' | 'rectangleColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn';
+  model?: 'endAnchorageCircularColumns' | 'complexColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn';
   towerParams?: TowerParams;
   complexColumnParams?: ComplexColumnParams;
-  rectangleColumnParams?: RectangleColumnParams;
   lapspliceSlabParams?: SlabParams;
   lapspliceBeamParams?: SlabParams;
   lapspliceWallParams?: SlabParams;
@@ -146,20 +143,6 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     cuboid2PostCountTopEdge: 2,
     postRadius: 0.05,
     postOffset: 0.1,
-  },
-  rectangleColumnParams = {
-    isFiniteConcrete: false,
-    concreteThickness: 3,
-    columnWidth: 3,
-    columnDepth: 2,
-    postCountX: 3,
-    postCountZ: 2,
-    postDiameter: 0.2,
-    postOffset: 0.1,
-    concreteOffsetXRight: 1.5,
-    concreteOffsetXLeft: 1.5,
-    concreteOffsetZBack: 1.5,
-    concreteOffsetZFront: 1.5,
   },
   lapspliceSlabParams = {
     isFiniteConcrete: true,
@@ -279,7 +262,6 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   const engineRef = useRef<BABYLON.Engine | null>(null);
   const endAnchorageCircularColumnsRef = useRef<EndAnchorageCircularColumnsNode | null>(null);
   const complexColumnRef = useRef<ComplexColumnNode | null>(null);
-  const rectangleColumnRef = useRef<RectangleColumnNode | null>(null);
   const lapspliceSlabRef = useRef<BaseLapSpliceNode | null>(null);
   const lapspliceBeamRef = useRef<BaseLapSpliceNode | null>(null);
   const lapspliceWallRef = useRef<BaseLapSpliceNode | null>(null);
@@ -316,11 +298,12 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       Math.PI / 2,     // alpha
       0,     // beta
       5,               // radius
-      BABYLON.Vector3.Zero(), // target
+      new BABYLON.Vector3(0, -1, 0), // target
       scene
     );
     camera.attachControl(canvas, true); // mouse drag to rotate, wheel to zoom
-    camera.wheelPrecision = 50; // Slow down zoom speed (higher value = slower zoom)
+    camera.wheelPrecision = 100; // Slow down zoom speed (higher value = slower zoom)
+    camera.minZ = 0.01; // Near plane distance
 
     // Light
     const light = new BABYLON.HemisphericLight(
@@ -372,10 +355,6 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       if (complexColumnRef.current) {
         complexColumnRef.current.dispose();
         complexColumnRef.current = null;
-      }
-      if (rectangleColumnRef.current) {
-        rectangleColumnRef.current.dispose();
-        rectangleColumnRef.current = null;
       }
       if (lapspliceSlabRef.current) {
         lapspliceSlabRef.current.dispose();
@@ -577,60 +556,6 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
           complexColumnParams.cuboid2PostCountTopEdge,
           complexColumnParams.postRadius,
           complexColumnParams.postOffset
-        );
-      }
-
-
-    } else if (model === 'rectangleColumn') {
-
-      // Calculate concrete dimensions and positions
-      const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
-        concreteOffsetXRight: rectangleColumnParams.concreteOffsetXRight,
-        concreteOffsetXLeft: rectangleColumnParams.concreteOffsetXLeft,
-        concreteOffsetZBack: rectangleColumnParams.concreteOffsetZBack,
-        concreteOffsetZFront: rectangleColumnParams.concreteOffsetZFront,
-        concreteThickness: rectangleColumnParams.concreteThickness,
-      });
-
-      // Calculate post positions first
-      const columnCenterY = rectangleColumnParams.concreteThickness + 0.75;
-      const postPositions = calculateRectanglePostPositions(
-        rectangleColumnParams.columnWidth,
-        rectangleColumnParams.columnDepth,
-        rectangleColumnParams.postCountX,
-        rectangleColumnParams.postCountZ,
-        rectangleColumnParams.postOffset,
-        columnCenterY
-      );
-
-      if (!rectangleColumnRef.current) {
-        disposePreviousStructure();
-
-        rectangleColumnRef.current = createRectangleColumn(
-          scene,
-          postPositions,
-          rectangleColumnParams.concreteThickness,
-          rectangleColumnParams.columnWidth,
-          rectangleColumnParams.columnDepth,
-          rectangleColumnParams.postDiameter,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          rectangleColumnParams.isFiniteConcrete
-        );
-        adjustCameraForModel('rectangleColumn');
-      } else {
-        updateRectangleColumn(
-          rectangleColumnRef.current,
-          postPositions,
-          rectangleColumnParams.concreteThickness,
-          rectangleColumnParams.columnWidth,
-          rectangleColumnParams.columnDepth,
-          rectangleColumnParams.postDiameter,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          rectangleColumnParams.isFiniteConcrete
         );
       }
 
@@ -1027,19 +952,6 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     complexColumnParams.cuboid2TranslateZ,
     complexColumnParams.postRadius,
     complexColumnParams.postOffset,
-
-    rectangleColumnParams.isFiniteConcrete,
-    rectangleColumnParams.concreteThickness,
-    rectangleColumnParams.columnWidth,
-    rectangleColumnParams.columnDepth,
-    rectangleColumnParams.postCountX,
-    rectangleColumnParams.postCountZ,
-    rectangleColumnParams.postDiameter,
-    rectangleColumnParams.postOffset,
-    rectangleColumnParams.concreteOffsetXRight,
-    rectangleColumnParams.concreteOffsetXLeft,
-    rectangleColumnParams.concreteOffsetZBack,
-    rectangleColumnParams.concreteOffsetZFront,
 
     lapspliceSlabParams.isFiniteConcrete,
     lapspliceSlabParams.concreteThickness,

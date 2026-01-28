@@ -1,4 +1,4 @@
-import type { ComplexColumnParams, RectangleColumnParams, SlabParams } from '../App';
+import type { ComplexColumnParams, SlabParams } from '../App';
 import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
 
 export interface TowerParams {
@@ -48,21 +48,6 @@ export const DEFAULT_COMPLEX_COLUMN_PARAMS: ComplexColumnParams = {
   cuboid2PostCountTopEdge: 2,
   postRadius: 0.01,
   postOffset: 0.1,
-};
-
-export const DEFAULT_RECTANGLE_COLUMN_PARAMS: RectangleColumnParams = {
-  isFiniteConcrete: true,
-  concreteThickness: 1,
-  columnWidth: 0.3,
-  columnDepth: 0.5,
-  postCountX: 3,
-  postCountZ: 2,
-  postDiameter: 0.02,
-  postOffset: 0.02,
-  concreteOffsetXRight: 0.5,
-  concreteOffsetXLeft: 0.5,
-  concreteOffsetZBack: 0.5,
-  concreteOffsetZFront: 0.5,
 };
 
 export const DEFAULT_LAPSPLICE_SLAB_PARAMS: SlabParams = {
