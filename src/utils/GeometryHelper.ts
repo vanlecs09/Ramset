@@ -2,7 +2,7 @@ import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
 import { getDimensionLabelTexture } from './ConcreteNode';
 import { BaseNodeImpl } from './BaseNode';
-import { createLineArrowNode, LineArrowNode } from './LineArrowNode';
+import { createLineArrowNode } from './LineArrowNode';
 
 // ==================== Constants ====================
 

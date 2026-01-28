@@ -1,5 +1,5 @@
 import * as BABYLON from '@babylonjs/core';
-import { createConcrete, updateConcrete, ConcreteNode } from './ConcreteNode';
+import { createConcrete, ConcreteNode } from './ConcreteNode';
 import { createPost } from './PostNode';
 import { createWaveBlock } from './WaveBuilder';
 import { BaseStructNodeImpl } from './BaseNode';
@@ -165,18 +165,18 @@ export const updateRectangleColumn = (
   if (!concreteGroup) {
     concreteGroup = {} as ConcreteNode;
   }
-  updateConcrete(
-    concreteGroup,
-    scene,
-    {
-      thickness: concreteThickness,
-      width: concreteWidth,
-      depth: concreteDepth,
-      position: concretePosition,
-    },
-    rectangleColumn.group,
-    isFiniteConcrete,
-  );
+  // updateConcrete(
+  //   concreteGroup,
+  //   scene,
+  //   {
+  //     thickness: concreteThickness,
+  //     width: concreteWidth,
+  //     depth: concreteDepth,
+  //     position: concretePosition,
+  //   },
+  //   rectangleColumn.group,
+  //   isFiniteConcrete,
+  // );
   rectangleColumn.setConcreteGroup(concreteGroup);
 
   const concreteTopY = 0;

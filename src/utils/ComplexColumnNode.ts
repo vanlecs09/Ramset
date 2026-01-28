@@ -1,6 +1,6 @@
 import * as BABYLON from '@babylonjs/core';
 import { BaseStructNodeImpl } from './BaseNode';
-import { createConcrete, updateConcrete } from './ConcreteNode';
+import { createConcrete } from './ConcreteNode';
 import type { ConcreteNode } from './ConcreteNode';
 import { calculateCuboidPostPositions } from './CuboidPostPositionCalculator';
 import { createPost } from './PostNode';
