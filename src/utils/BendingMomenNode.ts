@@ -135,7 +135,7 @@ export const createBendingMomenNode = (
   length: number = 1,
   direction: BABYLON.Vector3 = new BABYLON.Vector3(1, 0, 0),
   color: BABYLON.Color3 = BENDING_MOMENT_CONSTANTS.MATERIAL_COLOR,
-  labelText?: string,
+  momenValue: number,
 ): BendingMomentNode => {
   const group = new BABYLON.TransformNode('BendingMomentGroup', scene);
   const dottedLineMeshes: BABYLON.Mesh[] = [];
@@ -171,12 +171,20 @@ export const createBendingMomenNode = (
     dottedLineMeshes.push(dot);
   }
 
+  let arrowBeginPosition = BABYLON.Vector3.Zero();
+  let arrowEndPosition = BABYLON.Vector3.Zero();
   // Create arrow at the end of the line using createLineArrow
-  const arrowPosition = position.add(normalizedDirection.scale(length));
-  const arrowEndPosition = arrowPosition.add(normalizedDirection.scale(0.1));
-  
+  if (momenValue > 0) {
+    arrowBeginPosition = position.add(normalizedDirection.scale(length));
+    arrowEndPosition = arrowBeginPosition.add(normalizedDirection.scale(0.1));
+  }
+  else {
+    arrowBeginPosition = position.add(normalizedDirection.scale(length + 0.1));
+    arrowEndPosition = arrowBeginPosition.add(normalizedDirection.scale(-0.1));
+  }
+
   const arrowNode = createLineArrowNode(
-    arrowPosition,
+    arrowBeginPosition,
     arrowEndPosition,
     'bendingMoment_arrow',
     scene,
@@ -186,8 +194,9 @@ export const createBendingMomenNode = (
 
   // Create label if text is provided
   let label: GUI.TextBlock | null = null;
-  if (labelText) {
-    label = createBendingMomentLabel(arrowNode.arrow, labelText);
+  let text = momenValue.toString();
+  if (text) {
+    label = createBendingMomentLabel(arrowNode.arrow, text);
     if (label) {
       labels.push(label);
     }

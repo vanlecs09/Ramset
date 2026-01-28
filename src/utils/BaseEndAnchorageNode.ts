@@ -203,7 +203,7 @@ export const createEndAnchorage = (
     1,
     new BABYLON.Vector3(1, 0, 0),
     BABYLON.Color3.Black(),
-    '200',
+    200,
   );
   bendingMoment1.setLineAndArrowVisible(false);
   mainNode.addBendingMomentNode(bendingMoment1);
@@ -219,7 +219,7 @@ export const createEndAnchorage = (
     1,
     new BABYLON.Vector3(0, 0, 1),
     BABYLON.Color3.Black(),
-    '200',
+    200,
   );
   bendingMoment2.setLineAndArrowVisible(false);
   mainNode.addBendingMomentNode(bendingMoment2);
@@ -230,7 +230,7 @@ export const createEndAnchorage = (
     1,
     new BABYLON.Vector3(0, 1, 0),
     BABYLON.Color3.Black(),
-    '200',
+    200,
   );
   mainNode.addBendingMomentNode(bendingMoment3);
 
