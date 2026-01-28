@@ -244,8 +244,8 @@ export const createEndAnchorage = (
   const torsion = createTorsionMomentNode(
     'torque1',
     scene,
+    mainNode.group,
     basePosition.add(new BABYLON.Vector3(1, 0, 0)),
-
     new BABYLON.Vector3(0, -1, 0), // Direction along XF
     new BABYLON.Vector3(0, 0, 1), // Direction along X
     undefined, // arcAngle (use default)
@@ -258,8 +258,8 @@ export const createEndAnchorage = (
   const torsion2 = createTorsionMomentNode(
     'torque1',
     scene,
+    mainNode.group,
     basePosition.add(new BABYLON.Vector3(0, 0, 1)),
-
     new BABYLON.Vector3(1, 0, 0), // Direction along XF
     new BABYLON.Vector3(0, 1, 0), // Direction along X
     undefined, // arcAngle (use default)

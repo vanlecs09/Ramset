@@ -362,7 +362,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       // Keep axis aligned to world space (don't rotate with camera)
       // This shows the world orientation - X, Y, Z always point in world directions
-      unitAxesGroupRef.current.rotation = BABYLON.Vector3.Zero();
+      // unitAxesGroupRef.current.rotation = BABYLON.Vector3.Zero();
       unitAxesGroupRef.current.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
     });
 
@@ -398,7 +398,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene) return;
-
+     unitAxesGroupRef.current!.rotation.x = 0;
     // Helper function to dispose current structure
     const disposePreviousStructure = () => {
       // return;
@@ -665,6 +665,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       );
       // Rotate the group by 90 degrees on X-axis
       lapspliceSlabRef.current.group.rotation.x = Math.PI / 2;
+      unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
 
     } else if (model === 'lapspliceBeam') {
       // Calculate concrete dimensions and positions
@@ -715,6 +716,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       );
       // Rotate the group by 90 degrees on X-axis
       lapspliceBeamRef.current.group.rotation.x = Math.PI / 2;
+       unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
 
     } else if (model === 'lapspliceWall') {
       // Calculate concrete dimensions and positions
@@ -856,6 +858,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       endAnchorageBeamRef.current = createEndAnchorage(scene, postPos, endAnchorageBeamParams, concreteParam, secondaryParams);
       // Rotate the group by 90 degrees on X-axis
       endAnchorageBeamRef.current.group.rotation.x = Math.PI / 2;
+       unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
 
     } else if (model === 'endAnchorageSlab') {
       // Calculate concrete dimensions and positions
@@ -897,6 +900,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       endAnchorageSlabRef.current = createEndAnchorage(scene, postPos, endAnchorageSlabParams, concreteParam, secondaryParams);
       // Rotate the group by 90 degrees on X-axis
       endAnchorageSlabRef.current.group.rotation.x = Math.PI / 2;
+       unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
     } else if (model === 'endAnchorageWall') {
       // Calculate concrete dimensions and positions
       const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({

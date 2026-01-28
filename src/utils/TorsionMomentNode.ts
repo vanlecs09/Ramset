@@ -119,6 +119,7 @@ export const TORSION_MOMENT_CONSTANTS = {
 export const createTorsionMomentNode = (
   name: string,
   scene: BABYLON.Scene,
+  parent: BABYLON.TransformNode,
   centerPosition: BABYLON.Vector3,
   rightVec: BABYLON.Vector3,
   upVec: BABYLON.Vector3,
@@ -129,7 +130,7 @@ export const createTorsionMomentNode = (
 ): TorsionMomentNode => {
   const arcRadius: number = TORSION_MOMENT_CONSTANTS.ARC_RADIUS;
   const arcThickness: number = TORSION_MOMENT_CONSTANTS.ARC_THICKNESS;
-  const group = new BABYLON.TransformNode(name + 'Group', scene);
+  // const group = new BABYLON.TransformNode(name + 'Group', scene);
   const meshes: BABYLON.Mesh[] = [];
   const labels: GUI.TextBlock[] = [];
 
@@ -152,7 +153,7 @@ export const createTorsionMomentNode = (
     arcAngle,
     material,
   );
-  arc.parent = group;
+  arc.parent = parent;
   meshes.push(arc);
 
   // Create arrow at arc end indicating direction
@@ -167,14 +168,14 @@ export const createTorsionMomentNode = (
     arcDir,
     material,
   );
-  arrow.parent = group;
+  arrow.parent = parent;
   meshes.push(arrow);
 
   // Create label
   const label = createLabel(arrow, labelText);
   if (label) labels.push(label);
 
-  return new TorsionMomentNode(group, arc, arrow, meshes, label, labels);
+  return new TorsionMomentNode(parent, arc, arrow, meshes, label, labels);
 };
 
 /**
