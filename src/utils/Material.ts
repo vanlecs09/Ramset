@@ -65,9 +65,12 @@ export const getBoundlessMaterial = (scene: BABYLON.Scene): BABYLON.StandardMate
       217 / 255,
       200 / 255,
     ); // tan/beige color
-    cache.boundlessMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
-    cache.boundlessMaterial.alpha = 0.2; // semi-transparent
+    // cache.boundlessMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
+    cache.boundlessMaterial.alpha = 0.1; // semi-transparent
     cache.boundlessMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
+    cache.boundlessMaterial.backFaceCulling = false;
+    cache.boundlessMaterial.cullBackFaces = false;
+     cache.boundlessMaterial.disableLighting = true;
   }
 
   return cache.boundlessMaterial;
