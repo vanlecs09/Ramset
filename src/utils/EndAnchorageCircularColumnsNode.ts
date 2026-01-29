@@ -6,7 +6,7 @@ import type { PostPosition } from './CircularPostPositionCalculator';
 import { createLineTwoArrow, DimensionLineNode } from './GeometryHelper';
 import { createUnitAxes } from './UnitAxisNode';
 import { BaseEndAnchorageNode, createMomens } from './BaseEndAnchorageNode';
-import { getConcreteMaterial, getWaveBlockMaterial, getConcreteDimensionMaterial } from './Material';
+import { getConcreteMaterial, getWaveBlockMaterial, getConcreteDimensionMaterial, getCircularStandingWaveMaterial } from './Material';
 
 export interface BaseStructureGroup {
   group: BABYLON.TransformNode;
@@ -157,12 +157,14 @@ export const createCircularColumns = (
     0,
   );
 
+  const circularStandingWaveMaterial = getCircularStandingWaveMaterial(scene);
+
   const standingWave = createCircularStandingWave(
     scene,
     wavePosition,
     params.circleColumnsParam.columnRadius,
     0.1,
-    getWaveBlockMaterial(scene),
+    circularStandingWaveMaterial,
     0.02,
     4,
   );
@@ -202,8 +204,7 @@ export const createCircularColumns = (
   mainNode.setUnitAxisNode(axisNode);
 
   createMomens(scene, params.concreteParam.position, params.concreteParam, mainNode);
-  if (params.concreteParam.isBoundless)
-  {
+  if (params.concreteParam.isBoundless) {
     createInnerDeimensionLine(
       params.concreteParam.position,
       params.concreteParam,

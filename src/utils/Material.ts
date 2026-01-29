@@ -20,6 +20,7 @@ interface MaterialSet {
   waveBlockMaterial?: BABYLON.StandardMaterial;
   secondaryPostMaterial?: BABYLON.StandardMaterial;
   torsionMaterial?: BABYLON.StandardMaterial;
+  circularStandingWaveMaterial?: BABYLON.StandardMaterial;
   dimensionLabelTexture?: GUI.AdvancedDynamicTexture;
 }
 
@@ -171,6 +172,34 @@ export const getTorsionMaterial = (scene: BABYLON.Scene): BABYLON.StandardMateri
   }
 
   return cache.torsionMaterial;
+};
+
+/**
+ * Get or create circular standing wave material for a scene
+ */
+export const getCircularStandingWaveMaterial = (scene: BABYLON.Scene): BABYLON.StandardMaterial => {
+  let cache = materialCache.get(scene);
+  if (!cache) {
+    cache = {};
+    materialCache.set(scene, cache);
+  }
+
+  if (!cache.circularStandingWaveMaterial) {
+    cache.circularStandingWaveMaterial = new BABYLON.StandardMaterial(
+      'circularStandingWaveMaterial',
+      scene,
+    );
+    cache.circularStandingWaveMaterial.diffuseColor = new BABYLON.Color3(
+      214 / 255,
+      217 / 255,
+      200 / 255,
+    ); // tan/beige color
+    cache.circularStandingWaveMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
+    cache.circularStandingWaveMaterial.alpha = 0.4;
+    cache.circularStandingWaveMaterial.backFaceCulling = false;
+  }
+
+  return cache.circularStandingWaveMaterial;
 };
 
 // ============================================================================
