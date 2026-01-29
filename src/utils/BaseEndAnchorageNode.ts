@@ -192,80 +192,7 @@ export const createEndAnchorage = (
   mainNode.setAxisMeshes(axisNode.meshes);
   mainNode.setLabels(axisNode.labels);
 
-  const bendingMoment1 = createBendingMomenNode(
-    scene,
-    new BABYLON.Vector3(
-      concretePosition.x,
-      concretePosition.y + concreteParams.thickness / 2,
-      concretePosition.z,
-    ),
-    1,
-    new BABYLON.Vector3(1, 0, 0),
-    BABYLON.Color3.Black(),
-    200,
-    mainNode.group,
-  );
-  bendingMoment1.setLineAndArrowVisible(false);
-  mainNode.addBendingMomentNode(bendingMoment1);
-
-  const basePosition = new BABYLON.Vector3(
-    0,
-    concretePosition.y + concreteParams.thickness / 2,
-    concretePosition.z,
-  );
-  const bendingMoment2 = createBendingMomenNode(
-    scene,
-    basePosition,
-    1,
-    new BABYLON.Vector3(0, 0, 1),
-    BABYLON.Color3.Black(),
-    200,
-    mainNode.group,
-  );
-  bendingMoment2.setLineAndArrowVisible(false);
-  mainNode.addBendingMomentNode(bendingMoment2);
-
-  const bendingMoment3 = createBendingMomenNode(
-    scene,
-    basePosition,
-    1,
-    new BABYLON.Vector3(0, 1, 0),
-    BABYLON.Color3.Black(),
-    200,
-    mainNode.group,
-  );
-  mainNode.addBendingMomentNode(bendingMoment3);
-
-  const torsionMat = new BABYLON.StandardMaterial('torsionMat', scene);
-  torsionMat.diffuseColor = BABYLON.Color3.Black();
-
-  const torsion = createTorsionMomentNode(
-    'torque1',
-    scene,
-    mainNode.group,
-    basePosition.add(new BABYLON.Vector3(1, 0, 0)),
-    new BABYLON.Vector3(0, -1, 0), // Direction along XF
-    new BABYLON.Vector3(0, 0, 1), // Direction along X
-    undefined, // arcAngle (use default)
-    ArcDirection.FORWARD, // Forward pointing
-    torsionMat,
-    '25kg', // Label text
-  );
-  mainNode.addTorsionMomentNode(torsion);
-
-  const torsion2 = createTorsionMomentNode(
-    'torque1',
-    scene,
-    mainNode.group,
-    basePosition.add(new BABYLON.Vector3(0, 0, 1)),
-    new BABYLON.Vector3(1, 0, 0), // Direction along XF
-    new BABYLON.Vector3(0, 1, 0), // Direction along X
-    undefined, // arcAngle (use default)
-    ArcDirection.FORWARD, // Forward pointing
-    torsionMat,
-    '25kg', // Label text
-  );
-  mainNode.addTorsionMomentNode(torsion2);
+  createMomens(scene, concretePosition, concreteParams, mainNode);
 
   return mainNode;
 };
@@ -418,6 +345,85 @@ export const createWaveBlockTop = (
 };
 
 export type EndAnchorageNode = BaseEndAnchorageNode;
+export const createMomens = (
+  scene: BABYLON.Scene,
+  concretePosition: BABYLON.Vector3,
+  concreteParams: ConcreteParams,
+  mainNode: BaseStructNodeImpl) => {
+
+  const basePosition = new BABYLON.Vector3(
+    0,
+    concretePosition.y + concreteParams.thickness / 2,
+    0,
+  );
+  const bendingMoment1 = createBendingMomenNode(
+    scene,
+    basePosition,
+    1,
+    new BABYLON.Vector3(1, 0, 0),
+    BABYLON.Color3.Black(),
+    200,
+    mainNode.group
+  );
+  bendingMoment1.setLineAndArrowVisible(false);
+  mainNode.addBendingMomentNode(bendingMoment1);
+
+
+  const bendingMoment2 = createBendingMomenNode(
+    scene,
+    basePosition,
+    1,
+    new BABYLON.Vector3(0, 0, 1),
+    BABYLON.Color3.Black(),
+    200,
+    mainNode.group
+  );
+  bendingMoment2.setLineAndArrowVisible(false);
+  mainNode.addBendingMomentNode(bendingMoment2);
+
+  const bendingMoment3 = createBendingMomenNode(
+    scene,
+    basePosition,
+    1,
+    new BABYLON.Vector3(0, 1, 0),
+    BABYLON.Color3.Black(),
+    200,
+    mainNode.group
+  );
+  mainNode.addBendingMomentNode(bendingMoment3);
+
+  const torsionMat = new BABYLON.StandardMaterial('torsionMat', scene);
+  torsionMat.diffuseColor = BABYLON.Color3.Black();
+
+  const torsion = createTorsionMomentNode(
+    'torque1',
+    scene,
+    mainNode.group,
+    basePosition.add(new BABYLON.Vector3(1, 0, 0)),
+    new BABYLON.Vector3(0, -1, 0), // Direction along XF
+    new BABYLON.Vector3(0, 0, 1), // Direction along X
+    undefined, // arcAngle (use default)
+    ArcDirection.FORWARD, // Forward pointing
+    torsionMat,
+    '25kg'
+  );
+  mainNode.addTorsionMomentNode(torsion);
+
+  const torsion2 = createTorsionMomentNode(
+    'torque1',
+    scene,
+    mainNode.group,
+    basePosition.add(new BABYLON.Vector3(0, 0, 1)),
+    new BABYLON.Vector3(1, 0, 0), // Direction along XF
+    new BABYLON.Vector3(0, 1, 0), // Direction along X
+    undefined, // arcAngle (use default)
+    ArcDirection.FORWARD, // Forward pointing
+    torsionMat,
+    '25kg'
+  );
+  mainNode.addTorsionMomentNode(torsion2);
+}
+
 function createDeimensionLine(
   concretePosition: BABYLON.Vector3,
   beamParams: SecondaryEndAnchorageParams,

@@ -1,15 +1,10 @@
 import * as BABYLON from '@babylonjs/core';
-import { createConcrete, ConcreteNode } from './ConcreteNode';
+import { createConcrete, ConcreteNode, type ConcreteParams } from './ConcreteNode';
 import { createPost } from './PostNode';
 import { createUnitAxes } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
-import { createBendingMomenNode } from './BendingMomenNode';
-import {
-  ArcDirection,
-  createTorsionMomentNode as createTorsionMomentNode,
-} from './TorsionMomentNode';
-import { createWaveBlockTop } from './BaseEndAnchorageNode';
+import { createMomens, createWaveBlockTop } from './BaseEndAnchorageNode';
 
 export class BaseLapSpliceNode extends BaseStructNodeImpl {
   private concreteNode?: ConcreteNode;
@@ -113,12 +108,7 @@ const initializeMaterials = (scene: BABYLON.Scene) => {
 export const createLapsplice = (
   scene: BABYLON.Scene,
   postPositions: RectanglePostPosition[],
-  concreteParam: {
-    thickness: number;
-    width: number;
-    depth: number;
-    position: BABYLON.Vector3;
-  },
+  concreteParam: ConcreteParams,
   slabParam: {
     slabWidth: number;
     slabDepth: number;
@@ -195,77 +185,7 @@ export const createLapsplice = (
   mainNode.setAxisMeshes(axesResult.meshes);
   mainNode.setLabels(axesResult.labels);
 
-  const basePosition = new BABYLON.Vector3(
-    concretePosition.x,
-    concretePosition.y + concreteParam.thickness / 2,
-    concretePosition.z,
-  );
-  const bendingMoment1 = createBendingMomenNode(
-    scene,
-    basePosition,
-    1,
-    new BABYLON.Vector3(1, 0, 0),
-    BABYLON.Color3.Black(),
-    -200,
-    mainNode.group,
-  );
-  bendingMoment1.setLineAndArrowVisible(false);
-  mainNode.addBendingMomentNode(bendingMoment1);
-
-
-  const bendingMoment2 = createBendingMomenNode(
-    scene,
-    basePosition,
-    1,
-    new BABYLON.Vector3(0, 0, 1),
-    BABYLON.Color3.Black(),
-    -200,
-    mainNode.group,
-  );
-  bendingMoment2.setLineAndArrowVisible(false);
-  mainNode.addBendingMomentNode(bendingMoment2);
-
-  const bendingMoment3 = createBendingMomenNode(
-    scene,
-    basePosition,
-    1,
-    new BABYLON.Vector3(0, 1, 0),
-    BABYLON.Color3.Black(),
-    200,
-    mainNode.group,
-  );
-  mainNode.addBendingMomentNode(bendingMoment3);
-
-  const torsionMat = new BABYLON.StandardMaterial('torsionMat', scene);
-  torsionMat.diffuseColor = BABYLON.Color3.Black();
-
-  const torsion = createTorsionMomentNode(
-    'torque1',
-    scene,
-    mainNode.group,
-    basePosition.add(new BABYLON.Vector3(1, 0, 0)),
-    new BABYLON.Vector3(0, -1, 0), // Direction along XF
-    new BABYLON.Vector3(0, 0, 1), // Direction along X
-    undefined, // arcAngle (use default)
-    ArcDirection.FORWARD, // Forward pointing
-    torsionMat,
-    '25kg', // Label text
-  );
-  mainNode.addTorsionMomentNode(torsion);
-
-  const torsion2 = createTorsionMomentNode(
-    'torque1',
-    scene,
-    mainNode.group,
-    basePosition.add(new BABYLON.Vector3(0, 0, 1)),
-    new BABYLON.Vector3(1, 0, 0), // Direction along XF
-    new BABYLON.Vector3(0, 1, 0), // Direction along X
-    undefined, // arcAngle (use default)
-    ArcDirection.FORWARD, // Forward pointing
-    torsionMat,
-    '25kg', // Label text
-  );
-  mainNode.addTorsionMomentNode(torsion2);
+  createMomens(scene, concreteParam.position, concreteParam, mainNode);
 
   // 4. Create secondary posts inside concrete (black color, high density)
   addSecondaryPostsInsideConcrete(
@@ -320,7 +240,7 @@ export const addSecondaryPostsInsideConcrete = (
   const concreteMaxZ = concretePosition.z + concreteDepth / 2;
 
   // Post depth extends through concrete (along Z-axis)
-  const postDepth = concreteThickness;
+  const postDepth = concreteThickness - 0.2;
   const postCentery = concretePosition.y;
 
   // Generate grid of secondary posts (X-Y grid, extending along Z)

@@ -2,11 +2,9 @@ import * as BABYLON from '@babylonjs/core';
 import { createConcrete, ConcreteNode } from './ConcreteNode';
 import { createPost } from './PostNode';
 import { createCircularStandingWave } from './WaveBuilder';
-import { BaseStructNodeImpl } from './BaseNode';
 import type { PostPosition } from './CircularPostPositionCalculator';
 import { createUnitAxes } from './GeometryHelper';
-import { createBendingMomenNode } from './BendingMomenNode';
-import { createTorsionMomentNode, ArcDirection } from './TorsionMomentNode';
+import { BaseEndAnchorageNode, createMomens } from './BaseEndAnchorageNode';
 
 export interface BaseStructureGroup {
   group: BABYLON.TransformNode;
@@ -16,7 +14,7 @@ export interface BaseStructureGroup {
   dispose(): void;
 }
 
-export class EndAnchorageCircularColumnsNode extends BaseStructNodeImpl {
+export class EndAnchorageCircularColumnsNode extends BaseEndAnchorageNode {
   private concreteGroup?: ConcreteNode;
   private circularColumn?: BABYLON.Mesh;
   private standingWaveMesh?: BABYLON.Mesh;
@@ -51,16 +49,6 @@ export class EndAnchorageCircularColumnsNode extends BaseStructNodeImpl {
     this.standingWaveMesh = mesh;
   }
 
-  getTorqueMeshes(): BABYLON.Mesh[] {
-    return this.torqueMeshes || [];
-  }
-
-  addTorqueMesh(mesh: BABYLON.Mesh): void {
-    if (!this.torqueMeshes) {
-      this.torqueMeshes = [];
-    }
-    this.torqueMeshes.push(mesh);
-  }
 
   dispose(): void {
     // Dispose concrete group and all its resources
@@ -169,9 +157,9 @@ export const createCircularColumns = (
 
   // Create standing wave on top of cylinder
   const wavePosition = new BABYLON.Vector3(
-    params.concreteParam.position.x,
+    0,
     concreteTopY + gapDistance + params.circleColumnsParam.columnHeight + 0.05,
-    params.concreteParam.position.z,
+    0,
   );
 
   const waveWaveMaterial = new BABYLON.StandardMaterial(
@@ -232,77 +220,7 @@ export const createCircularColumns = (
   mainNode.setAxisMeshes(axisNode.meshes);
   mainNode.setLabels(axisNode.labels);
 
-  const basePosition = new BABYLON.Vector3(
-    params.concreteParam.position.x,
-    params.concreteParam.position.y + params.concreteParam.thickness / 2,
-    params.concreteParam.position.z,
-  );
-  const bendingMoment1 = createBendingMomenNode(
-    scene,
-    basePosition,
-    1,
-    new BABYLON.Vector3(1, 0, 0),
-    BABYLON.Color3.Black(),
-    200,
-    mainNode.group,
-  );
-  bendingMoment1.setLineAndArrowVisible(false);
-  mainNode.addBendingMomentNode(bendingMoment1);
-
-
-  const bendingMoment2 = createBendingMomenNode(
-    scene,
-    basePosition,
-    1,
-    new BABYLON.Vector3(0, 0, 1),
-    BABYLON.Color3.Black(),
-    200,
-    mainNode.group,
-  );
-  bendingMoment2.setLineAndArrowVisible(false);
-  mainNode.addBendingMomentNode(bendingMoment2);
-
-  const bendingMoment3 = createBendingMomenNode(
-    scene,
-    basePosition,
-    1,
-    new BABYLON.Vector3(0, 1, 0),
-    BABYLON.Color3.Black(),
-    -200,
-    mainNode.group,
-  );
-  mainNode.addBendingMomentNode(bendingMoment3);
-
-  const torsionMat = new BABYLON.StandardMaterial('torsionMat', scene);
-  torsionMat.diffuseColor = BABYLON.Color3.Black();
-
-  const torsion = createTorsionMomentNode(
-    'torque1',
-    scene,
-    mainNode.group,
-    basePosition.add(new BABYLON.Vector3(1, 0, 0)),
-    new BABYLON.Vector3(0, -1, 0), // Direction along XF
-    new BABYLON.Vector3(0, 0, 1), // Direction along X
-    undefined, // arcAngle (use default)
-    ArcDirection.FORWARD, // Forward pointing
-    torsionMat,
-    '25kg', // Label text
-  );
-  mainNode.addTorsionMomentNode(torsion);
-
-  const torsion2 = createTorsionMomentNode(
-    'torque1',
-    scene,
-    mainNode.group,
-    basePosition.add(new BABYLON.Vector3(0, 0, 1)),
-    new BABYLON.Vector3(1, 0, 0), // Direction along XF
-    new BABYLON.Vector3(0, 1, 0), // Direction along X
-    undefined, // arcAngle (use default)
-    ArcDirection.FORWARD, // Forward pointing
-    torsionMat,
-    '25kg', // Label text
-  );
-  mainNode.addTorsionMomentNode(torsion2);
+  createMomens(scene, params.concreteParam.position, params.concreteParam, mainNode);
 
   return mainNode;
 };

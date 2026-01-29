@@ -265,7 +265,7 @@ export const createConcrete = (
     // if (depthLabel) labels.push(depthLabel.label);
 
     // Height dimension (Y axis) - offset from X min, Z min corner
-    const heightLabel = createDimensionWithLabel(
+    const heightDimensionNode = createDimensionWithLabel(
       'height',
       scene,
       new BABYLON.Vector3(minX - offset, minY, minZ - offset),
@@ -279,7 +279,7 @@ export const createConcrete = (
       -30,
       0,
     );
-    if (heightLabel) labels.push(heightLabel.label);
+    if (heightDimensionNode) labels.push(heightDimensionNode.label);
 
     const dimensionLineResult2 = new DimensionLineNode(dimensionGroup);
     dimensionLineResult2.setLabels(labels);

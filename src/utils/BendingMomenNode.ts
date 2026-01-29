@@ -138,11 +138,6 @@ export const createBendingMomenNode = (
   momenValue: number,
   parent: BABYLON.TransformNode,
 ): BendingMomentNode => {
-  // Create group for bending moment with optional parent
-  // const group = new BABYLON.TransformNode('BendingMomentGroup', scene);
-  // if (parent) {
-  //   group.parent = parent;
-  // }
 
   const dottedLineMeshes: BABYLON.Mesh[] = [];
   const labels: GUI.TextBlock[] = [];

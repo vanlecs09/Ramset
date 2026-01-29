@@ -617,6 +617,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     } else if (model === 'lapspliceSlab') {
 
       // Calculate concrete dimensions and positions
+      lapspliceSlabParams.concreteThickness = 0.6;
       const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
         concreteOffsetXRight: lapspliceSlabParams.concreteOffsetXRight,
         concreteOffsetXLeft: lapspliceSlabParams.concreteOffsetXLeft,
@@ -668,6 +669,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
 
     } else if (model === 'lapspliceBeam') {
+      lapspliceSlabParams.concreteThickness = 0.6;
       // Calculate concrete dimensions and positions
       const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
         concreteOffsetXRight: lapspliceBeamParams.concreteOffsetXRight,
@@ -719,6 +721,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
        unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
 
     } else if (model === 'lapspliceWall') {
+      lapspliceSlabParams.concreteThickness = 0.6;
       // Calculate concrete dimensions and positions
       const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
         concreteOffsetXRight: lapspliceWallParams.concreteOffsetXRight,
@@ -767,6 +770,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       );
 
     } else if (model === 'lapspliceColumn') {
+      lapspliceColumnParams.concreteThickness = 0.6;
       // Calculate concrete dimensions and positions
       const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
         concreteOffsetXRight: lapspliceColumnParams.concreteOffsetXRight,
