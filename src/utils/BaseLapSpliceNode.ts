@@ -4,7 +4,7 @@ import { createPost } from './PostNode';
 import { createUnitAxes } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
-import { createMomens, createWaveBlockTop } from './BaseEndAnchorageNode';
+import { createMomens, createWaveBlockTop as createTopBlockWave } from './BaseEndAnchorageNode';
 import { getSecondaryPostMaterial } from './Material';
 
 export class BaseLapSpliceNode extends BaseStructNodeImpl {
@@ -88,7 +88,7 @@ export const createLapsplice = (
   );
 
 
-  createWaveBlockTop(
+  createTopBlockWave(
     mainNode as unknown as BaseStructNodeImpl,
     slabParam.slabWidth,
     slabParam.slabDepth,

@@ -14,7 +14,6 @@ export class BendingMomentNode {
   readonly dottedLineMeshes: BABYLON.Mesh[];
   readonly arrowNode: LineArrowNode;
   readonly label?: GUI.TextBlock | null;
-  readonly labels: GUI.TextBlock[];
 
   /**
    * Creates a new BendingMomentNode instance.
@@ -24,13 +23,11 @@ export class BendingMomentNode {
     dottedLineMeshes: BABYLON.Mesh[],
     arrowNode: LineArrowNode,
     label?: GUI.TextBlock | null,
-    labels?: GUI.TextBlock[],
   ) {
     this.group = group;
     this.dottedLineMeshes = dottedLineMeshes;
     this.arrowNode = arrowNode;
     this.label = label;
-    this.labels = labels || [];
   }
 
   /**
@@ -42,11 +39,6 @@ export class BendingMomentNode {
     // Delegate arrow visibility to arrowNode
     // this.arrowNode.setArrowVisible(visible);
     this.arrowNode.setLineAndArrowVisible(visible); // Keep line visible
-
-    // Hide/show all labels
-    this.labels.forEach(label => {
-      label.isVisible = visible;
-    });
 
     // Hide/show single label if it exists
     if (this.label) {
@@ -73,11 +65,6 @@ export class BendingMomentNode {
     // Show/hide arrow and label through arrowNode
     this.arrowNode.setVisible(visible);
 
-    // Show/hide additional labels
-    this.labels.forEach(label => {
-      label.isVisible = visible;
-    });
-
     // Show/hide single label if it exists
     if (this.label) {
       this.label.isVisible = visible;
@@ -93,8 +80,7 @@ export class BendingMomentNode {
     this.dottedLineMeshes.forEach(mesh => mesh.dispose());
     // Dispose arrow node (which handles its own meshes and group)
     this.arrowNode.dispose();
-    // Dispose labels
-    this.labels.forEach(label => label.dispose());
+    // Dispose label
     this.label?.dispose();
     this.group.dispose();
   }
@@ -140,7 +126,6 @@ export const createBendingMomenNode = (
 ): BendingMomentNode => {
 
   const dottedLineMeshes: BABYLON.Mesh[] = [];
-  const labels: GUI.TextBlock[] = [];
 
   // Normalize direction
   const normalizedDirection = BABYLON.Vector3.Normalize(direction);
@@ -198,9 +183,6 @@ export const createBendingMomenNode = (
   let text = momenValue.toString();
   if (text) {
     label = createBendingMomentLabel(arrowNode.arrow, text);
-    if (label) {
-      labels.push(label);
-    }
   }
 
   return new BendingMomentNode(
@@ -208,7 +190,6 @@ export const createBendingMomenNode = (
     dottedLineMeshes,
     arrowNode,
     label,
-    labels,
   );
 };
 

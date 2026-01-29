@@ -854,9 +854,9 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       };
 
       let secondaryParams = {
-        beamWidth: endAnchorageBeamParams.beamWidth,
-        beamDepth: endAnchorageBeamParams.beamDepth,
-        beamHeight: endAnchorageBeamParams.beamHeight,
+        width: endAnchorageBeamParams.beamWidth,
+        depth: endAnchorageBeamParams.beamDepth,
+        height: endAnchorageBeamParams.beamHeight,
       };
       // updateEndAnchorage(endAnchorageBeamRef.current!,
       endAnchorageBeamRef.current = createEndAnchorage(scene, postPos, endAnchorageBeamParams, concreteParam, secondaryParams);
@@ -897,9 +897,9 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       };
 
       let secondaryParams = {
-        beamWidth: endAnchorageSlabParams.beamWidth,
-        beamDepth: endAnchorageSlabParams.beamDepth,
-        beamHeight: endAnchorageSlabParams.beamHeight,
+        width: endAnchorageSlabParams.beamWidth,
+        depth: endAnchorageSlabParams.beamDepth,
+        height: endAnchorageSlabParams.beamHeight,
       };
       endAnchorageSlabRef.current = createEndAnchorage(scene, postPos, endAnchorageSlabParams, concreteParam, secondaryParams);
       // Rotate the group by 90 degrees on X-axis
@@ -938,9 +938,9 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       };
 
       let secondaryParams = {
-        beamWidth: endAnchorageWallParams.beamWidth,
-        beamDepth: endAnchorageWallParams.beamDepth,
-        beamHeight: endAnchorageWallParams.beamHeight,
+        width: endAnchorageWallParams.beamWidth,
+        depth: endAnchorageWallParams.beamDepth,
+        height: endAnchorageWallParams.beamHeight,
       };
       endAnchorageWallRef.current = createEndAnchorage(scene, postPos, endAnchorageWallParams, concreteParam, secondaryParams);
       // Rotate the group by 90 degrees on X-axis
@@ -978,9 +978,9 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       };
 
       let secondaryParams = {
-        beamWidth: endAnchorageRectangularColumnParams.beamWidth,
-        beamDepth: endAnchorageRectangularColumnParams.beamDepth,
-        beamHeight: endAnchorageRectangularColumnParams.beamHeight,
+        width: endAnchorageRectangularColumnParams.beamWidth,
+        depth: endAnchorageRectangularColumnParams.beamDepth,
+        height: endAnchorageRectangularColumnParams.beamHeight,
       };
       endAnchorageRectangularColumnRef.current = createEndAnchorage(scene, postPos, endAnchorageRectangularColumnParams, concreteParam, secondaryParams);
       // Rotate the group by 90 degrees on X-axis

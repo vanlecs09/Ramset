@@ -40,10 +40,10 @@ export interface EndAnchorageParams {
   isBoundlessConcrete?: boolean;
 }
 
-export interface SecondaryEndAnchorageParams {
-  beamWidth: number;
-  beamDepth: number;
-  beamHeight: number;
+export interface TopBlockParams {
+  width: number;
+  depth: number;
+  height: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -87,7 +87,7 @@ export const createEndAnchorage = (
   postPositions: BABYLON.Vector3[],
   params: EndAnchorageParams,
   concreteParams: ConcreteParams,
-  beamParams: SecondaryEndAnchorageParams,
+  beamParams: TopBlockParams,
 ): BaseEndAnchorageNode => {
   const anchorageTrans = new BABYLON.TransformNode('endAnchorage', scene);
   const mainNode = new BaseEndAnchorageNode(anchorageTrans);
@@ -106,7 +106,7 @@ export const createEndAnchorage = (
   const concretePosition = concreteParams.position;
   const beamPosition = new BABYLON.Vector3(
     0,
-    concretePosition.y + beamParams.beamHeight / 2 + concreteNode.getConcreteHeight() / 2,
+    concretePosition.y + beamParams.height / 2 + concreteNode.getConcreteHeight() / 2,
     0,
   );
   if (params.isBoundlessConcrete == false) {
@@ -122,9 +122,9 @@ export const createEndAnchorage = (
 
   createWaveBlockTop(
     mainNode,
-    beamParams.beamWidth,
-    beamParams.beamDepth,
-    beamParams.beamHeight,
+    beamParams.width,
+    beamParams.depth,
+    beamParams.height,
     beamPosition,
   );
 
@@ -385,7 +385,7 @@ export const createMomens = (
 
 function createInnerDeimensionLine(
   concretePosition: BABYLON.Vector3,
-  beamParams: SecondaryEndAnchorageParams,
+  beamParams: TopBlockParams,
   concreteParams: ConcreteParams,
   beamPosition: BABYLON.Vector3,
   scene: BABYLON.Scene,
@@ -399,14 +399,14 @@ function createInnerDeimensionLine(
   // const beamWidthMeasure = Math.abs(beamParams.beamWidth / 2);szz//s
   {
     const beginPos = new BABYLON.Vector3(
-      beamPosition.x + beamParams.beamWidth / 2,
+      beamPosition.x + beamParams.width / 2,
       concretePosition.y + concreteParams.thickness / 2,
-      beamPosition.z - beamParams.beamDepth / 2,
+      beamPosition.z - beamParams.depth / 2,
     );
     const endPos = new BABYLON.Vector3(
       concretePosition.x + concreteParams.width / 2,
       concretePosition.y + concreteParams.thickness / 2,
-      beamPosition.z - beamParams.beamDepth / 2,
+      beamPosition.z - beamParams.depth / 2,
     );
     const length = BABYLON.Vector3.Distance(beginPos, endPos);
     if (length > 0) {
@@ -431,14 +431,14 @@ function createInnerDeimensionLine(
 
   {
     const beginPos = new BABYLON.Vector3(
-      beamPosition.x - beamParams.beamWidth / 2,
+      beamPosition.x - beamParams.width / 2,
       concretePosition.y + concreteParams.thickness / 2,
-      beamPosition.z - beamParams.beamDepth / 2,
+      beamPosition.z - beamParams.depth / 2,
     );
     const endPos = new BABYLON.Vector3(
       concretePosition.x - concreteParams.width / 2,
       concretePosition.y + concreteParams.thickness / 2,
-      beamPosition.z - beamParams.beamDepth / 2,
+      beamPosition.z - beamParams.depth / 2,
     );
     const length = BABYLON.Vector3.Distance(beginPos, endPos);
     if (length > 0) {
@@ -463,12 +463,12 @@ function createInnerDeimensionLine(
 
   {
     const beginPos = new BABYLON.Vector3(
-      beamPosition.x + beamParams.beamWidth / 2,
+      beamPosition.x + beamParams.width / 2,
       concretePosition.y + concreteParams.thickness / 2,
-      beamPosition.z - beamParams.beamDepth / 2,
+      beamPosition.z - beamParams.depth / 2,
     );
     const endPos = new BABYLON.Vector3(
-      beamPosition.x + beamParams.beamWidth / 2,
+      beamPosition.x + beamParams.width / 2,
       concretePosition.y + concreteParams.thickness / 2,
       concretePosition.z - concreteParams.depth / 2,
     );
@@ -495,12 +495,12 @@ function createInnerDeimensionLine(
 
   {
     const beginePos = new BABYLON.Vector3(
-      beamPosition.x + beamParams.beamWidth / 2,
+      beamPosition.x + beamParams.width / 2,
       concretePosition.y + concreteParams.thickness / 2,
-      beamPosition.z + beamParams.beamDepth / 2,
+      beamPosition.z + beamParams.depth / 2,
     );
     const endPos = new BABYLON.Vector3(
-      beamPosition.x + beamParams.beamWidth / 2,
+      beamPosition.x + beamParams.width / 2,
       concretePosition.y + concreteParams.thickness / 2,
       concretePosition.z + concreteParams.depth / 2,
     );
