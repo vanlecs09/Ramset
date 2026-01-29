@@ -146,15 +146,16 @@ export const createEndAnchorage = (
     concretePosition.y + beamParams.beamHeight / 2 + concreteNode.getConcreteHeight() / 2,
     0,
   );
-
-  createDeimensionLine(
-    concretePosition,
-    beamParams,
-    concreteParams,
-    beamPosition,
-    scene,
-    mainNode,
-  );
+  if (params.isBoundlessConcrete == false) {
+    createInnerDeimensionLine(
+      concretePosition,
+      beamParams,
+      concreteParams,
+      beamPosition,
+      scene,
+      mainNode,
+    );
+  }
 
   createWaveBlockTop(
     mainNode,
@@ -424,7 +425,7 @@ export const createMomens = (
   mainNode.addTorsionMomentNode(torsion2);
 }
 
-function createDeimensionLine(
+function createInnerDeimensionLine(
   concretePosition: BABYLON.Vector3,
   beamParams: SecondaryEndAnchorageParams,
   concreteParams: ConcreteParams,

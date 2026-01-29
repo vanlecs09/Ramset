@@ -159,7 +159,7 @@ export const createConcrete = (
   scene: BABYLON.Scene,
   params: ConcreteParams,
   parent?: BABYLON.TransformNode,
-  isFiniteConcrete: boolean = true,
+  isBounded: boolean = true,
   showDimensions: boolean = true,
 ): ConcreteNode => {
   // Create a transform node to group concrete elements
@@ -187,7 +187,7 @@ export const createConcrete = (
     concrete.parent = parent as BABYLON.Node;
   }
 
-  const sinBlocks = !isFiniteConcrete
+  const sinBlocks = !isBounded
     ? createInfiniteBlocks(
         scene,
         params.width,

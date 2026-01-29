@@ -1,9 +1,9 @@
 import * as BABYLON from '@babylonjs/core';
-import { createConcrete, ConcreteNode } from './ConcreteNode';
+import { createConcrete, ConcreteNode, type ConcreteParams } from './ConcreteNode';
 import { createPost } from './PostNode';
 import { createCircularStandingWave } from './WaveBuilder';
 import type { PostPosition } from './CircularPostPositionCalculator';
-import { createUnitAxes } from './GeometryHelper';
+import { createLineTwoArrow, createUnitAxes, DimensionLineNode } from './GeometryHelper';
 import { BaseEndAnchorageNode, createMomens } from './BaseEndAnchorageNode';
 
 export interface BaseStructureGroup {
@@ -113,7 +113,7 @@ export const createCircularColumns = (
   const mainNode = new EndAnchorageCircularColumnsNode(towerGroup);
 
   // Create bottom concrete
-  const concreteGroup = createConcrete(
+  const concreteNode = createConcrete(
     scene,
     {
       thickness: params.concreteParam.thickness,
@@ -125,7 +125,7 @@ export const createCircularColumns = (
     params.concreteParam.isBoundless,
   );
 
-  mainNode.setConcreteGroup(concreteGroup);
+  mainNode.setConcreteGroup(concreteNode);
 
   // Calculate concrete top position
   const concreteTopY = 0;
@@ -221,6 +221,162 @@ export const createCircularColumns = (
   mainNode.setLabels(axisNode.labels);
 
   createMomens(scene, params.concreteParam.position, params.concreteParam, mainNode);
+  if (params.concreteParam.isBoundless)
+  {
+    createInnerDeimensionLine(
+      params.concreteParam.position,
+      params.concreteParam,
+      new BABYLON.Vector3(0, 0, 0),
+      scene,
+      mainNode,
+    );
+  }
 
   return mainNode;
 };
+
+
+function createInnerDeimensionLine(
+  concretePosition: BABYLON.Vector3,
+  concreteParams: ConcreteParams,
+  beamPosition: BABYLON.Vector3,
+  scene: BABYLON.Scene,
+  anchorageNode: BaseEndAnchorageNode,
+) {
+  const dimMat = new BABYLON.StandardMaterial('dimensionMaterial', scene);
+  dimMat.diffuseColor = new BABYLON.Color3(0, 0, 0); // black for visibility
+  let dimensionMaterial = dimMat;
+
+  const dimensionNodes = new BABYLON.TransformNode(
+    'beamDimensionsDistance',
+    scene,
+  );
+  dimensionNodes.parent = anchorageNode.group;
+  // const beamWidthMeasure = Math.abs(beamParams.beamWidth / 2);szz//s
+  {
+    const beginPos = new BABYLON.Vector3(
+      beamPosition.x,
+      concretePosition.y + concreteParams.thickness / 2,
+      beamPosition.z,
+    );
+    const endPos = new BABYLON.Vector3(
+      concretePosition.x + concreteParams.width / 2,
+      concretePosition.y + concreteParams.thickness / 2,
+      beamPosition.z,
+    );
+    const length = BABYLON.Vector3.Distance(beginPos, endPos);
+    if (length > 0) {
+      const result1 = createLineTwoArrow(
+        beginPos,
+        endPos,
+        'beamWidthArrow',
+        scene,
+        dimensionNodes,
+        dimensionMaterial!,
+        // beamWidthMeasure
+      );
+
+      const dimensionLineNode1 = new DimensionLineNode(anchorageNode.group);
+      dimensionLineNode1.addMesh(result1.line!);
+      if (result1.label) dimensionLineNode1.addLabel(result1.label);
+      dimensionLineNode1.addMesh(result1.arrow[0]!);
+      dimensionLineNode1.addMesh(result1.arrow[1]!);
+      anchorageNode.addDimensionLine(dimensionLineNode1);
+    }
+  }
+
+  {
+    const beginPos = new BABYLON.Vector3(
+      beamPosition.x,
+      concretePosition.y + concreteParams.thickness / 2,
+      beamPosition.z,
+    );
+    const endPos = new BABYLON.Vector3(
+      concretePosition.x - concreteParams.width / 2,
+      concretePosition.y + concreteParams.thickness / 2,
+      beamPosition.z,
+    );
+    const length = BABYLON.Vector3.Distance(beginPos, endPos);
+    if (length > 0) {
+      const result2 = createLineTwoArrow(
+        beginPos,
+        endPos,
+        'beamWidthArrow',
+        scene,
+        dimensionNodes,
+        dimensionMaterial!,
+        // beamWidthMeasure
+      );
+
+      const dimensionLineNode2 = new DimensionLineNode(anchorageNode.group);
+      dimensionLineNode2.addMesh(result2.line!);
+      if (result2.label) dimensionLineNode2.addLabel(result2.label);
+      dimensionLineNode2.addMesh(result2.arrow[0]!);
+      dimensionLineNode2.addMesh(result2.arrow[1]!);
+      anchorageNode.addDimensionLine(dimensionLineNode2);
+    }
+  }
+
+  {
+    const beginPos = new BABYLON.Vector3(
+      beamPosition.x,
+      concretePosition.y + concreteParams.thickness / 2,
+      beamPosition.z,
+    );
+    const endPos = new BABYLON.Vector3(
+      beamPosition.x,
+      concretePosition.y + concreteParams.thickness / 2,
+      concretePosition.z - concreteParams.depth / 2,
+    );
+    const length = BABYLON.Vector3.Distance(beginPos, endPos);
+    if (length > 0) {
+      const result3 = createLineTwoArrow(
+        beginPos,
+        endPos,
+        'beamWidthArrow',
+        scene,
+        dimensionNodes,
+        dimensionMaterial!,
+        // beamWidthMeasure
+      );
+
+      const dimensionLineNode3 = new DimensionLineNode(anchorageNode.group);
+      dimensionLineNode3.addMesh(result3.line!);
+      if (result3.label) dimensionLineNode3.addLabel(result3.label);
+      dimensionLineNode3.addMesh(result3.arrow[0]!);
+      dimensionLineNode3.addMesh(result3.arrow[1]!);
+      anchorageNode.addDimensionLine(dimensionLineNode3);
+    }
+  }
+
+  {
+    const beginePos = new BABYLON.Vector3(
+      beamPosition.x,
+      concretePosition.y + concreteParams.thickness / 2,
+      beamPosition.z,
+    );
+    const endPos = new BABYLON.Vector3(
+      beamPosition.x,
+      concretePosition.y + concreteParams.thickness / 2,
+      concretePosition.z + concreteParams.depth / 2,
+    );
+    const length = BABYLON.Vector3.Distance(beginePos, endPos);
+    if (length > 0) {
+      const result4 = createLineTwoArrow(
+        beginePos,
+        endPos,
+        'beamWidthArrow',
+        scene,
+        dimensionNodes,
+        dimensionMaterial!,
+        // beamWidthMeasure
+      );
+      const dimensionLineNode4 = new DimensionLineNode(anchorageNode.group);
+      dimensionLineNode4.addMesh(result4.line!);
+      if (result4.label) dimensionLineNode4.addLabel(result4.label);
+      dimensionLineNode4.addMesh(result4.arrow[0]!);
+      dimensionLineNode4.addMesh(result4.arrow[1]!);
+      anchorageNode.addDimensionLine(dimensionLineNode4);
+    }
+  }
+}
