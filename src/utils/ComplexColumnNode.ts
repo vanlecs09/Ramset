@@ -5,41 +5,6 @@ import type { ConcreteNode } from './ConcreteNode';
 import { calculateCuboidPostPositions } from './CuboidPostPositionCalculator';
 import { createPost } from './PostNode';
 
-export const createCross = (
-  position: BABYLON.Vector3,
-  scene: BABYLON.Scene,
-  sizeX: number = 2,
-  sizeZ: number = 2,
-) => {
-  const crossGroup = new BABYLON.TransformNode('cross', scene);
-
-  const crossMaterial = new BABYLON.StandardMaterial('crossMaterial', scene);
-  crossMaterial.emissiveColor = new BABYLON.Color3(1, 1, 0.42); // #FFFF6B
-  crossMaterial.alpha = 0.7;
-
-  // Horizontal beam (along X axis)
-  const horizontalBeam = BABYLON.MeshBuilder.CreateBox(
-    'horizontalBeam',
-    { width: sizeX, height: 0.5, depth: 1 },
-    scene,
-  );
-  horizontalBeam.material = crossMaterial;
-  horizontalBeam.receiveShadows = true;
-  horizontalBeam.parent = crossGroup;
-
-  // Depth beam (along Z axis)
-  const depthBeam = BABYLON.MeshBuilder.CreateBox(
-    'depthBeam',
-    { width: 1, height: 0.5, depth: sizeZ },
-    scene,
-  );
-  depthBeam.material = crossMaterial;
-  depthBeam.receiveShadows = true;
-  depthBeam.parent = crossGroup;
-
-  crossGroup.position = position;
-  return crossGroup;
-};
 
 export class ComplexColumnNode extends BaseStructNodeImpl {
   private concreteGroup?: ConcreteNode;

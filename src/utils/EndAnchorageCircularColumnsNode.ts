@@ -5,6 +5,7 @@ import { createCircularStandingWave } from './WaveBuilder';
 import type { PostPosition } from './CircularPostPositionCalculator';
 import { createLineTwoArrow, createUnitAxes, DimensionLineNode } from './GeometryHelper';
 import { BaseEndAnchorageNode, createMomens } from './BaseEndAnchorageNode';
+import { getConcreteMaterial, getWaveBlockMaterial, getConcreteDimensionMaterial } from './Material';
 
 export interface BaseStructureGroup {
   group: BABYLON.TransformNode;
@@ -143,14 +144,7 @@ export const createCircularColumns = (
   cylinder.position.y =
     concreteTopY + gapDistance + params.circleColumnsParam.columnHeight / 2;
 
-  const cylinderMaterial = new BABYLON.StandardMaterial(
-    'cylinderMaterial',
-    scene,
-  );
-  cylinderMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8);
-  cylinderMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
-  cylinderMaterial.alpha = 0.4;
-  cylinder.material = cylinderMaterial;
+  cylinder.material = getConcreteMaterial(scene);
   cylinder.receiveShadows = true;
   cylinder.parent = towerGroup;
   mainNode.setCircularColumn(cylinder);
@@ -162,25 +156,12 @@ export const createCircularColumns = (
     0,
   );
 
-  const waveWaveMaterial = new BABYLON.StandardMaterial(
-    'waveWaveMaterial',
-    scene,
-  );
-  waveWaveMaterial.diffuseColor = new BABYLON.Color3(
-    214 / 255,
-    217 / 255,
-    200 / 255,
-  ); // tan/beige color
-  waveWaveMaterial.specularColor = new BABYLON.Color3(1, 1, 1); // semi-transparent
-  waveWaveMaterial.alpha = 0.4;
-  waveWaveMaterial.backFaceCulling = false;
-
   const standingWave = createCircularStandingWave(
     scene,
     wavePosition,
     params.circleColumnsParam.columnRadius,
     0.1,
-    waveWaveMaterial,
+    getWaveBlockMaterial(scene),
     0.02,
     4,
   );
@@ -243,9 +224,7 @@ function createInnerDeimensionLine(
   scene: BABYLON.Scene,
   anchorageNode: BaseEndAnchorageNode,
 ) {
-  const dimMat = new BABYLON.StandardMaterial('dimensionMaterial', scene);
-  dimMat.diffuseColor = new BABYLON.Color3(0, 0, 0); // black for visibility
-  let dimensionMaterial = dimMat;
+  const dimensionMaterial = getConcreteDimensionMaterial(scene);
 
   const dimensionNodes = new BABYLON.TransformNode(
     'beamDimensionsDistance',

@@ -2,7 +2,6 @@ import * as BABYLON from '@babylonjs/core';
 import {
   createConcrete,
   ConcreteNode,
-  getDimensionLabelTexture,
 } from './ConcreteNode';
 import { createPost } from './PostNode';
 import { createWaveBlock } from './WaveBuilder';
@@ -18,6 +17,12 @@ import {
   ArcDirection,
   createTorsionMomentNode as createTorsionMomentNode,
 } from './TorsionMomentNode';
+import {
+  getWaveBlockMaterial,
+  getConcreteDimensionMaterial,
+  getTorsionMaterial,
+  getDimensionLabelTexture,
+} from './Material';
 
 export interface EndAnchorageParams {
   beamWidth: number;
@@ -77,45 +82,6 @@ export class BaseEndAnchorageNode extends BaseStructNodeImpl {
   }
 }
 
-// Global materials - shared across create and update functions
-let beamMaterial: BABYLON.StandardMaterial | null = null;
-let waveBlockMaterial: BABYLON.StandardMaterial | null = null;
-let dimensionMaterial: BABYLON.StandardMaterial | null = null;
-
-const initializeMaterials = (scene: BABYLON.Scene) => {
-  // Check if existing materials belong to a different/disposed scene
-  if (beamMaterial && beamMaterial.getScene() !== scene) {
-    beamMaterial = null;
-  }
-  if (waveBlockMaterial && waveBlockMaterial.getScene() !== scene) {
-    waveBlockMaterial = null;
-  }
-  if (dimensionMaterial && dimensionMaterial.getScene() !== scene) {
-    dimensionMaterial = null;
-  }
-
-  if (!beamMaterial) {
-    const mat = new BABYLON.StandardMaterial('beamMaterial', scene);
-    mat.diffuseColor = new BABYLON.Color3(0.7, 0.7, 0.7); // medium gray
-    mat.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
-    mat.alpha = 0.85;
-    beamMaterial = mat;
-  }
-  if (!waveBlockMaterial) {
-    const waveMat = new BABYLON.StandardMaterial('waveBlockMaterial', scene);
-    waveMat.diffuseColor = new BABYLON.Color3(214 / 255, 217 / 255, 200 / 255); // tan/beige
-    waveMat.specularColor = new BABYLON.Color3(1, 1, 1);
-    waveMat.alpha = 0.7;
-    waveMat.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
-    waveBlockMaterial = waveMat;
-  }
-  if (!dimensionMaterial) {
-    const dimMat = new BABYLON.StandardMaterial('dimensionMaterial', scene);
-    dimMat.diffuseColor = new BABYLON.Color3(0, 0, 0); // black for visibility
-    dimensionMaterial = dimMat;
-  }
-};
-
 export const createEndAnchorage = (
   scene: BABYLON.Scene,
   postPositions: BABYLON.Vector3[],
@@ -125,9 +91,6 @@ export const createEndAnchorage = (
 ): BaseEndAnchorageNode => {
   const anchorageTrans = new BABYLON.TransformNode('endAnchorage', scene);
   const mainNode = new BaseEndAnchorageNode(anchorageTrans);
-
-  // Initialize materials
-  initializeMaterials(scene);
 
   // 1. Create concrete
   const concreteNode = createConcrete(
@@ -210,9 +173,6 @@ export const createWaveBlockTop = (
 ) => {
   const scene = anchorageNode.group.getScene();
 
-  // Initialize materials
-  initializeMaterials(scene);
-
   // Clear existing wave blocks
   anchorageNode.clearWaveBlocks();
   const blockPosition = beamPosition;
@@ -226,7 +186,6 @@ export const createWaveBlockTop = (
     blockHeight, // Height along Y-axis
     blockDepth, // Depth along Z-axis
     'y', // Wave on Z-axis
-    waveBlockMaterial!,
   );
 
   blockMesh.receiveShadows = true;
@@ -277,7 +236,7 @@ export const createWaveBlockTop = (
     depthArrow2Position,
     depthCorner1,
     depthCorner2,
-    dimensionMaterial!,
+    getConcreteDimensionMaterial(scene),
     blockWidth,
     dimensionNodes,
     advancedTexture,
@@ -331,7 +290,7 @@ export const createWaveBlockTop = (
     heightArrow2Position,
     heightCorner1,
     heightCorner2,
-    dimensionMaterial!,
+    getConcreteDimensionMaterial(scene),
     blockDepth,
     dimensionNodes,
     advancedTexture,
@@ -393,8 +352,7 @@ export const createMomens = (
   );
   mainNode.addBendingMomentNode(bendingMoment3);
 
-  const torsionMat = new BABYLON.StandardMaterial('torsionMat', scene);
-  torsionMat.diffuseColor = BABYLON.Color3.Black();
+  const torsionMat = getTorsionMaterial(scene);
 
   const torsion = createTorsionMomentNode(
     'torque1',
@@ -458,7 +416,7 @@ function createInnerDeimensionLine(
         'beamWidthArrow',
         scene,
         dimensionNodes,
-        dimensionMaterial!,
+        getConcreteDimensionMaterial(scene),
         // beamWidthMeasure
       );
 
@@ -490,7 +448,7 @@ function createInnerDeimensionLine(
         'beamWidthArrow',
         scene,
         dimensionNodes,
-        dimensionMaterial!,
+        getConcreteDimensionMaterial(scene),
         // beamWidthMeasure
       );
 
@@ -522,7 +480,7 @@ function createInnerDeimensionLine(
         'beamWidthArrow',
         scene,
         dimensionNodes,
-        dimensionMaterial!,
+        getConcreteDimensionMaterial(scene),
         // beamWidthMeasure
       );
 
@@ -554,7 +512,7 @@ function createInnerDeimensionLine(
         'beamWidthArrow',
         scene,
         dimensionNodes,
-        dimensionMaterial!,
+        getConcreteDimensionMaterial(scene),
         // beamWidthMeasure
       );
       const dimensionLineNode4 = new DimensionLineNode(anchorageNode.group);

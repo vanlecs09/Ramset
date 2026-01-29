@@ -1,7 +1,7 @@
 import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
 import { createLine } from './GeometryHelper';
-import { getDimensionLabelTexture } from './ConcreteNode';
+import { getDimensionLabelTexture } from './Material';
 import { createLineArrowNode, LineArrowNode } from './LineArrowNode';
 
 /**

@@ -5,6 +5,7 @@ import { createUnitAxes } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 import { createMomens, createWaveBlockTop } from './BaseEndAnchorageNode';
+import { getSecondaryPostMaterial } from './Material';
 
 export class BaseLapSpliceNode extends BaseStructNodeImpl {
   private concreteNode?: ConcreteNode;
@@ -53,58 +54,6 @@ export class BaseLapSpliceNode extends BaseStructNodeImpl {
   }
 }
 
-// Global materials - shared across create and update functions
-let slabMaterial: BABYLON.StandardMaterial | null = null;
-let waveBlockMaterial: BABYLON.StandardMaterial | null = null;
-let dimensionMaterial: BABYLON.StandardMaterial | null = null;
-let secondaryPostMaterial: BABYLON.StandardMaterial | null = null;
-
-const initializeMaterials = (scene: BABYLON.Scene) => {
-  // Check if existing materials belong to a different/disposed scene
-  if (slabMaterial && slabMaterial.getScene() !== scene) {
-    slabMaterial = null;
-  }
-  if (waveBlockMaterial && waveBlockMaterial.getScene() !== scene) {
-    waveBlockMaterial = null;
-  }
-  if (dimensionMaterial && dimensionMaterial.getScene() !== scene) {
-    dimensionMaterial = null;
-  }
-  if (secondaryPostMaterial && secondaryPostMaterial.getScene() !== scene) {
-    secondaryPostMaterial = null;
-  }
-
-  if (!slabMaterial) {
-    const mat = new BABYLON.StandardMaterial('slabMaterial', scene);
-    mat.diffuseColor = new BABYLON.Color3(0.7, 0.7, 0.7); // medium gray
-    mat.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
-    mat.alpha = 0.85;
-    slabMaterial = mat;
-  }
-  if (!waveBlockMaterial) {
-    const waveMat = new BABYLON.StandardMaterial('waveBlockMaterial', scene);
-    waveMat.diffuseColor = new BABYLON.Color3(214 / 255, 217 / 255, 200 / 255); // tan/beige
-    waveMat.specularColor = new BABYLON.Color3(1, 1, 1);
-    waveMat.alpha = 0.7;
-    waveMat.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
-    waveBlockMaterial = waveMat;
-  }
-  if (!dimensionMaterial) {
-    const dimMat = new BABYLON.StandardMaterial('dimensionMaterial', scene);
-    dimMat.diffuseColor = new BABYLON.Color3(0, 0, 0); // red for visibility
-    dimensionMaterial = dimMat;
-  }
-  if (!secondaryPostMaterial) {
-    const blackMat = new BABYLON.StandardMaterial(
-      'secondaryPostMaterial',
-      scene,
-    );
-    blackMat.diffuseColor = new BABYLON.Color3(0, 0, 0); // black
-    blackMat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
-    secondaryPostMaterial = blackMat;
-  }
-};
-
 export const createLapsplice = (
   scene: BABYLON.Scene,
   postPositions: RectanglePostPosition[],
@@ -118,9 +67,6 @@ export const createLapsplice = (
 ): BaseLapSpliceNode => {
   const slabGroup = new BABYLON.TransformNode('slab', scene);
   const mainNode = new BaseLapSpliceNode(slabGroup);
-
-  // Initialize materials
-  initializeMaterials(scene);
 
   // 1. Create concrete using ConcreteBuilder
   const concreteNode = createConcrete(
@@ -223,9 +169,6 @@ export const addSecondaryPostsInsideConcrete = (
 ) => {
   const scene = slabGroup.group.getScene();
 
-  // Initialize materials
-  initializeMaterials(scene);
-
   // Clear existing secondary posts
   slabGroup.clearSecondaryPosts();
 
@@ -261,7 +204,7 @@ export const addSecondaryPostsInsideConcrete = (
 
       // Apply black material
       if (postGroup.mesh) {
-        postGroup.mesh.material = secondaryPostMaterial!;
+        postGroup.mesh.material = getSecondaryPostMaterial(scene);
         slabGroup.addSecondaryPost(postGroup.mesh);
       }
     }

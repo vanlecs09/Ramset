@@ -2,10 +2,14 @@ import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
 import { createDimensionWithLabel, DimensionLineNode } from './GeometryHelper';
 import { BaseStructNodeImpl } from './BaseNode';
+import {
+  getConcreteMaterial,
+  getBoundlessMaterial,
+  getDimensionLabelTexture,
+} from './Material';
 
 export class ConcreteNode extends BaseStructNodeImpl {
   private mesh?: BABYLON.Mesh;
-  private material?: BABYLON.StandardMaterial;
   private infiniteBlocks?: BABYLON.Mesh[];
   // private dimensionLines?: DimensionLineNode;
   private concreteWidth: number = 0;
@@ -22,14 +26,6 @@ export class ConcreteNode extends BaseStructNodeImpl {
 
   setMesh(mesh: BABYLON.Mesh | undefined): void {
     this.mesh = mesh;
-  }
-
-  getMaterial(): BABYLON.StandardMaterial | undefined {
-    return this.material;
-  }
-
-  setMaterial(material: BABYLON.StandardMaterial | undefined): void {
-    this.material = material;
   }
 
   getInfiniteBlocks(): BABYLON.Mesh[] | undefined {
@@ -73,81 +69,6 @@ export class ConcreteNode extends BaseStructNodeImpl {
   }
 }
 
-// Global concrete material - shared across all concrete instances
-let concreteMaterial: BABYLON.StandardMaterial | null = null;
-let sinBlockMaterial: BABYLON.StandardMaterial | null = null;
-let dimensionLabelTexture: GUI.AdvancedDynamicTexture | null = null;
-
-const initializeConcreteMaterial = (scene: BABYLON.Scene) => {
-  // Check if existing material belongs to a different/disposed scene
-  if (concreteMaterial && concreteMaterial.getScene() !== scene) {
-    concreteMaterial = null;
-  }
-  if (!concreteMaterial) {
-    concreteMaterial = new BABYLON.StandardMaterial('concreteMaterial', scene);
-    concreteMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8); // light gray tint
-    concreteMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
-    concreteMaterial.alpha = 0.4; // transparency (0 = invisible, 1 = opaque)
-    concreteMaterial.backFaceCulling = false;
-  }
-  return concreteMaterial;
-};
-
-export const initializeDimensionLabelTexture = () => {
-  // Check if existing texture is still valid (not disposed)
-  // A disposed texture will have null internal references
-  if (dimensionLabelTexture) {
-    try {
-      // Try to access the layer to check if it's still valid
-      const layer = dimensionLabelTexture.layer;
-      if (!layer || !layer.texture) {
-        // Texture was disposed, clean up and recreate
-        dimensionLabelTexture = null;
-      }
-    } catch {
-      // If any error occurs, assume texture is invalid
-      dimensionLabelTexture = null;
-    }
-  }
-
-  if (!dimensionLabelTexture) {
-    dimensionLabelTexture =
-      GUI.AdvancedDynamicTexture.CreateFullscreenUI('DimensionLabelUI');
-  }
-  return dimensionLabelTexture;
-};
-
-export const getDimensionLabelTexture = () => {
-  return initializeDimensionLabelTexture();
-};
-
-export const disposeDimensionLabelTexture = () => {
-  if (dimensionLabelTexture) {
-    dimensionLabelTexture.dispose();
-    dimensionLabelTexture = null;
-  }
-};
-
-const initializeSinBlockMaterial = (scene: BABYLON.Scene) => {
-  // Check if existing material belongs to a different/disposed scene
-  if (sinBlockMaterial && sinBlockMaterial.getScene() !== scene) {
-    sinBlockMaterial = null;
-  }
-  if (!sinBlockMaterial) {
-    sinBlockMaterial = new BABYLON.StandardMaterial('sinBlockMaterial', scene);
-    sinBlockMaterial.diffuseColor = new BABYLON.Color3(
-      214 / 255,
-      217 / 255,
-      200 / 255,
-    ); // tan/beige color
-    sinBlockMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
-    sinBlockMaterial.alpha = 0.2; // semi-transparent
-    // sinBlockMaterial.backFaceCulling = false;
-    sinBlockMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
-  }
-  return sinBlockMaterial;
-};
-
 export interface ConcreteParams {
   thickness: number;
   width: number;
@@ -172,7 +93,6 @@ export const createConcrete = (
   }
 
   const concreteNode = new ConcreteNode(concreteTransformNode);
-  const material = initializeConcreteMaterial(scene);
 
   const concrete = BABYLON.MeshBuilder.CreateBox(
     'concrete',
@@ -180,7 +100,7 @@ export const createConcrete = (
     scene,
   );
   concrete.position = params.position;
-  concrete.material = material;
+  concrete.material = getConcreteMaterial(scene);;
   concrete.receiveShadows = true;
 
   if (parent) {
@@ -188,7 +108,7 @@ export const createConcrete = (
   }
 
   const sinBlocks = !isBounded
-    ? createInfiniteBlocks(
+    ? createBoundlessBlocks(
         scene,
         params.width,
         params.depth,
@@ -228,7 +148,7 @@ export const createConcrete = (
     const labels: GUI.TextBlock[] = [];
 
     // Use global AdvancedDynamicTexture for dimension labels
-    const advancedTexture = initializeDimensionLabelTexture();
+    const advancedTexture = getDimensionLabelTexture();
 
     // // Width dimension (X axis) - offset from Z min edge
     // const widthLabel = createDimensionWithLabel(
@@ -295,7 +215,6 @@ export const createConcrete = (
   }
 
   concreteNode.setMesh(concrete);
-  concreteNode.setMaterial(material);
   concreteNode.setInfiniteBlocks(sinBlocks);
   concreteNode.addDimensionLine(dimensionLines!);
   concreteNode.setConcreteWidth(params.width);
@@ -305,7 +224,7 @@ export const createConcrete = (
   return concreteNode;
 };
 
-const createInfiniteBlocks = (
+const createBoundlessBlocks = (
   scene: BABYLON.Scene,
   concreteWidth: number,
   concreteDepth: number,
@@ -313,7 +232,6 @@ const createInfiniteBlocks = (
   concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
   parent?: BABYLON.TransformNode,
 ): BABYLON.Mesh[] => {
-  const sinBlockMat = initializeSinBlockMaterial(scene);
 
   // Create a single mesh that surrounds the concrete on all sides
   const surroundingMesh = createSurroundingConcreteMesh(
@@ -323,7 +241,7 @@ const createInfiniteBlocks = (
     concreteDepth,
     concreteThickness,
     concretePosition,
-    sinBlockMat,
+    // sinBlockMat,
   );
 
   if (parent) {
@@ -340,7 +258,6 @@ const createSurroundingConcreteMesh = (
   concreteDepth: number,
   concreteThickness: number,
   concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
-  material: BABYLON.StandardMaterial,
 ): BABYLON.Mesh => {
   const blockThickness = 0.2;
   const amp = 0.02;
@@ -543,11 +460,7 @@ const createSurroundingConcreteMesh = (
   mesh.setVerticesData(BABYLON.VertexBuffer.NormalKind, normalsArray);
   mesh.setIndices(indices);
 
-  mesh.material = material;
+  mesh.material = getBoundlessMaterial(scene);
 
   return mesh;
-};
-
-export const getConcreteMaterial = (): BABYLON.StandardMaterial | null => {
-  return concreteMaterial;
 };

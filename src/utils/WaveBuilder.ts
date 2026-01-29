@@ -1,4 +1,5 @@
 import * as BABYLON from '@babylonjs/core';
+import { getWaveBlockMaterial } from './Material';
 
 export const createWaveBlock = (
   scene: BABYLON.Scene,
@@ -7,9 +8,7 @@ export const createWaveBlock = (
   blockWidth: number,
   blockHeight: number,
   blockDepth: number,
-
   waveAxis: 'x' | 'y' | 'z' | '-x' | '-y' | '-z',
-  material: BABYLON.StandardMaterial,
 ): BABYLON.Mesh => {
   const positions: number[] = [];
   const indices: number[] = [];
@@ -36,7 +35,7 @@ export const createWaveBlock = (
   mesh.setVerticesData(BABYLON.VertexBuffer.NormalKind, normalsArray);
   mesh.setIndices(indices);
 
-  mesh.material = material;
+  mesh.material = getWaveBlockMaterial(scene);
   // mesh.position = position;
 
   return mesh;
