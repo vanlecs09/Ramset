@@ -6,7 +6,7 @@ import { createLapsplice } from '../utils/BaseLapSpliceNode';
 import { createEndAnchorage } from '../utils/BaseEndAnchorageNode';
 import { calculateCircularPostPositions } from '../utils/CircularPostPositionCalculator';
 import { calculateRectanglePostPositions } from '../utils/RectanglePostPositionCalculator';
-import { createUnitAxes } from '../utils/GeometryHelper';
+import { createUnitAxes } from '../utils/UnitAxisNode';
 import type { EndAnchorageCircularColumnsNode } from '../utils/EndAnchorageCircularColumnsNode';
 import type { ComplexColumnNode } from '../utils/ComplexColumnNode';
 import type { BaseLapSpliceNode } from '../utils/BaseLapSpliceNode';
@@ -320,7 +320,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     const unitAxesGroup = new BABYLON.TransformNode('unitAxesGroup', scene);
     
     // Create unit axes at bottom-left corner
-    const { meshes: axisMeshes } = createUnitAxes(
+    const unitAxisNode = createUnitAxes(
       scene,
       unitAxesGroup,
       new BABYLON.Vector3(0, 0, 0),
@@ -332,6 +332,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     );
     
     // Parent axis meshes to the group
+    const axisMeshes = unitAxisNode.getMeshes();
     axisMeshes.forEach(mesh => {
       mesh.parent = unitAxesGroup;
     });

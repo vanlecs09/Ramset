@@ -6,11 +6,11 @@ import {
 import { createPost } from './PostNode';
 import { createWaveBlock } from './WaveBuilder';
 import {
-  createUnitAxes,
   createLineTwoArrow,
   createDimensionWithLabel,
   DimensionLineNode,
 } from './GeometryHelper';
+import { createUnitAxes } from './UnitAxisNode';
 import { BaseStructNodeImpl } from './BaseNode';
 import { createBendingMomenNode } from './BendingMomenNode';
 import {
@@ -18,7 +18,6 @@ import {
   createTorsionMomentNode as createTorsionMomentNode,
 } from './TorsionMomentNode';
 import {
-  getWaveBlockMaterial,
   getConcreteDimensionMaterial,
   getTorsionMaterial,
   getDimensionLabelTexture,
@@ -153,8 +152,7 @@ export const createEndAnchorage = (
     new BABYLON.Vector3(0, 0, 1),
     new BABYLON.Vector3(0, 1, 0),
   );
-  mainNode.setAxisMeshes(axisNode.meshes);
-  mainNode.setLabels(axisNode.labels);
+  mainNode.setUnitAxisNode(axisNode);
 
   createMomens(scene, concretePosition, concreteParams, mainNode);
 

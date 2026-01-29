@@ -3,7 +3,8 @@ import { createConcrete, ConcreteNode, type ConcreteParams } from './ConcreteNod
 import { createPost } from './PostNode';
 import { createCircularStandingWave } from './WaveBuilder';
 import type { PostPosition } from './CircularPostPositionCalculator';
-import { createLineTwoArrow, createUnitAxes, DimensionLineNode } from './GeometryHelper';
+import { createLineTwoArrow, DimensionLineNode } from './GeometryHelper';
+import { createUnitAxes } from './UnitAxisNode';
 import { BaseEndAnchorageNode, createMomens } from './BaseEndAnchorageNode';
 import { getConcreteMaterial, getWaveBlockMaterial, getConcreteDimensionMaterial } from './Material';
 
@@ -198,8 +199,7 @@ export const createCircularColumns = (
     new BABYLON.Vector3(0, 0, 1),
     new BABYLON.Vector3(0, 1, 0),
   );
-  mainNode.setAxisMeshes(axisNode.meshes);
-  mainNode.setLabels(axisNode.labels);
+  mainNode.setUnitAxisNode(axisNode);
 
   createMomens(scene, params.concreteParam.position, params.concreteParam, mainNode);
   if (params.concreteParam.isBoundless)

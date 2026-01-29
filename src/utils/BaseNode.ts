@@ -1,11 +1,11 @@
 import * as BABYLON from '@babylonjs/core';
 import type {
   DimensionLabelNode,
-  AxisLabelNode,
   DimensionLineNode,
 } from './GeometryHelper';
 import type { BendingMomentNode } from './BendingMomenNode';
 import type { TorsionMomentNode } from './TorsionMomentNode';
+import type { UnitAxisNode, AxisLabelNode } from './UnitAxisNode';
 
 /**
  * Union type for label nodes that can be stored in the base class.
@@ -42,7 +42,7 @@ export abstract class BaseNodeImpl implements BaseNode {
  */
 export abstract class BaseStructNodeImpl implements BaseNode {
   group: BABYLON.TransformNode;
-  protected axisMeshes?: BABYLON.Mesh[];
+  protected unitAxisNode?: UnitAxisNode;
   protected labels?: LabelNode[];
   protected posts?: BABYLON.Mesh[];
   protected waveBlocks?: BABYLON.Mesh[];
@@ -52,7 +52,6 @@ export abstract class BaseStructNodeImpl implements BaseNode {
 
   constructor(group: BABYLON.TransformNode) {
     this.group = group;
-    this.axisMeshes = [];
     this.labels = [];
     this.posts = [];
     this.waveBlocks = [];
@@ -61,18 +60,18 @@ export abstract class BaseStructNodeImpl implements BaseNode {
     this.torsionMomentNodes = [];
   }
 
-  getAxisMeshes(): BABYLON.Mesh[] {
-    return this.axisMeshes || [];
+  getUnitAxisNode(): UnitAxisNode | undefined {
+    return this.unitAxisNode;
   }
 
-  setAxisMeshes(meshes: BABYLON.Mesh[]): void {
-    this.axisMeshes = meshes;
+  setUnitAxisNode(axisNode: UnitAxisNode): void {
+    this.unitAxisNode = axisNode;
   }
 
-  clearAxisMeshes(): void {
-    if (this.axisMeshes) {
-      this.axisMeshes.forEach(mesh => mesh.dispose());
-      this.axisMeshes = [];
+  clearUnitAxisNode(): void {
+    if (this.unitAxisNode) {
+      this.unitAxisNode.dispose();
+      this.unitAxisNode = undefined;
     }
   }
 
@@ -194,11 +193,11 @@ export abstract class BaseStructNodeImpl implements BaseNode {
   }
 
   /**
-   * Base dispose method that cleans up axis meshes, labels, and posts.
+   * Base dispose method that cleans up unit axis node, labels, and posts.
    * Subclasses should override this and call super.dispose() at the end.
    */
   dispose(): void {
-    this.clearAxisMeshes();
+    this.clearUnitAxisNode();
     this.clearLabels();
     this.clearPosts();
     this.clearWaveBlocks();

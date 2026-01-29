@@ -1,7 +1,7 @@
 import * as BABYLON from '@babylonjs/core';
 import { createConcrete, ConcreteNode, type ConcreteParams } from './ConcreteNode';
 import { createPost } from './PostNode';
-import { createUnitAxes } from './GeometryHelper';
+import { createUnitAxes } from './UnitAxisNode';
 import { BaseStructNodeImpl } from './BaseNode';
 import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
 import { createMomens, createWaveBlockTop as createTopBlockWave } from './BaseEndAnchorageNode';
@@ -119,8 +119,8 @@ export const createLapsplice = (
     mainNode.addPost(postGroup.mesh!);
   });
   const concretePosition = concreteParam.position;
-  // 5. Create and cache axis meshes and labels for visualization
-  const axesResult = createUnitAxes(
+  // 5. Create and cache axis node for visualization
+  const axisNode = createUnitAxes(
     scene,
     mainNode.group,
     new BABYLON.Vector3(concretePosition.x, 0, concretePosition.z),
@@ -128,8 +128,7 @@ export const createLapsplice = (
     new BABYLON.Vector3(0, 0, 1),
     new BABYLON.Vector3(0, 1, 0),
   );
-  mainNode.setAxisMeshes(axesResult.meshes);
-  mainNode.setLabels(axesResult.labels);
+  mainNode.setUnitAxisNode(axisNode);
 
   createMomens(scene, concreteParam.position, concreteParam, mainNode);
 

@@ -15,23 +15,6 @@ export const DIMENSION_LINE_CONSTANTS = {
   LABEL_DECIMAL_PLACES: 2,
 } as const;
 
-/** Default values for axis visualization */
-export const AXIS_CONSTANTS = {
-  AXIS_RADIUS: 0.005,
-  ARROW_SIZE: 0.03,
-  LABEL_FONT_SIZE: 24,
-  LABEL_OFFSET_X: 20,
-  LABEL_OFFSET_Y: 0,
-  DEFAULT_AXIS_LENGTH: 0.2,
-} as const;
-
-/** Standard axis colors */
-export const AXIS_COLORS = {
-  X: new BABYLON.Color3(1, 0, 0), // Red
-  Y: new BABYLON.Color3(0, 1, 0), // Green
-  Z: new BABYLON.Color3(0, 0, 1), // Blue
-} as const;
-
 export const SCREEN_TO_WORLD_UNIT = 1000;
 
 /**
@@ -78,16 +61,6 @@ export interface DimensionLabelNode {
   linePosition: BABYLON.Vector3;
   offsetX: number;
   offsetY: number;
-}
-
-/**
- * Data structure representing an axis label in 3D space.
- * Tracks the relationship between a GUI label and its associated axis arrow mesh.
- */
-export interface AxisLabelNode {
-  label: GUI.TextBlock;
-  arrowMesh: BABYLON.Mesh;
-  axisName: string;
 }
 
 export class DimensionLineNode extends BaseNodeImpl {
@@ -318,164 +291,6 @@ export const createArrow = (
   arrow.material = material;
 
   return arrow;
-};
-
-/**
- * Creates a visual helper displaying X, Y, Z coordinate axes with arrows and labels.
- * Each axis is rendered as a colored line with an arrow head and text label.
- */
-export const createUnitAxes = (
-  scene: BABYLON.Scene,
-  parent: BABYLON.TransformNode,
-  origin: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
-  xDirection: BABYLON.Vector3 = new BABYLON.Vector3(1, 0, 0),
-  yDirection: BABYLON.Vector3 = new BABYLON.Vector3(0, 1, 0),
-  zDirection: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 1),
-  axisLength: number = AXIS_CONSTANTS.DEFAULT_AXIS_LENGTH,
-  showLabels: boolean = false,
-  advancedTexture?: GUI.AdvancedDynamicTexture,
-): { meshes: BABYLON.Mesh[]; labels: AxisLabelNode[] } => {
-  const meshes: BABYLON.Mesh[] = [];
-  const axisLabels: AxisLabelNode[] = [];
-  const axisTexture = advancedTexture || getDimensionLabelTexture();
-
-  // Normalize direction vectors
-  const xDir = BABYLON.Vector3.Normalize(xDirection);
-  const yDir = BABYLON.Vector3.Normalize(yDirection);
-  const zDir = BABYLON.Vector3.Normalize(zDirection);
-
-  // Create axes: X (Red), Y (Green), Z (Blue)
-  const axes = [
-    { direction: xDir, color: AXIS_COLORS.X, name: 'X', baseName: 'xAxis' },
-    { direction: yDir, color: AXIS_COLORS.Y, name: 'Y', baseName: 'yAxis' },
-    { direction: zDir, color: AXIS_COLORS.Z, name: 'Z', baseName: 'zAxis' },
-  ];
-
-  axes.forEach(axis => {
-    // Create axis line
-    const end = origin.add(axis.direction.scale(axisLength));
-    const line = createAxisLine(
-      axis.baseName,
-      scene,
-      origin,
-      end,
-      AXIS_CONSTANTS.AXIS_RADIUS,
-      axis.color,
-    );
-    meshes.push(line);
-
-    // Create arrow at end of axis
-    const arrowPos = origin.add(
-      axis.direction.scale(axisLength + AXIS_CONSTANTS.ARROW_SIZE),
-    );
-    const arrow = createAxisArrow(
-      axis.baseName,
-      scene,
-      arrowPos,
-      axis.direction,
-      axis.color,
-    );
-    meshes.push(arrow);
-    arrow.parent = parent;
-    line.parent = parent;
-
-    // Create label
-    if (showLabels) {
-      const label = createAxisLabelNode(
-        arrow,
-        axis.name,
-        axis.color,
-        axisTexture,
-      );
-      if (label) axisLabels.push(label);
-      // label!.label.parent = parent;
-    }
-  });
-
-  return { meshes, labels: axisLabels };
-};
-
-/**
- * Creates a colored line for an axis.
- * @private
- */
-const createAxisLine = (
-  name: string,
-  scene: BABYLON.Scene,
-  start: BABYLON.Vector3,
-  end: BABYLON.Vector3,
-  radius: number,
-  color: BABYLON.Color3,
-): BABYLON.Mesh => {
-  const line = BABYLON.MeshBuilder.CreateTube(
-    name,
-    {
-      path: [start, end],
-      radius: radius,
-    },
-    scene,
-  );
-
-  const material = new BABYLON.StandardMaterial(name + 'Material', scene);
-  material.diffuseColor = color;
-  line.material = material;
-
-  return line;
-};
-
-/**
- * Creates an arrow head for an axis.
- * @private
- */
-const createAxisArrow = (
-  name: string,
-  scene: BABYLON.Scene,
-  position: BABYLON.Vector3,
-  direction: BABYLON.Vector3,
-  color: BABYLON.Color3,
-): BABYLON.Mesh => {
-  const arrowMaterial = new BABYLON.StandardMaterial(
-    name + 'ArrowMaterial',
-    scene,
-  );
-  arrowMaterial.diffuseColor = color;
-
-  return createArrow(
-    name,
-    AXIS_CONSTANTS.ARROW_SIZE,
-    AXIS_CONSTANTS.ARROW_SIZE * 1.5,
-    scene,
-    position,
-    direction,
-    arrowMaterial,
-  );
-};
-
-/**
- * Creates a GUI label for an axis.
- * @private
- */
-const createAxisLabelNode = (
-  arrowMesh: BABYLON.Mesh,
-  labelText: string,
-  color: BABYLON.Color3,
-  texture: GUI.AdvancedDynamicTexture,
-): AxisLabelNode | null => {
-  const label = new GUI.TextBlock();
-  label.text = labelText;
-  label.fontSize = AXIS_CONSTANTS.LABEL_FONT_SIZE;
-  label.color = `rgb(${Math.round(color.r * 255)}, ${Math.round(color.g * 255)}, ${Math.round(color.b * 255)})`;
-
-  texture.addControl(label);
-  label.linkWithMesh(arrowMesh);
-  label.linkOffsetX = AXIS_CONSTANTS.LABEL_OFFSET_X;
-  label.linkOffsetY = AXIS_CONSTANTS.LABEL_OFFSET_Y;
-
-  return {
-    label: label,
-    arrowMesh: arrowMesh,
-    axisName: labelText,
-  };
 };
 
 /**
