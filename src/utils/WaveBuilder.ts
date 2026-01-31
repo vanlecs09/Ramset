@@ -54,7 +54,7 @@ const addBlockVertices = (
 ) => {
   const startVertex = vertexCount;
   const divU = 50;
-  const divV = 10;
+  const divV = 50;
   const amp = 0.04;
   const freq = blockWidth * 10; // blockDepth 1 = freq 5
 
