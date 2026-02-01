@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import * as BABYLON from '@babylonjs/core';
-import { createComplexColumn, updateComplexColumn } from '../utils/ComplexColumnNode';
 import { createCircularColumns } from '../utils/EndAnchorageCircularColumnsNode';
 import { createLapsplice } from '../utils/BaseLapSpliceNode';
 import { createEndAnchorage } from '../utils/BaseEndAnchorageNode';
@@ -8,11 +7,11 @@ import { calculateCircularPostPositions } from '../utils/CircularPostPositionCal
 import { calculateRectanglePostPositions } from '../utils/RectanglePostPositionCalculator';
 import { createUnitAxes } from '../utils/UnitAxisNode';
 import type { EndAnchorageCircularColumnsNode } from '../utils/EndAnchorageCircularColumnsNode';
-import type { ComplexColumnNode } from '../utils/ComplexColumnNode';
 import type { BaseLapSpliceNode } from '../utils/BaseLapSpliceNode';
 import { BaseEndAnchorageNode } from '../utils/BaseEndAnchorageNode';
 import type { SlabParams } from '../App';
 import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
+import { createComplexColumn, type ComplexColumnNode } from '../utils/ComplexColumnNode';
 
 interface TowerParams {
   isFiniteConcrete: boolean;
@@ -318,7 +317,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
     // Create a group to hold unit axes for positioning
     const unitAxesGroup = new BABYLON.TransformNode('unitAxesGroup', scene);
-    
+
     // Create unit axes at bottom-left corner
     const unitAxisNode = createUnitAxes(
       scene,
@@ -364,7 +363,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       // Keep axis aligned to world space (don't rotate with camera)
       // This shows the world orientation - X, Y, Z always point in world directions
       // unitAxesGroupRef.current.rotation = BABYLON.Vector3.Zero();
-      unitAxesGroupRef.current.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+      // unitAxesGroupRef.current.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
     });
 
     // Render loop
@@ -399,7 +398,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene) return;
-     unitAxesGroupRef.current!.rotation.x = 0;
+    unitAxesGroupRef.current!.rotation.x = 0;
     // Helper function to dispose current structure
     const disposePreviousStructure = () => {
       // return;
@@ -568,51 +567,31 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       if (!complexColumnRef.current) {
         disposePreviousStructure();
-        complexColumnRef.current = createComplexColumn(
-          scene,
-          complexColumnParams.concreteThickness,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          finiteBlockPositions,
-          complexColumnParams.isFiniteConcrete,
-          complexColumnParams.cuboid1SizeX,
-          complexColumnParams.cuboid1SizeZ,
-          complexColumnParams.cuboid1PostCountLeftEdge,
-          complexColumnParams.cuboid1PostCountTopEdge,
-          complexColumnParams.cuboid2SizeX,
-          complexColumnParams.cuboid2SizeZ,
-          complexColumnParams.cuboid2TranslateX,
-          complexColumnParams.cuboid2TranslateZ,
-          complexColumnParams.cuboid2PostCountLeftEdge,
-          complexColumnParams.cuboid2PostCountTopEdge,
-          complexColumnParams.postRadius,
-          complexColumnParams.postOffset
-        );
         adjustCameraForModel('complexColumn');
-      } else {
-        updateComplexColumn(
-          complexColumnRef.current,
-          complexColumnParams.concreteThickness,
-          concreteWidth,
-          concreteDepth,
-          concretePosition,
-          finiteBlockPositions,
-          complexColumnParams.isFiniteConcrete,
-          complexColumnParams.cuboid1SizeX,
-          complexColumnParams.cuboid1SizeZ,
-          complexColumnParams.cuboid1PostCountLeftEdge,
-          complexColumnParams.cuboid1PostCountTopEdge,
-          complexColumnParams.cuboid2SizeX,
-          complexColumnParams.cuboid2SizeZ,
-          complexColumnParams.cuboid2TranslateX,
-          complexColumnParams.cuboid2TranslateZ,
-          complexColumnParams.cuboid2PostCountLeftEdge,
-          complexColumnParams.cuboid2PostCountTopEdge,
-          complexColumnParams.postRadius,
-          complexColumnParams.postOffset
-        );
       }
+      complexColumnRef.current?.dispose();
+      complexColumnRef.current = createComplexColumn(
+        scene,
+        complexColumnParams.concreteThickness,
+        concreteWidth,
+        concreteDepth,
+        concretePosition,
+        finiteBlockPositions,
+        complexColumnParams.isFiniteConcrete,
+        complexColumnParams.cuboid1SizeX,
+        complexColumnParams.cuboid1SizeZ,
+        complexColumnParams.cuboid1PostCountLeftEdge,
+        complexColumnParams.cuboid1PostCountTopEdge,
+        complexColumnParams.cuboid2SizeX,
+        complexColumnParams.cuboid2SizeZ,
+        complexColumnParams.cuboid2TranslateX,
+        complexColumnParams.cuboid2TranslateZ,
+        complexColumnParams.cuboid2PostCountLeftEdge,
+        complexColumnParams.cuboid2PostCountTopEdge,
+        complexColumnParams.postRadius,
+        complexColumnParams.postOffset
+      );
+
 
 
     } else if (model === 'lapspliceSlab') {
@@ -719,7 +698,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       );
       // Rotate the group by 90 degrees on X-axis
       lapspliceBeamRef.current.group.rotation.x = Math.PI / 2;
-       unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
+      unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
 
     } else if (model === 'lapspliceWall') {
       lapspliceSlabParams.concreteThickness = 0.6;
@@ -863,7 +842,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       endAnchorageBeamRef.current = createEndAnchorage(scene, postPos, endAnchorageBeamParams, concreteParam, secondaryParams);
       // Rotate the group by 90 degrees on X-axis
       endAnchorageBeamRef.current.group.rotation.x = Math.PI / 2;
-       unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
+      unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
 
     } else if (model === 'endAnchorageSlab') {
       // Calculate concrete dimensions and positions
@@ -905,7 +884,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       endAnchorageSlabRef.current = createEndAnchorage(scene, postPos, endAnchorageSlabParams, concreteParam, secondaryParams);
       // Rotate the group by 90 degrees on X-axis
       endAnchorageSlabRef.current.group.rotation.x = Math.PI / 2;
-       unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
+      unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
     } else if (model === 'endAnchorageWall') {
       // Calculate concrete dimensions and positions
       const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({

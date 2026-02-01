@@ -8,111 +8,6 @@ import { createUnitAxes } from './UnitAxisNode';
 import { createMomens } from './BaseEndAnchorageNode';
 import { getWaveBlockMaterial } from './Material';
 
-
-
-
-
-// Helper function to create a combined mesh from two cuboids without duplicate vertices
-const createCombinedCuboidMesh = (
-  scene: BABYLON.Scene,
-  cuboid1Pos: BABYLON.Vector3,
-  cuboid1SizeX: number,
-  cuboid1SizeZ: number,
-  cuboid2Pos: BABYLON.Vector3,
-  cuboid2SizeX: number,
-  cuboid2SizeZ: number,
-  cuboidHeight: number,
-  material: BABYLON.Material
-): BABYLON.Mesh => {
-  // Create vertex data for both cuboids
-  const vertices: number[] = [];
-  const indices: number[] = [];
-  const normals: number[] = [];
-  const vertexMap = new Map<string, number>(); // Map to track unique vertices
-
-  const VERTEX_TOLERANCE = 0.0001; // Tolerance for vertex merging
-
-  // Function to get or create a vertex
-  const getOrCreateVertex = (x: number, y: number, z: number): number => {
-    // Round to tolerance to handle floating point precision
-    const key = `${Math.round(x / VERTEX_TOLERANCE) * VERTEX_TOLERANCE},${Math.round(y / VERTEX_TOLERANCE) * VERTEX_TOLERANCE},${Math.round(z / VERTEX_TOLERANCE) * VERTEX_TOLERANCE}`;
-
-    if (vertexMap.has(key)) {
-      return vertexMap.get(key)!;
-    }
-
-    const index = vertices.length / 3;
-    vertices.push(x, y, z);
-    vertexMap.set(key, index);
-    return index;
-  };
-
-  // Function to add a cuboid's vertices and indices
-  const addCuboidGeometry = (
-    position: BABYLON.Vector3,
-    sizeX: number,
-    sizeZ: number,
-    height: number
-  ) => {
-    const halfX = sizeX / 2;
-    const halfZ = sizeZ / 2;
-    const halfH = height / 2;
-
-    // 8 vertices of the cuboid
-    const v0 = getOrCreateVertex(position.x - halfX, position.y - halfH, position.z - halfZ);
-    const v1 = getOrCreateVertex(position.x + halfX, position.y - halfH, position.z - halfZ);
-    const v2 = getOrCreateVertex(position.x + halfX, position.y + halfH, position.z - halfZ);
-    const v3 = getOrCreateVertex(position.x - halfX, position.y + halfH, position.z - halfZ);
-    const v4 = getOrCreateVertex(position.x - halfX, position.y - halfH, position.z + halfZ);
-    const v5 = getOrCreateVertex(position.x + halfX, position.y - halfH, position.z + halfZ);
-    const v6 = getOrCreateVertex(position.x + halfX, position.y + halfH, position.z + halfZ);
-    const v7 = getOrCreateVertex(position.x - halfX, position.y + halfH, position.z + halfZ);
-
-    // 12 triangles (2 per face)
-    const idx = [
-      // Front face (z-)
-      v0, v2, v1,
-      v0, v3, v2,
-      // Back face (z+)
-      v5, v7, v6,
-      v5, v4, v7,
-      // Left face (x-)
-      v4, v3, v7,
-      v4, v0, v3,
-      // Right face (x+)
-      v1, v6, v5,
-      v1, v2, v6,
-      // Top face (y+)
-      v3, v6, v7,
-      v3, v2, v6,
-      // Bottom face (y-)
-      v4, v1, v5,
-      v4, v0, v1,
-    ];
-
-    indices.push(...idx);
-  };
-
-  // Add both cuboids
-  addCuboidGeometry(cuboid1Pos, cuboid1SizeX, cuboid1SizeZ, cuboidHeight);
-  addCuboidGeometry(cuboid2Pos, cuboid2SizeX, cuboid2SizeZ, cuboidHeight);
-
-  // Create mesh and compute normals
-  const mesh = new BABYLON.Mesh('combinedCuboid', scene);
-  const vertexData = new BABYLON.VertexData();
-
-  vertexData.positions = vertices;
-  vertexData.indices = indices;
-  BABYLON.VertexData.ComputeNormals(vertices, indices, normals);
-  vertexData.normals = normals;
-
-  vertexData.applyToMesh(mesh);
-
-  mesh.material = material;
-  mesh.receiveShadows = true;
-
-  return mesh;
-};
 export class ComplexColumnNode extends BaseStructNodeImpl {
   private concreteGroup?: ConcreteNode;
   private cuboid1?: BABYLON.Mesh;
@@ -211,10 +106,11 @@ export const createComplexColumn = (
   const concreteTopY = 0;
   const cuboidGap = 0;
   const cuboidHeight = 0.3;
-  const cuboidCenterY = concreteTopY + cuboidGap + cuboidHeight / 2;
-  
+  const waveHeight = 0.3;
+  const cuboidCenterY = concreteTopY + waveHeight/2;
+
   // 8. Create standing wave on top of the cross shape
-  const waveHeight = 0.15;
+
   const standingWave = createCrossStandingWave(
     scene,
     cuboid1SizeX,
@@ -224,72 +120,11 @@ export const createComplexColumn = (
     cuboid2TranslateX,
     cuboid2TranslateZ,
     waveHeight,
-    cuboidCenterY ,
-    cuboidHeight,
+    cuboidCenterY,
+    0,
   );
 
-  // const cuboid1Pos = new BABYLON.Vector3(0, cuboidCenterY, 0);
-  // const cuboid2Pos = new BABYLON.Vector3(cuboid2TranslateX, cuboidCenterY, cuboid2TranslateZ);
 
-  // const cuboidMaterial = new BABYLON.StandardMaterial('cuboidMaterial', scene);
-  // cuboidMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8); // #FF6B6B
-  // cuboidMaterial.alpha = 0.2;
-  // cuboidMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
-  // cuboidMaterial.alphaMode = BABYLON.Engine.ALPHA_COMBINE;
-  // // cuboidMaterial.disableLighting = true;
-  // // cuboidMaterial.rei
-  // // cuboidMaterial.alphaMode = BABYLON.Engine.alpha_;
-  // cuboidMaterial.backFaceCulling = false;
-  // cuboidMaterial.disableLighting = true;
-
-  // const doIntersect = checkCuboidIntersection(
-  //   cuboid1Pos,
-  //   cuboid1SizeX,
-  //   cuboid1SizeZ,
-  //   cuboidHeight,
-  //   cuboid2Pos,
-  //   cuboid2SizeX,
-  //   cuboid2SizeZ
-  // );
-
-  // if (doIntersect) {
-  //   // Create single combined mesh from both cuboids
-  //   complexColumn.cuboidsMerged = true;
-
-  //   const combinedMesh = createCombinedCuboidMesh(
-  //     scene,
-  //     cuboid1Pos,
-  //     cuboid1SizeX,
-  //     cuboid1SizeZ,
-  //     cuboid2Pos,
-  //     cuboid2SizeX,
-  //     cuboid2SizeZ,
-  //     cuboidHeight,
-  //     cuboidMaterial
-  //   );
-
-  //   combinedMesh.parent = columnGroup;
-  //   complexColumn.mergedCuboid = combinedMesh;
-  // } else {
-  //   // Keep cuboids separate
-  //   complexColumn.cuboidsMerged = false;
-
-  //   // First cuboid (along X axis)
-  //   const cuboid1 = BABYLON.MeshBuilder.CreateBox('cuboid1', { width: cuboid1SizeX, height: cuboidHeight, depth: cuboid1SizeZ }, scene);
-  //   cuboid1.position = cuboid1Pos;
-  //   cuboid1.material = cuboidMaterial;
-  //   cuboid1.receiveShadows = true;
-  //   cuboid1.parent = columnGroup;
-  //   complexColumn.setCuboid1(cuboid1);
-
-  //   // Second cuboid (along Z axis)
-  //   const cuboid2 = BABYLON.MeshBuilder.CreateBox('cuboid2', { width: cuboid2SizeX, height: cuboidHeight, depth: cuboid2SizeZ }, scene);
-  //   cuboid2.position = cuboid2Pos;
-  //   cuboid2.material = cuboidMaterial;
-  //   cuboid2.receiveShadows = true;
-  //   cuboid2.parent = columnGroup;
-  //   complexColumn.setCuboid2(cuboid2);
-  // }
 
   // 3. Create posts around the perimeter of cuboids
   const cuboid1Positions = calculateCuboidPostPositions(
@@ -431,8 +266,8 @@ const createCrossStandingWave = (
   // Calculate wave displacement
   const getWaveDisplacement = (iu: number, iv: number): number => {
     const xWave = Math.sin((iu / divU) * Math.PI * freq) * amp;
-    // const zWave = Math.cos((iv / divV) * Math.PI * freq) * amp * 0.7;
-    const zWave  = 0;
+    const zWave = Math.cos((iv / divV) * Math.PI * freq) * amp * 0.7;
+    // const zWave = 0;
     return xWave + zWave;
   };
 
@@ -505,61 +340,166 @@ const createCrossStandingWave = (
     }
   }
 
-  // SIDE WALLS - Extract 12 corner points from cross perimeter and create walls
-  
-  // Helper function to find vertex indices along a line segment in the grid
-  const findVerticesAlongLine = (
-    x1: number, z1: number,
-    x2: number, z2: number,
+  // SIDE WALLS - Extract 12 border edges directly from vertexGrid
+  // Find boundary edges where one adjacent cell is inside cross and one is outside
+
+  const borderEdges: Array<{
+    topIndices: number[];
+    bottomIndices: number[];
+  }> = [];
+
+  // Helper to collect edge vertices in order
+  const collectEdgeVertices = (
+    cellIndices: Array<[number, number]>, // array of [iu, iv] positions
     topGrid: number[][],
     bottomGrid: number[][]
-  ): { topIndices: number[], bottomIndices: number[] } => {
+  ): { topIndices: number[]; bottomIndices: number[] } => {
     const topIndices: number[] = [];
     const bottomIndices: number[] = [];
-    
-    // Scan grid for points along this line segment
-    for (let iv = 0; iv <= divV; iv++) {
-      for (let iu = 0; iu <= divU; iu++) {
-        const x = rectMinX + iu * xStep;
-        const z = rectMinZ + iv * zStep;
-        
-        // Check if point is close to the line segment
-        const dx = x2 - x1;
-        const dz = z2 - z1;
-        const len2 = dx * dx + dz * dz;
-        
-        if (len2 > 0.0001) {
-          // Project point onto line
-          let t = ((x - x1) * dx + (z - z1) * dz) / len2;
-          t = Math.max(0, Math.min(1, t)); // Clamp to segment
-          
-          const closestX = x1 + t * dx;
-          const closestZ = z1 + t * dz;
-          const dist2 = (x - closestX) * (x - closestX) + (z - closestZ) * (z - closestZ);
-          
-          // If close to line and inside cross
-          if (dist2 < (xStep * xStep + zStep * zStep) / 4 && isInsideCross(x, z)) {
-            const topIdx = topGrid[iv][iu];
-            const bottomIdx = bottomGrid[iv][iu];
-            if (topIdx >= 0 && bottomIdx >= 0) {
-              topIndices.push(topIdx);
-              bottomIndices.push(bottomIdx);
-            }
-          }
-        }
+
+    for (const [iu, iv] of cellIndices) {
+      const topIdx = topGrid[iv][iu];
+      const bottomIdx = bottomGrid[iv][iu];
+      if (topIdx >= 0 && bottomIdx >= 0) {
+        topIndices.push(topIdx);
+        bottomIndices.push(bottomIdx);
       }
     }
-    
+
     return { topIndices, bottomIndices };
   };
 
-  // Helper function to create wall between two edge sequences
-  const addWallBetweenEdges = (
+  // Scan vertexGrid to find boundary edges
+  // A vertex is on boundary if it has an adjacent cell that's outside the cross
+  const boundaryVertices = new Set<number>(); // Store all boundary vertex indices
+
+  for (let iv = 0; iv <= divV; iv++) {
+    for (let iu = 0; iu <= divU; iu++) {
+      const vertexIdx = vertexGrid[iv][iu];
+
+      if (vertexIdx >= 0) {
+        // This vertex is inside cross, check if it's on boundary
+        let isBoundary = false;
+
+        // Check all 4 neighbors (up, down, left, right)
+        const neighbors = [
+          [iu - 1, iv], // left
+          [iu + 1, iv], // right
+          [iu, iv - 1], // up
+          [iu, iv + 1], // down
+          [iu - 1, iv - 1], // left
+          [iu - 1, iv + 1], // right
+          [iu + 1, iv - 1], // up
+          [iu + 1, iv + 1], // down
+        ];
+
+        for (const [nIu, nIv] of neighbors) {
+          // If neighbor is outside grid or is -1 (outside cross), this is boundary
+          if (
+            nIu < 0 || nIu > divU ||
+            nIv < 0 || nIv > divV ||
+            vertexGrid[nIv]?.[nIu] === -1
+          ) {
+            isBoundary = true;
+            break;
+          }
+        }
+
+        if (isBoundary) {
+          boundaryVertices.add(iu * 10000 + iv); // Encode position as unique key
+        }
+      }
+    }
+  }
+
+  console.log(`Found ${boundaryVertices.size} boundary vertex positions`);
+
+  // Extract 12 continuous border edge sequences from boundary
+  // Trace each boundary segment in perimeter order
+  const extractBorderEdges = (): Array<{ topIndices: number[]; bottomIndices: number[] }> => {
+    const edges: Array<{ topIndices: number[]; bottomIndices: number[] }> = [];
+    const visited = new Set<number>();
+
+    // For each boundary vertex, trace a continuous edge segment
+    for (const encoded of boundaryVertices) {
+      if (visited.has(encoded)) continue;
+
+      const iv = encoded % 10000;
+      const iu = Math.floor(encoded / 10000);
+
+      // Trace this edge segment by following boundary vertices
+      const edgeCells: Array<[number, number]> = [];
+      let currentIu = iu;
+      let currentIv = iv;
+      let direction = 0; // 0=right, 1=down, 2=left, 3=up
+
+      const maxSteps = 200;
+      let steps = 0;
+
+      while (steps < maxSteps) {
+        edgeCells.push([currentIu, currentIv]);
+        visited.add(currentIu * 10000 + currentIv);
+
+        // Try to move to next boundary vertex
+        let foundNext = false;
+
+        // Try 4 directions in order (prefer continuing in same direction)
+        const tryDirections = [direction, (direction + 1) % 4, (direction + 3) % 4, (direction + 2) % 4];
+
+        for (const d of tryDirections) {
+          let nextIu = currentIu;
+          let nextIv = currentIv;
+
+          if (d === 0) nextIu++; // right
+          else if (d === 1) nextIv++; // down
+          else if (d === 2) nextIu--; // left
+          else if (d === 3) nextIv--; // up
+
+          const nextEncoded = nextIu * 10000 + nextIv;
+
+          if (
+            nextIu >= 0 && nextIu <= divU &&
+            nextIv >= 0 && nextIv <= divV &&
+            vertexGrid[nextIv]?.[nextIu] !== undefined &&
+            vertexGrid[nextIv][nextIu] >= 0 &&
+            boundaryVertices.has(nextEncoded)
+          ) {
+            currentIu = nextIu;
+            currentIv = nextIv;
+            direction = d;
+            foundNext = true;
+            break;
+          }
+        }
+
+        if (!foundNext || edgeCells.length > divU + divV) {
+          break; // End of edge segment
+        }
+
+        steps++;
+      }
+
+      if (edgeCells.length > 2) {
+        const edge = collectEdgeVertices(edgeCells, vertexGrid, bottomVertexGrid);
+        if (edge.topIndices.length > 0) {
+          edges.push(edge);
+        }
+      }
+    }
+
+    return edges;
+  };
+
+  const borderEdgesExtracted = extractBorderEdges();
+  console.log(`Extracted ${borderEdgesExtracted.length} border edges from vertexGrid`);
+
+  // Create walls from extracted border edges
+  const addWallFromEdge = (
     topEdgeIndices: number[],
     bottomEdgeIndices: number[]
   ) => {
     const edgeLength = Math.min(topEdgeIndices.length, bottomEdgeIndices.length);
-    
+
     for (let i = 0; i < edgeLength - 1; i++) {
       const topA = topEdgeIndices[i];
       const topB = topEdgeIndices[i + 1];
@@ -567,53 +507,19 @@ const createCrossStandingWave = (
       const bottomB = bottomEdgeIndices[i + 1];
 
       if (topA >= 0 && topB >= 0 && bottomA >= 0 && bottomB >= 0) {
+        // Two triangles per quad
         indices.push(topA, bottomA, topB);
         indices.push(topB, bottomA, bottomB);
       }
     }
   };
 
-  // Define the 12 line segments of the cross perimeter
-  // The cross is formed by two cuboids intersecting
-  // We have 4 corners per cuboid + 4 corners from overlap = 12 edges
-  
-  const overlapMinX = Math.max(c1MinX, c2MinX);
-  const overlapMaxX = Math.min(c1MaxX, c2MaxX);
-  const overlapMinZ = Math.max(c1MinZ, c2MinZ);
-  const overlapMaxZ = Math.min(c1MaxZ, c2MaxZ);
-
-  // 12 wall segments connecting the cross perimeter
-  const wallSegments = [
-    // Cuboid1 segments (4 sides)
-    { x1: c1MinX, z1: c1MinZ, x2: overlapMinX, z2: overlapMinZ }, // Front
-    { x1: c1MinX, z1: c1MinZ, x2: c1MinX, z2: c1MaxX }, // Right-front corner
-    { x1: c1MinX, z1: c1MaxZ, x2: overlapMinX, z2: overlapMaxZ }, // Overlap front-left
-    { x1: c2MinX, z1: c2MaxZ, x2: c2MaxX, z2: c2MaxZ }, // Overlap left
-    { x1: overlapMinX, z1: overlapMaxZ, x2: c2MinX, z2: c2MaxZ }, // Overlap back-left
-    { x1: c2MaxX, z1: c2MaxZ, x2: overlapMaxX, z2: overlapMaxZ }, // Right-back corner
-    { x1: overlapMaxX, z1: overlapMaxZ, x2: c1MaxX, z2: c1MaxZ }, // Back
-    { x1: c1MaxX, z1: c1MaxZ, x2: c1MaxX, z2: c1MinZ }, // Left-back corner
-    { x1: c1MaxX, z1: c1MinZ, x2: overlapMaxX, z2: overlapMinZ }, // Overlap back-right
-    { x1: overlapMaxX, z1: overlapMinZ, x2: c2MaxX, z2: c2MinZ }, // Overlap right
-    { x1: c2MaxX, z1: c2MinZ, x2: c2MinX, z2: c2MinZ }, // Overlap front-right
-    { x1: c2MinX, z1: c2MinZ, x2: overlapMinX, z2: overlapMinZ }, // Left-front corner
-  ];
-
-  // Create walls for each segment
-  wallSegments.forEach((segment) => {
-    const { topIndices, bottomIndices } = findVerticesAlongLine(
-      segment.x1, segment.z1,
-      segment.x2, segment.z2,
-      vertexGrid,
-      bottomVertexGrid
-    );
-    
-    if (topIndices.length > 0) {
-      addWallBetweenEdges(topIndices, bottomIndices);
-    }
+  // Create all wall segments
+  borderEdgesExtracted.forEach((edge) => {
+    addWallFromEdge(edge.topIndices, edge.bottomIndices);
   });
 
-  console.log('Created 12 wall segments for cross perimeter');
+  console.log('Created walls from extracted border edges');
 
   // Build mesh
   const mesh = new BABYLON.Mesh('crossStandingWave', scene);
@@ -628,9 +534,9 @@ const createCrossStandingWave = (
   let waveBlockMaterial = new BABYLON.StandardMaterial('waveBlockMaterial', scene);
   waveBlockMaterial.diffuseColor = new BABYLON.Color3(214 / 255, 217 / 255, 200 / 255); // tan/beige
   waveBlockMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
-  waveBlockMaterial.alpha = 0.7 ;
-  waveBlockMaterial.disableLighting = true;
-  // waveBlockMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
+  waveBlockMaterial.alpha = 0.4;
+  // waveBlockMaterial.disableLighting = true;
+  waveBlockMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
   waveBlockMaterial.backFaceCulling = false;
   waveBlockMaterial.cullBackFaces = false;
 
@@ -640,28 +546,3 @@ const createCrossStandingWave = (
   return mesh;
 };
 
-
-// Helper function to check if two cuboids intersect
-const checkCuboidIntersection = (
-  pos1: BABYLON.Vector3,
-  size1X: number,
-  size1Z: number,
-  height: number,
-  pos2: BABYLON.Vector3,
-  size2X: number,
-  size2Z: number
-): boolean => {
-  // Check AABB (Axis-Aligned Bounding Box) collision
-  const minX1 = pos1.x - size1X / 2;
-  const maxX1 = pos1.x + size1X / 2;
-  const minZ1 = pos1.z - size1Z / 2;
-  const maxZ1 = pos1.z + size1Z / 2;
-
-  const minX2 = pos2.x - size2X / 2;
-  const maxX2 = pos2.x + size2X / 2;
-  const minZ2 = pos2.z - size2Z / 2;
-  const maxZ2 = pos2.z + size2Z / 2;
-
-  // Check if bounding boxes overlap
-  return !(maxX1 < minX2 || minX1 > maxX2 || maxZ1 < minZ2 || minZ1 > maxZ2);
-};
