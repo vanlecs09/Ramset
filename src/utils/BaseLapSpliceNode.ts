@@ -1,9 +1,9 @@
 import * as BABYLON from '@babylonjs/core';
 import { createConcrete, ConcreteNode, type ConcreteParams } from './ConcreteNode';
-import { createPost } from './PostNode';
+import { createPost, type PostParam } from './PostNode';
 import { createUnitAxes } from './UnitAxisNode';
 import { BaseStructNodeImpl } from './BaseNode';
-import type { RectanglePostPosition } from './RectanglePostPositionCalculator';
+
 import { createMomens, createWaveBlockTop as createTopBlockWave } from './BaseEndAnchorageNode';
 import { getSecondaryPostMaterial } from './Material';
 
@@ -56,14 +56,15 @@ export class BaseLapSpliceNode extends BaseStructNodeImpl {
 
 export const createLapsplice = (
   scene: BABYLON.Scene,
-  postPositions: RectanglePostPosition[],
+  // postPositions: RectanglePostPosition[],
   concreteParam: ConcreteParams,
   slabParam: {
     slabWidth: number;
     slabDepth: number;
-    postDiameter: number;
-    isFiniteConcrete: boolean;
+    // postDiameter: number;
+    // isFiniteConcrete: boolean;
   },
+  postParam : PostParam
 ): BaseLapSpliceNode => {
   const slabGroup = new BABYLON.TransformNode('slab', scene);
   const mainNode = new BaseLapSpliceNode(slabGroup);
@@ -73,7 +74,7 @@ export const createLapsplice = (
     scene,
     concreteParam,
     slabGroup,
-    slabParam.isFiniteConcrete,
+    !concreteParam.isBounded,
   );
   mainNode.setConcreteGroup(concreteNode);
 
@@ -98,23 +99,23 @@ export const createLapsplice = (
   // 3. Create posts connecting concrete to wave blocks
   const postHeight = 0.3;
 
-  postPositions.forEach(postPos => {
+  postParam.postPositions.forEach((postPos, index) => {
     // Position post at concrete top surface with adjusted Y
     const postPositionY = 0;
     const adjustedPostPosition = new BABYLON.Vector3(
-      postPos.position.x,
+      postPos.x,
       postPositionY,
-      postPos.position.z,
+      postPos.z,
     );
 
     const postGroup = createPost(
       scene,
       postHeight,
-      slabParam.postDiameter,
+      postParam.postRadius * 2,
       adjustedPostPosition,
       new BABYLON.Vector3(0, 0, 0),
       slabGroup,
-      `slabPost_${postPos.index}`,
+      `slabPost_${index}`,
     );
     mainNode.addPost(postGroup.mesh!);
   });
@@ -130,7 +131,13 @@ export const createLapsplice = (
   );
   mainNode.setUnitAxisNode(axisNode);
 
-  createMomens(scene, concreteParam.position, concreteParam, mainNode);
+  createMomens(scene, concreteParam.position, {
+    thickness: concreteParam.thickness,
+    width: concreteParam.width,
+    depth: concreteParam.depth,
+    position: concreteParam.position,
+    isBounded: !concreteParam.isBounded,
+  }, mainNode);
 
   // 4. Create secondary posts inside concrete (black color, high density)
   addSecondaryPostsInsideConcrete(
@@ -139,7 +146,7 @@ export const createLapsplice = (
     concreteParam.width,
     concreteParam.depth,
     concreteParam.thickness,
-    slabParam.postDiameter * 0.7, // Slightly smaller diameter
+    postParam.postRadius * 2 * 0.7, // Slightly smaller diameter
   );
 
   return mainNode;

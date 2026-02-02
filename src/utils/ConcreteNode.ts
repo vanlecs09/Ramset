@@ -74,7 +74,7 @@ export interface ConcreteParams {
   width: number;
   depth: number;
   position: BABYLON.Vector3;
-  isBoundless: boolean;
+  isBounded: boolean;
 }
 
 export const createConcrete = (

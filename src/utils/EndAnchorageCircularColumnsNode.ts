@@ -1,8 +1,8 @@
 import * as BABYLON from '@babylonjs/core';
 import { createConcrete, ConcreteNode, type ConcreteParams } from './ConcreteNode';
-import { createPost } from './PostNode';
+import { createPost, type PostParam } from './PostNode';
 import { createCircularStandingWave } from './WaveBuilder';
-import type { PostPosition } from './CircularPostPositionCalculator';
+
 import { createLineTwoArrow, DimensionLineNode } from './GeometryHelper';
 import { createUnitAxes } from './UnitAxisNode';
 import { BaseEndAnchorageNode, createMomens } from './BaseEndAnchorageNode';
@@ -79,26 +79,14 @@ export class EndAnchorageCircularColumnsNode extends BaseEndAnchorageNode {
   }
 }
 
-export interface ConcreteParam {
-  thickness: number;
-  width: number;
-  depth: number;
-  position: BABYLON.Vector3;
-  isBoundless: boolean;
-}
-
 export interface CircleColumnsParam {
   columnHeight: number;
   columnRadius: number;
 }
 
-export interface PostParam {
-  postRadius: number;
-  postPositions: PostPosition[];
-}
 
 export interface CircularColumnParams {
-  concreteParam: ConcreteParam;
+  concreteParam: ConcreteParams;
   circleColumnsParam: CircleColumnsParam;
   postParam: PostParam;
   infiniteBlockPositions?: BABYLON.Vector3[];
@@ -122,10 +110,10 @@ export const createCircularColumns = (
       width: params.concreteParam.width,
       depth: params.concreteParam.depth,
       position: params.concreteParam.position,
-      isBoundless: params.concreteParam.isBoundless,
+      isBounded: params.concreteParam.isBounded,
     },
     towerGroup,
-    params.concreteParam.isBoundless,
+    params.concreteParam.isBounded,
   );
 
   mainNode.setConcreteGroup(concreteNode);
@@ -173,23 +161,25 @@ export const createCircularColumns = (
   mainNode.setStandingWaveMesh(standingWave);
 
   // Create posts
-  const postHeight = params.circleColumnsParam.columnHeight * 2;
+  params.postParam.postPositions.forEach((postPos: any, index: number) => {
+    // Handle both PostPosition and Vector3 types
+    const position = postPos.position instanceof BABYLON.Vector3 ? postPos.position : postPos;
+    const posIndex = postPos.index !== undefined ? postPos.index : index;
 
-  params.postParam.postPositions.forEach(postPos => {
     const adjustedPostPosition = new BABYLON.Vector3(
-      postPos.position.x,
+      position.x,
       concreteTopY,
-      postPos.position.z,
+      position.z,
     );
 
     const postGroup = createPost(
       scene,
-      postHeight,
+      params.postParam.postHeight,
       params.postParam.postRadius * 2,
       adjustedPostPosition,
       undefined,
       towerGroup,
-      `towerPost_${postPos.index}`,
+      `towerPost_${posIndex}`,
     );
     mainNode.addPost(postGroup.mesh!);
   });
@@ -205,7 +195,7 @@ export const createCircularColumns = (
   mainNode.setUnitAxisNode(axisNode);
 
   createMomens(scene, params.concreteParam.position, params.concreteParam, mainNode);
-  if (params.concreteParam.isBoundless) {
+  if (params.concreteParam.isBounded) {
     createInnerDeimensionLine(
       params.concreteParam.position,
       params.concreteParam,

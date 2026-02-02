@@ -2,8 +2,9 @@ import * as BABYLON from '@babylonjs/core';
 import {
   createConcrete,
   ConcreteNode,
+  type ConcreteParams,
 } from './ConcreteNode';
-import { createPost } from './PostNode';
+import { createPost, type PostParam } from './PostNode';
 import { createWaveBlock } from './WaveBuilder';
 import {
   createLineTwoArrow,
@@ -45,16 +46,6 @@ export interface TopBlockParams {
   height: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface postParams { }
-
-export interface ConcreteParams {
-  thickness: number;
-  width: number;
-  depth: number;
-  position: BABYLON.Vector3;
-  isBoundless: boolean;
-}
 
 export class BaseEndAnchorageNode extends BaseStructNodeImpl {
   private concreteNode?: ConcreteNode;
@@ -84,10 +75,9 @@ export class BaseEndAnchorageNode extends BaseStructNodeImpl {
 
 export const createEndAnchorage = (
   scene: BABYLON.Scene,
-  postPositions: BABYLON.Vector3[],
-  params: EndAnchorageParams,
   concreteParams: ConcreteParams,
   beamParams: TopBlockParams,
+  postParam: PostParam,
 ): BaseEndAnchorageNode => {
   const anchorageTrans = new BABYLON.TransformNode('endAnchorage', scene);
   const mainNode = new BaseEndAnchorageNode(anchorageTrans);
@@ -97,7 +87,7 @@ export const createEndAnchorage = (
     scene,
     concreteParams,
     anchorageTrans,
-    !params.isBoundlessConcrete,
+    concreteParams.isBounded,
     true,
   );
   mainNode.setConcreteGroup(concreteNode);
@@ -109,7 +99,7 @@ export const createEndAnchorage = (
     concretePosition.y + beamParams.height / 2 + concreteNode.getConcreteHeight() / 2,
     0,
   );
-  if (params.isBoundlessConcrete == false) {
+  if (concreteParams.isBounded == true) {
     createInnerDeimensionLine(
       concretePosition,
       beamParams,
@@ -129,12 +119,12 @@ export const createEndAnchorage = (
   );
 
   // Update posts
-  const postHeight = 0.3;
-  for (const postPosition of postPositions) {
+  // const postHeight = 0.3;
+  for (const postPosition of postParam.postPositions) {
     const postGroup = createPost(
       scene,
-      postHeight,
-      params.postDiameter,
+      postParam.postHeight,
+      postParam.postRadius * 2, // diameter
       postPosition,
       new BABYLON.Vector3(0, 0, 0),
       // new BABYLON.Vector3(Math.PI / 2, 0, 0),

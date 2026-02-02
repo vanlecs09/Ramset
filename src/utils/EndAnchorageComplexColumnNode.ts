@@ -81,11 +81,8 @@ export const createEnAnchorageComplexColumn = (
   const cuboid2TranslateZ = params.cuboid2TranslateZ ?? 0;
 
   // Extract concrete parameters
-  const concreteThickness = concreteParams.thickness;
-  const concreteWidth = concreteParams.width;
-  const concreteDepth = concreteParams.depth;
   const concretePosition = concreteParams.position;
-  const isBoundless = concreteParams.isBoundless;
+  const isBounded = concreteParams.isBounded;
 
   const columnGroup = new BABYLON.TransformNode('complexColumn', scene);
   const complexColumn = new EndAnchorageComplexColumnNode(columnGroup);
@@ -95,7 +92,7 @@ export const createEnAnchorageComplexColumn = (
     scene,
     concreteParams,
     columnGroup,
-    !isBoundless,
+    !isBounded,
   );
   complexColumn.setConcreteGroup(concreteGroup);
 
@@ -160,13 +157,7 @@ export const createEnAnchorageComplexColumn = (
   complexColumn.setUnitAxisNode(axisNode);
 
   // 5. Create moments
-  createMomens(scene, concretePosition, {
-    thickness: concreteThickness,
-    width: concreteWidth,
-    depth: concreteDepth,
-    position: concretePosition,
-    isBoundless: isBoundless,
-  }, complexColumn);
+  createMomens(scene, concretePosition, concreteParams, complexColumn);
 
 
   standingWave.parent = columnGroup;

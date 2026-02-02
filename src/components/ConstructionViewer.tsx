@@ -506,7 +506,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         width: concreteWidth,
         depth: concreteDepth,
         position: concretePosition,
-        isBoundless: !circleColumns.isFiniteConcrete,
+        isBounded: circleColumns.isFiniteConcrete,
       };
 
       let circleColumnsParam = {
@@ -516,7 +516,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       let postParam = {
         postRadius: circleColumns.postRadius,
-        postPositions: postPositions,
+        postHeight: circleColumnsParam.columnHeight * 2,
+        postPositions: postPositions.map(pos => pos.position),
       };
 
       endAnchorageCircularColumnsRef.current?.dispose();
@@ -583,7 +584,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         width: concreteWidth,
         depth: concreteDepth,
         position: concretePosition,
-        isBoundless: !complexColumnParams.isFiniteConcrete,
+        isBounded: complexColumnParams.isFiniteConcrete,
       }
 
       complexColumnRef.current?.dispose();
@@ -634,7 +635,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         width: concreteWidth,
         depth: concreteDepth,
         position: concretePosition,
-        isBoundless: !lapspliceSlabParams.isFiniteConcrete,
+        isBounded: lapspliceSlabParams.isFiniteConcrete,
       };
 
       let slabParam = {
@@ -642,6 +643,12 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         slabDepth: lapspliceSlabParams.slabDepth,
         postDiameter: lapspliceSlabParams.postDiameter,
         isFiniteConcrete: lapspliceSlabParams.isFiniteConcrete
+      };
+
+      let slabPostParam = {
+        postRadius: lapspliceSlabParams.postDiameter / 2,
+        postHeight: 0.3,
+        postPositions: postPositions.map(pos => pos.position),
       };
 
       if (!lapspliceSlabRef.current) {
@@ -652,9 +659,9 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       lapspliceSlabRef.current?.dispose();
       lapspliceSlabRef.current = createLapsplice(
         scene,
-        postPositions,
         concreteParam,
-        slabParam
+        slabParam,
+        slabPostParam
       );
       // Rotate the group by 90 degrees on X-axis
       lapspliceSlabRef.current.group.rotation.x = Math.PI / 2;
@@ -688,7 +695,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         width: concreteWidth,
         depth: concreteDepth,
         position: concretePosition,
-        isBoundless: !lapspliceBeamParams.isFiniteConcrete,
+        isBounded: lapspliceBeamParams.isFiniteConcrete,
       };
 
       let beamParam = {
@@ -698,6 +705,12 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         isFiniteConcrete: lapspliceBeamParams.isFiniteConcrete
       };
 
+      let beamPostParam = {
+        postRadius: lapspliceBeamParams.postDiameter / 2,
+        postHeight: 0.3,
+        postPositions: postPositions.map(pos => pos.position),
+      };
+
       if (!lapspliceBeamRef.current) {
         disposePreviousStructure();
         adjustCameraForModel();
@@ -705,9 +718,9 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       lapspliceBeamRef.current?.dispose();
       lapspliceBeamRef.current = createLapsplice(
         scene,
-        postPositions,
         concreteParam,
-        beamParam
+        beamParam,
+        beamPostParam
       );
       // Rotate the group by 90 degrees on X-axis
       lapspliceBeamRef.current.group.rotation.x = Math.PI / 2;
@@ -741,7 +754,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         width: concreteWidth,
         depth: concreteDepth,
         position: concretePosition,
-        isBoundless: !lapspliceWallParams.isFiniteConcrete,
+        isBounded: lapspliceWallParams.isFiniteConcrete,
       };
 
       let wallParam = {
@@ -751,6 +764,12 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         isFiniteConcrete: lapspliceWallParams.isFiniteConcrete
       };
 
+      let wallPostParam = {
+        postRadius: lapspliceWallParams.postDiameter / 2,
+        postHeight: 0.3,
+        postPositions: postPositions.map(pos => pos.position),
+      };
+
       if (!lapspliceWallRef.current) {
         disposePreviousStructure();
         adjustCameraForModel();
@@ -758,9 +777,9 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       lapspliceWallRef.current?.dispose();
       lapspliceWallRef.current = createLapsplice(
         scene,
-        postPositions,
         concreteParam,
-        wallParam
+        wallParam,
+        wallPostParam
       );
 
     } else if (model === 'lapspliceColumn') {
@@ -791,7 +810,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         width: concreteWidth,
         depth: concreteDepth,
         position: concretePosition,
-        isBoundless: !lapspliceColumnParams.isFiniteConcrete,
+        isBounded: lapspliceColumnParams.isFiniteConcrete,
       };
 
       let columnParam = {
@@ -801,6 +820,12 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         isFiniteConcrete: lapspliceColumnParams.isFiniteConcrete
       };
 
+      let columnPostParam = {
+        postRadius: lapspliceColumnParams.postDiameter / 2,
+        postHeight: 0.3,
+        postPositions: postPositions.map(pos => pos.position),
+      };
+
       if (!lapspliceColumnRef.current) {
         disposePreviousStructure();
         adjustCameraForModel();
@@ -808,9 +833,9 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       lapspliceColumnRef.current?.dispose();
       lapspliceColumnRef.current = createLapsplice(
         scene,
-        postPositions,
         concreteParam,
-        columnParam
+        columnParam,
+        columnPostParam
       );
       // Rotate the group by 90 degrees on X-axis
       // lapspliceColumnRef.current.group.rotation.x = Math.PI / 2;
@@ -846,7 +871,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         width: concreteWidth,
         depth: concreteDepth,
         position: concretePosition,
-        isBoundless: endAnchorageBeamParams.isBoundlessConcrete!,
+        isBounded: !endAnchorageBeamParams.isBoundlessConcrete!,
       };
 
       let secondaryParams = {
@@ -854,8 +879,13 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         depth: endAnchorageBeamParams.beamDepth,
         height: endAnchorageBeamParams.beamHeight,
       };
+      let beamPostParam = {
+        postRadius: endAnchorageBeamParams.postDiameter / 2,
+        postHeight: 0.3,
+        postPositions: postPos,
+      };
       // updateEndAnchorage(endAnchorageBeamRef.current!,
-      endAnchorageBeamRef.current = createEndAnchorage(scene, postPos, endAnchorageBeamParams, concreteParam, secondaryParams);
+      endAnchorageBeamRef.current = createEndAnchorage(scene, concreteParam, secondaryParams, beamPostParam);
       // Rotate the group by 90 degrees on X-axis
       endAnchorageBeamRef.current.group.rotation.x = Math.PI / 2;
       unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
@@ -890,7 +920,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         width: concreteWidth,
         depth: concreteDepth,
         position: concretePosition,
-        isBoundless: endAnchorageSlabParams.isBoundlessConcrete!,
+        isBounded: !endAnchorageSlabParams.isBoundlessConcrete!,
       };
 
       let secondaryParams = {
@@ -898,7 +928,12 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         depth: endAnchorageSlabParams.beamDepth,
         height: endAnchorageSlabParams.beamHeight,
       };
-      endAnchorageSlabRef.current = createEndAnchorage(scene, postPos, endAnchorageSlabParams, concreteParam, secondaryParams);
+      let slabPostParam = {
+        postRadius: endAnchorageSlabParams.postDiameter / 2,
+        postHeight: 0.3,
+        postPositions: postPos,
+      };
+      endAnchorageSlabRef.current = createEndAnchorage(scene, concreteParam, secondaryParams, slabPostParam);
       // Rotate the group by 90 degrees on X-axis
       endAnchorageSlabRef.current.group.rotation.x = Math.PI / 2;
       unitAxesGroupRef.current!.rotation.x = Math.PI / 2;
@@ -932,7 +967,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         width: concreteWidth,
         depth: concreteDepth,
         position: concretePosition,
-        isBoundless: endAnchorageWallParams.isBoundlessConcrete!,
+        isBounded: !endAnchorageWallParams.isBoundlessConcrete!,
       };
 
       let secondaryParams = {
@@ -940,7 +975,12 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         depth: endAnchorageWallParams.beamDepth,
         height: endAnchorageWallParams.beamHeight,
       };
-      endAnchorageWallRef.current = createEndAnchorage(scene, postPos, endAnchorageWallParams, concreteParam, secondaryParams);
+      let wallPostParam = {
+        postRadius: endAnchorageWallParams.postDiameter / 2,
+        postHeight: 0.3,
+        postPositions: postPos,
+      };
+      endAnchorageWallRef.current = createEndAnchorage(scene, concreteParam, secondaryParams, wallPostParam);
       // Rotate the group by 90 degrees on X-axis
       // endAnchorageWallRef.current.group.rotation.x = Math.PI / 2;
     } else if (model === 'endAnchorageRectangularColumn') {
@@ -973,7 +1013,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         width: concreteWidth,
         depth: concreteDepth,
         position: concretePosition,
-        isBoundless: endAnchorageRectangularColumnParams.isBoundlessConcrete!,
+        isBounded: !endAnchorageRectangularColumnParams.isBoundlessConcrete!,
       };
 
       let secondaryParams = {
@@ -981,7 +1021,12 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         depth: endAnchorageRectangularColumnParams.beamDepth,
         height: endAnchorageRectangularColumnParams.beamHeight,
       };
-      endAnchorageRectangularColumnRef.current = createEndAnchorage(scene, postPos, endAnchorageRectangularColumnParams, concreteParam, secondaryParams);
+      let rectangularColumnPostParam = {
+        postRadius: endAnchorageRectangularColumnParams.postDiameter / 2,
+        postHeight: 0.3,
+        postPositions: postPos,
+      };
+      endAnchorageRectangularColumnRef.current = createEndAnchorage(scene, concreteParam, secondaryParams, rectangularColumnPostParam);
       // Rotate the group by 90 degrees on X-axis
       // endAnchorageRectangularColumnRef.current.group.rotation.x = Math.PI / 2;
     }
