@@ -56,7 +56,7 @@ export interface SlabParams {
 }
 
 function App() {
-  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn'>('endAnchorageWall');
+  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn'>('complexColumn');
   const [towerParams, setTowerParams] = useState<CircularColumnParams>(DEFAULT_TOWER_PARAMS);
   const [complexColumnParams, setComplexColumnParams] = useState<ComplexColumnParams>(DEFAULT_COMPLEX_COLUMN_PARAMS);
   const [lapspliceSlabParams, setLapspliceSlabParams] = useState<SlabParams>(DEFAULT_LAPSPLICE_SLAB_PARAMS);

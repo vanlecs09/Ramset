@@ -1,14 +1,22 @@
 import * as BABYLON from '@babylonjs/core';
 import { BaseStructNodeImpl } from './BaseNode';
-import { createConcrete } from './ConcreteNode';
+import { createConcrete, type ConcreteParams } from './ConcreteNode';
 import type { ConcreteNode } from './ConcreteNode';
-import { calculateCuboidPostPositions } from './CuboidPostPositionCalculator';
-import { createPost } from './PostNode';
+import { createPost, type PostParam } from './PostNode';
 import { createUnitAxes } from './UnitAxisNode';
 import { createMomens } from './BaseEndAnchorageNode';
-import { getWaveBlockMaterial } from './Material';
 
-export class ComplexColumnNode extends BaseStructNodeImpl {
+export interface ComplexColumnParam {
+
+  cuboid1SizeX?: number;
+  cuboid1SizeZ?: number;
+  cuboid2SizeX?: number;
+  cuboid2SizeZ?: number;
+  cuboid2TranslateX?: number;
+  cuboid2TranslateZ?: number;
+}
+
+export class EndAnchorageComplexColumnNode extends BaseStructNodeImpl {
   private concreteGroup?: ConcreteNode;
   private cuboid1?: BABYLON.Mesh;
   private cuboid2?: BABYLON.Mesh;
@@ -58,42 +66,36 @@ export class ComplexColumnNode extends BaseStructNodeImpl {
   }
 }
 
-export const createComplexColumn = (
+export const createEnAnchorageComplexColumn = (
   scene: BABYLON.Scene,
-  concreteThickness: number = 1,
-  concreteWidth: number = 3,
-  concreteDepth: number = 3,
-  concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
-  _infiniteBlockPositions: BABYLON.Vector3[] = [],
-  isFiniteConcrete: boolean = true,
-  cuboid1SizeX: number = 2,
-  cuboid1SizeZ: number = 2,
-  cuboid1PostCountLeftEdge: number = 2,
-  cuboid1PostCountTopEdge: number = 2,
-  cuboid2SizeX: number = 2,
-  cuboid2SizeZ: number = 2,
-  cuboid2TranslateX: number = 0,
-  cuboid2TranslateZ: number = 0,
-  cuboid2PostCountLeftEdge: number = 2,
-  cuboid2PostCountTopEdge: number = 2,
-  postRadius: number = 0.05,
-  postOffset: number = 0.1,
-): ComplexColumnNode => {
+  concreteParams: ConcreteParams,
+  params: ComplexColumnParam,
+  postParam: PostParam
+): EndAnchorageComplexColumnNode => {
+  // Extract parameters with defaults
+  const cuboid1SizeX = params.cuboid1SizeX ?? 2;
+  const cuboid1SizeZ = params.cuboid1SizeZ ?? 2;
+  const cuboid2SizeX = params.cuboid2SizeX ?? 2;
+  const cuboid2SizeZ = params.cuboid2SizeZ ?? 2;
+  const cuboid2TranslateX = params.cuboid2TranslateX ?? 0;
+  const cuboid2TranslateZ = params.cuboid2TranslateZ ?? 0;
+
+  // Extract concrete parameters
+  const concreteThickness = concreteParams.thickness;
+  const concreteWidth = concreteParams.width;
+  const concreteDepth = concreteParams.depth;
+  const concretePosition = concreteParams.position;
+  const isBoundless = concreteParams.isBoundless;
+
   const columnGroup = new BABYLON.TransformNode('complexColumn', scene);
-  const complexColumn = new ComplexColumnNode(columnGroup);
-  console.log('_infiniteBlockPositions', _infiniteBlockPositions);
+  const complexColumn = new EndAnchorageComplexColumnNode(columnGroup);
 
   // 1. Create concrete base using ConcreteBuilder
   const concreteGroup = createConcrete(
     scene,
-    {
-      thickness: concreteThickness,
-      width: concreteWidth,
-      depth: concreteDepth,
-      position: concretePosition,
-    },
+    concreteParams,
     columnGroup,
-    isFiniteConcrete,
+    !isBoundless,
   );
   complexColumn.setConcreteGroup(concreteGroup);
 
@@ -104,10 +106,8 @@ export const createComplexColumn = (
 
   // Calculate cuboid position: concrete top (2) + gap (0.5) + height/2 (0.3) = 2.8
   const concreteTopY = 0;
-  const cuboidGap = 0;
-  const cuboidHeight = 0.3;
   const waveHeight = 0.3;
-  const cuboidCenterY = concreteTopY + waveHeight/2;
+  const cuboidCenterY = concreteTopY + waveHeight / 2;
 
   // 8. Create standing wave on top of the cross shape
 
@@ -127,48 +127,23 @@ export const createComplexColumn = (
 
 
   // 3. Create posts around the perimeter of cuboids
-  const cuboid1Positions = calculateCuboidPostPositions(
-    0, // centerX (cuboid1 is centered)
-    0, // centerZ (cuboid1 is centered)
-    cuboid1SizeX,
-    cuboid1SizeZ,
-    cuboid1PostCountLeftEdge,
-    cuboid1PostCountTopEdge,
-    postOffset,
-    cuboidCenterY - cuboidHeight / 2, // baseY (bottom of cuboid)
-  );
-
-  const cuboid2Positions = calculateCuboidPostPositions(
-    cuboid2TranslateX,
-    cuboid2TranslateZ,
-    cuboid2SizeX,
-    cuboid2SizeZ,
-    cuboid2PostCountLeftEdge,
-    cuboid2PostCountTopEdge,
-    postOffset,
-    cuboidCenterY - cuboidHeight / 2, // baseY (bottom of cuboid)
-  );
-
-  const allPostPositions = [...cuboid1Positions, ...cuboid2Positions];
-  const postHeight = cuboidHeight * 2;
-
-  allPostPositions.forEach(postPos => {
+  postParam.postPositions.forEach((postPos: BABYLON.Vector3, index: number) => {
     // Position post at concrete top surface with adjusted Y
     const postPositionY = concreteTopY;
     const adjustedPostPosition = new BABYLON.Vector3(
-      postPos.position.x,
+      postPos.x,
       postPositionY,
-      postPos.position.z,
+      postPos.z,
     );
 
     const postGroup = createPost(
       scene,
-      postHeight,
-      postRadius * 2, // diameter
+      postParam.postHeight,
+      postParam.postRadius * 2, // diameter
       adjustedPostPosition,
       undefined,
       columnGroup,
-      `complexColumnPost_${postPos.index}`,
+      `complexColumnPost_${index}`,
     );
     complexColumn.addPost(postGroup.mesh!);
   });
@@ -190,6 +165,7 @@ export const createComplexColumn = (
     width: concreteWidth,
     depth: concreteDepth,
     position: concretePosition,
+    isBoundless: isBoundless,
   }, complexColumn);
 
 
@@ -342,11 +318,6 @@ const createCrossStandingWave = (
 
   // SIDE WALLS - Extract 12 border edges directly from vertexGrid
   // Find boundary edges where one adjacent cell is inside cross and one is outside
-
-  const borderEdges: Array<{
-    topIndices: number[];
-    bottomIndices: number[];
-  }> = [];
 
   // Helper to collect edge vertices in order
   const collectEdgeVertices = (

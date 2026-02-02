@@ -74,6 +74,7 @@ export interface ConcreteParams {
   width: number;
   depth: number;
   position: BABYLON.Vector3;
+  isBoundless: boolean;
 }
 
 export const createConcrete = (
@@ -134,11 +135,9 @@ export const createConcrete = (
 
     // Apply concrete position to transform bounding box from local to world space
     const minX = min.x + params.position.x;
-    const maxX = max.x + params.position.x;
     const minY = min.y + params.position.y;
     const maxY = max.y + params.position.y;
     const minZ = min.z + params.position.z;
-    const maxZ = max.z + params.position.z;
 
     const offset = 0.1;
     const dimensionGroup = new BABYLON.TransformNode(
@@ -374,7 +373,6 @@ const createSurroundingConcreteMesh = (
 
   // Add inner faces (flat surfaces that match the 4 faces of concrete)
   const concreteMinY = concretePosition.y - concreteThickness / 2;
-  const concreteMaxY = concretePosition.y + concreteThickness / 2;
   const concreteMinX = concretePosition.x - concreteWidth / 2;
   const concreteMaxX = concretePosition.x + concreteWidth / 2;
   const concreteMinZ = concretePosition.z - concreteDepth / 2;
@@ -509,7 +507,6 @@ const createWallMesh = (
   const amp = 0.02;
   const freq = 10 * concreteWidth;
   const divU = 50;
-  const divV = 10;
 
   const positions: number[] = [];
   const indices: number[] = [];
@@ -535,7 +532,6 @@ const createWallMesh = (
     const outerWidth = blockWidth + blockDepth * 2;
 
     // Select edge based on wall type
-    const edgeRow = wallType === 'bottom' ? 0 : divV;
     const v = wallType === 'bottom' ? concretePosition.y - concreteThickness / 2 : concretePosition.y + concreteThickness / 2;
 
     for (let iu = 0; iu <= divU; iu++) {

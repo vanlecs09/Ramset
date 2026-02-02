@@ -59,47 +59,6 @@ export const createPost = (
   };
 };
 
-export const updatePost = (
-  postGroup: PostNode,
-  scene: BABYLON.Scene,
-  height: number = 1,
-  diameter: number = 0.2,
-  position?: BABYLON.Vector3,
-  rotation?: BABYLON.Vector3,
-  parent?: BABYLON.TransformNode,
-  name: string = 'post',
-) => {
-  if (postGroup.mesh) {
-    postGroup.mesh.dispose();
-  }
-
-  const material = initializePostMaterial(scene);
-
-  const post = BABYLON.MeshBuilder.CreateCylinder(
-    name,
-    { height: height + 0.1, diameter: diameter },
-    scene,
-  );
-
-  if (position) {
-    post.position = position;
-  }
-
-  if (rotation) {
-    post.rotation = rotation;
-  }
-
-  post.material = material;
-  post.receiveShadows = true;
-
-  if (parent) {
-    post.parent = parent;
-  }
-
-  postGroup.mesh = post;
-  postGroup.material = material;
-};
-
 export const getPostMaterial = (): BABYLON.StandardMaterial | null => {
   return postMaterial;
 };
@@ -126,3 +85,9 @@ export const createPostBatch = (
     ),
   );
 };
+
+export interface PostParam {
+  postRadius: number;
+  postHeight: number;
+  postPositions: BABYLON.Vector3[]; 
+}

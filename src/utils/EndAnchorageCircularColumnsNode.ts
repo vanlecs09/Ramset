@@ -6,7 +6,7 @@ import type { PostPosition } from './CircularPostPositionCalculator';
 import { createLineTwoArrow, DimensionLineNode } from './GeometryHelper';
 import { createUnitAxes } from './UnitAxisNode';
 import { BaseEndAnchorageNode, createMomens } from './BaseEndAnchorageNode';
-import { getConcreteMaterial, getWaveBlockMaterial, getConcreteDimensionMaterial, getCircularStandingWaveMaterial } from './Material';
+import { getConcreteMaterial, getConcreteDimensionMaterial, getCircularStandingWaveMaterial } from './Material';
 
 export interface BaseStructureGroup {
   group: BABYLON.TransformNode;
@@ -122,6 +122,7 @@ export const createCircularColumns = (
       width: params.concreteParam.width,
       depth: params.concreteParam.depth,
       position: params.concreteParam.position,
+      isBoundless: params.concreteParam.isBoundless,
     },
     towerGroup,
     params.concreteParam.isBoundless,

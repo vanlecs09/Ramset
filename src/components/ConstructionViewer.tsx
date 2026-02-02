@@ -11,7 +11,9 @@ import type { BaseLapSpliceNode } from '../utils/BaseLapSpliceNode';
 import { BaseEndAnchorageNode } from '../utils/BaseEndAnchorageNode';
 import type { SlabParams } from '../App';
 import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
-import { createComplexColumn, type ComplexColumnNode } from '../utils/ComplexColumnNode';
+import { createEnAnchorageComplexColumn } from '../utils/EndAnchorageComplexColumnNode';
+import type { EndAnchorageComplexColumnNode } from '../utils/EndAnchorageComplexColumnNode';
+import { calculateCuboidPostPositions } from '../utils/CuboidPostPositionCalculator';
 
 interface TowerParams {
   isFiniteConcrete: boolean;
@@ -261,7 +263,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
   const sceneRef = useRef<BABYLON.Scene | null>(null);
   const engineRef = useRef<BABYLON.Engine | null>(null);
   const endAnchorageCircularColumnsRef = useRef<EndAnchorageCircularColumnsNode | null>(null);
-  const complexColumnRef = useRef<ComplexColumnNode | null>(null);
+  const complexColumnRef = useRef<EndAnchorageComplexColumnNode | null>(null);
   const lapspliceSlabRef = useRef<BaseLapSpliceNode | null>(null);
   const lapspliceBeamRef = useRef<BaseLapSpliceNode | null>(null);
   const lapspliceWallRef = useRef<BaseLapSpliceNode | null>(null);
@@ -329,7 +331,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       0.1,
       true, // Show labels
     );
-    
+
     // Parent axis meshes to the group
     const axisMeshes = unitAxisNode.getMeshes();
     axisMeshes.forEach(mesh => {
@@ -448,46 +450,18 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
  * Rotate the upVector via the camera's forward direction.  This will then update
  * the camera's perspective to appear as though it rotated.
  */
-    const rotateCamera = (camera: BABYLON.ArcRotateCamera, localAxis: BABYLON.Vector3, angle: BABYLON.float) => {
-      const upVector = camera.upVector.clone();
-      const axis = BABYLON.Quaternion.RotationAxis(localAxis, angle);
-      upVector.applyRotationQuaternionInPlace(axis);
-      camera.upVector = upVector;
-
-      // Note about this function: If you want to keep the same position, you'll
-      // need to call this function.  This will take the current camera position
-      // and recalculate the alpha and beta values.  Not calling this function will
-      // instead force the position to be changed on the next camera update.
-      camera.rebuildAnglesAndRadius();
-
-      // Since alpha has no limits, we want to try and keep it between 0 and 2 * PI
-      if (camera.alpha > Math.PI * 2) {
-        camera.alpha -= Math.PI * 2;
-      }
-      else if (camera.alpha < 0) {
-        camera.alpha += Math.PI * 2;
-      }
-    }
-
-    const rollCamera = (camera: BABYLON.ArcRotateCamera, angle: BABYLON.float) => {
-      const localZ = camera.getDirection(BABYLON.Axis.Z);
-      rotateCamera(camera, localZ, angle);
-
-      // camUp.rotate(localZ, angle, BABYLON.Space.WORLD);
-    }
 
     const resetScene = (camera: BABYLON.ArcRotateCamera) => {
       camera.upVector = BABYLON.Axis.Y;
       // camUp.rotation.copyFromFloats(0, 0, 0);
       // camUp.rotationQuaternion = null;
-      // Like in the rotateCamera function, we're calling this so that the position remains
-      // the same and the angles are rotated instead.
+      // We're calling this so that the position remains the same and the angles are rotated instead.
       camera.rebuildAnglesAndRadius();
     }
 
 
     // Helper function to adjust camera based on model type
-    const adjustCameraForModel = (modelType: string) => {
+    const adjustCameraForModel = () => {
       const camera = scene.activeCamera as BABYLON.ArcRotateCamera;
       if (!camera) return;
       resetScene(camera);
@@ -512,7 +486,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         baseY
       );
 
-      const { concreteWidth, concreteDepth, concretePosition, finiteBlockPositions } = calculateConcreteLayout({
+      const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
         concreteOffsetXRight: circleColumns.concreteOffsetXRight,
         concreteOffsetXLeft: circleColumns.concreteOffsetXLeft,
         concreteOffsetZBack: circleColumns.concreteOffsetZBack,
@@ -524,7 +498,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       if (!endAnchorageCircularColumnsRef.current) {
         disposePreviousStructure();
 
-        adjustCameraForModel('endAnchorageCircularColumns');
+        adjustCameraForModel();
       }
 
       let concreteParam = {
@@ -532,7 +506,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         width: concreteWidth,
         depth: concreteDepth,
         position: concretePosition,
-        isBoundless: circleColumns.isFiniteConcrete,
+        isBoundless: !circleColumns.isFiniteConcrete,
       };
 
       let circleColumnsParam = {
@@ -557,7 +531,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     } else if (model === 'complexColumn') {
 
       // Calculate concrete dimensions and positions
-      const { concreteWidth, concreteDepth, concretePosition, finiteBlockPositions } = calculateConcreteLayout({
+      const { concreteWidth, concreteDepth, concretePosition } = calculateConcreteLayout({
         concreteOffsetXRight: complexColumnParams.concreteOffsetXRight,
         concreteOffsetXLeft: complexColumnParams.concreteOffsetXLeft,
         concreteOffsetZBack: complexColumnParams.concreteOffsetZBack,
@@ -567,29 +541,66 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       if (!complexColumnRef.current) {
         disposePreviousStructure();
-        adjustCameraForModel('complexColumn');
+        adjustCameraForModel();
       }
-      complexColumnRef.current?.dispose();
-      complexColumnRef.current = createComplexColumn(
-        scene,
-        complexColumnParams.concreteThickness,
-        concreteWidth,
-        concreteDepth,
-        concretePosition,
-        finiteBlockPositions,
-        complexColumnParams.isFiniteConcrete,
+
+      const cuboidHeight = 0.3;
+      const waveHeight = 0.3;
+      const cuboidCenterY = waveHeight / 2;
+      const cuboid1Positions = calculateCuboidPostPositions(
+        0, // centerX (cuboid1 is centered)
+        0, // centerZ (cuboid1 is centered)
         complexColumnParams.cuboid1SizeX,
         complexColumnParams.cuboid1SizeZ,
         complexColumnParams.cuboid1PostCountLeftEdge,
         complexColumnParams.cuboid1PostCountTopEdge,
-        complexColumnParams.cuboid2SizeX,
-        complexColumnParams.cuboid2SizeZ,
+        complexColumnParams.postOffset,
+        cuboidCenterY - cuboidHeight / 2, // baseY (bottom of cuboid)
+      );
+
+      const cuboid2Positions = calculateCuboidPostPositions(
         complexColumnParams.cuboid2TranslateX,
         complexColumnParams.cuboid2TranslateZ,
+        complexColumnParams.cuboid2SizeX,
+        complexColumnParams.cuboid2SizeZ,
         complexColumnParams.cuboid2PostCountLeftEdge,
         complexColumnParams.cuboid2PostCountTopEdge,
-        complexColumnParams.postRadius,
-        complexColumnParams.postOffset
+        complexColumnParams.postOffset,
+        cuboidCenterY - cuboidHeight / 2, // baseY (bottom of cuboid)
+      );
+
+      const allPostPositions = [...cuboid1Positions, ...cuboid2Positions];
+      const postHeight = cuboidHeight * 2;
+
+      let postParams = {
+        postRadius: complexColumnParams.postRadius,
+        postHeight: postHeight,
+        postPositions: allPostPositions.map(pos => pos.position),
+      };
+
+      let concreteParam = {
+        thickness: complexColumnParams.concreteThickness,
+        width: concreteWidth,
+        depth: concreteDepth,
+        position: concretePosition,
+        isBoundless: !complexColumnParams.isFiniteConcrete,
+      }
+
+      complexColumnRef.current?.dispose();
+      complexColumnRef.current = createEnAnchorageComplexColumn(
+        scene,
+        concreteParam,
+        {
+
+          cuboid1SizeX: complexColumnParams.cuboid1SizeX,
+          cuboid1SizeZ: complexColumnParams.cuboid1SizeZ,
+          cuboid2SizeX: complexColumnParams.cuboid2SizeX,
+          cuboid2SizeZ: complexColumnParams.cuboid2SizeZ,
+          cuboid2TranslateX: complexColumnParams.cuboid2TranslateX,
+          cuboid2TranslateZ: complexColumnParams.cuboid2TranslateZ,
+
+        },
+        postParams,
       );
 
 
@@ -622,7 +633,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         thickness: lapspliceSlabParams.concreteThickness,
         width: concreteWidth,
         depth: concreteDepth,
-        position: concretePosition
+        position: concretePosition,
+        isBoundless: !lapspliceSlabParams.isFiniteConcrete,
       };
 
       let slabParam = {
@@ -634,7 +646,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       if (!lapspliceSlabRef.current) {
         disposePreviousStructure();
-        adjustCameraForModel('lapspliceSlab');
+        adjustCameraForModel();
 
       }
       lapspliceSlabRef.current?.dispose();
@@ -675,7 +687,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         thickness: lapspliceBeamParams.concreteThickness,
         width: concreteWidth,
         depth: concreteDepth,
-        position: concretePosition
+        position: concretePosition,
+        isBoundless: !lapspliceBeamParams.isFiniteConcrete,
       };
 
       let beamParam = {
@@ -687,7 +700,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       if (!lapspliceBeamRef.current) {
         disposePreviousStructure();
-        adjustCameraForModel('lapspliceBeam');
+        adjustCameraForModel();
       }
       lapspliceBeamRef.current?.dispose();
       lapspliceBeamRef.current = createLapsplice(
@@ -727,7 +740,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         thickness: lapspliceWallParams.concreteThickness,
         width: concreteWidth,
         depth: concreteDepth,
-        position: concretePosition
+        position: concretePosition,
+        isBoundless: !lapspliceWallParams.isFiniteConcrete,
       };
 
       let wallParam = {
@@ -739,7 +753,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       if (!lapspliceWallRef.current) {
         disposePreviousStructure();
-        adjustCameraForModel('lapspliceWall');
+        adjustCameraForModel();
       }
       lapspliceWallRef.current?.dispose();
       lapspliceWallRef.current = createLapsplice(
@@ -776,7 +790,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         thickness: lapspliceColumnParams.concreteThickness,
         width: concreteWidth,
         depth: concreteDepth,
-        position: concretePosition
+        position: concretePosition,
+        isBoundless: !lapspliceColumnParams.isFiniteConcrete,
       };
 
       let columnParam = {
@@ -788,7 +803,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       if (!lapspliceColumnRef.current) {
         disposePreviousStructure();
-        adjustCameraForModel('lapspliceColumn');
+        adjustCameraForModel();
       }
       lapspliceColumnRef.current?.dispose();
       lapspliceColumnRef.current = createLapsplice(
@@ -822,7 +837,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       if (!endAnchorageBeamRef.current) {
         disposePreviousStructure();
-        adjustCameraForModel('endAnchorageBeam');
+        adjustCameraForModel();
         // endAnchorageBeamRef.current = new EndAnchorageBeamNode('endAnchorageBeam', scene);
       }
       endAnchorageBeamRef.current?.dispose();
@@ -830,7 +845,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         thickness: endAnchorageBeamParams.concreteThickness,
         width: concreteWidth,
         depth: concreteDepth,
-        position: concretePosition
+        position: concretePosition,
+        isBoundless: endAnchorageBeamParams.isBoundlessConcrete!,
       };
 
       let secondaryParams = {
@@ -866,14 +882,15 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       if (!endAnchorageSlabRef.current) {
         disposePreviousStructure();
-        adjustCameraForModel('endAnchorageSlab');
+        adjustCameraForModel();
       }
       endAnchorageSlabRef.current?.dispose();
       let concreteParam = {
         thickness: endAnchorageSlabParams.concreteThickness,
         width: concreteWidth,
         depth: concreteDepth,
-        position: concretePosition
+        position: concretePosition,
+        isBoundless: endAnchorageSlabParams.isBoundlessConcrete!,
       };
 
       let secondaryParams = {
@@ -907,14 +924,15 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       if (!endAnchorageWallRef.current) {
         disposePreviousStructure();
-        adjustCameraForModel('endAnchorageWall');
+        adjustCameraForModel();
       }
       endAnchorageWallRef.current?.dispose();
       let concreteParam = {
         thickness: endAnchorageWallParams.concreteThickness,
         width: concreteWidth,
         depth: concreteDepth,
-        position: concretePosition
+        position: concretePosition,
+        isBoundless: endAnchorageWallParams.isBoundlessConcrete!,
       };
 
       let secondaryParams = {
@@ -947,14 +965,15 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
 
       if (!endAnchorageRectangularColumnRef.current) {
         disposePreviousStructure();
-        adjustCameraForModel('endAnchorageRectangularColumn');
+        adjustCameraForModel();
       }
       endAnchorageRectangularColumnRef.current?.dispose();
       let concreteParam = {
         thickness: endAnchorageRectangularColumnParams.concreteThickness,
         width: concreteWidth,
         depth: concreteDepth,
-        position: concretePosition
+        position: concretePosition,
+        isBoundless: endAnchorageRectangularColumnParams.isBoundlessConcrete!,
       };
 
       let secondaryParams = {

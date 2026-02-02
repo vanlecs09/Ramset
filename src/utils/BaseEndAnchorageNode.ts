@@ -53,6 +53,7 @@ export interface ConcreteParams {
   width: number;
   depth: number;
   position: BABYLON.Vector3;
+  isBoundless: boolean;
 }
 
 export class BaseEndAnchorageNode extends BaseStructNodeImpl {
