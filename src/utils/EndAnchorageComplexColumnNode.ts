@@ -102,7 +102,7 @@ export const createEnAnchorageComplexColumn = (
 
   // Calculate cuboid position: concrete top (2) + gap (0.5) + height/2 (0.3) = 2.8
   const concreteTopY = 0;
-  const waveHeight = 0.3;
+  const waveHeight = 0.3 + 0.1;
   const cuboidCenterY = concreteTopY + waveHeight / 2;
 
   // 8. Create standing wave on top of the cross shape
@@ -302,205 +302,290 @@ const createCrossStandingWave = (
     }
   }
 
-  // SIDE WALLS - Extract 12 border edges directly from vertexGrid
-  // Find boundary edges where one adjacent cell is inside cross and one is outside
+  // SIDE WALLS - Create walls around each cuboid perimeter separately
+  // If cuboids don't overlap, this is much simpler than extracting complex borders
 
-  // Helper to collect edge vertices in order
-  const collectEdgeVertices = (
-    cellIndices: Array<[number, number]>, // array of [iu, iv] positions
-    topGrid: number[][],
-    bottomGrid: number[][],
-  ): { topIndices: number[]; bottomIndices: number[] } => {
-    const topIndices: number[] = [];
-    const bottomIndices: number[] = [];
-
-    for (const [iu, iv] of cellIndices) {
-      const topIdx = topGrid[iv][iu];
-      const bottomIdx = bottomGrid[iv][iu];
-      if (topIdx >= 0 && bottomIdx >= 0) {
-        topIndices.push(topIdx);
-        bottomIndices.push(bottomIdx);
-      }
-    }
-
-    return { topIndices, bottomIndices };
+  // Helper to check if two cuboids overlap
+  const cuboidsOverlap = (): boolean => {
+    const overlapX = !(c1MaxX < c2MinX || c2MaxX < c1MinX);
+    const overlapZ = !(c1MaxZ < c2MinZ || c2MaxZ < c1MinZ);
+    return overlapX && overlapZ;
   };
 
-  // Scan vertexGrid to find boundary edges
-  // A vertex is on boundary if it has an adjacent cell that's outside the cross
-  const boundaryVertices = new Set<number>(); // Store all boundary vertex indices
+  const overlap = cuboidsOverlap();
+  console.log(`Cuboids overlap: ${overlap}`);
 
-  for (let iv = 0; iv <= divV; iv++) {
-    for (let iu = 0; iu <= divU; iu++) {
-      const vertexIdx = vertexGrid[iv][iu];
+  if (!overlap) {
+    // Simple case: Create walls for each cuboid separately
+    const createWallsForCuboid = (
+      minX: number,
+      maxX: number,
+      minZ: number,
+      maxZ: number,
+    ) => {
+      // Find grid indices that correspond to this cuboid's boundaries
+      const edges = [
+        // Left edge (X = minX)
+        { axis: 'x', value: minX, dir: 'z', start: minZ, end: maxZ },
+        // Right edge (X = maxX)
+        { axis: 'x', value: maxX, dir: 'z', start: minZ, end: maxZ },
+        // Bottom edge (Z = minZ)
+        { axis: 'z', value: minZ, dir: 'x', start: minX, end: maxX },
+        // Top edge (Z = maxZ)
+        { axis: 'z', value: maxZ, dir: 'x', start: minX, end: maxX },
+      ];
 
-      if (vertexIdx >= 0) {
-        // This vertex is inside cross, check if it's on boundary
-        let isBoundary = false;
+      edges.forEach(edge => {
+        const topIndices: number[] = [];
+        const bottomIndices: number[] = [];
 
-        // Check all 4 neighbors (up, down, left, right)
-        const neighbors = [
-          [iu - 1, iv], // left
-          [iu + 1, iv], // right
-          [iu, iv - 1], // up
-          [iu, iv + 1], // down
-          [iu - 1, iv - 1], // left
-          [iu - 1, iv + 1], // right
-          [iu + 1, iv - 1], // up
-          [iu + 1, iv + 1], // down
-        ];
-
-        for (const [nIu, nIv] of neighbors) {
-          // If neighbor is outside grid or is -1 (outside cross), this is boundary
-          if (
-            nIu < 0 ||
-            nIu > divU ||
-            nIv < 0 ||
-            nIv > divV ||
-            vertexGrid[nIv]?.[nIu] === -1
-          ) {
-            isBoundary = true;
-            break;
+        if (edge.axis === 'x') {
+          // Vertical edge (constant X, varying Z)
+          const iu = Math.round(((edge.value - rectMinX) / rectWidth) * divU);
+          for (let iv = 0; iv <= divV; iv++) {
+            const z = rectMinZ + iv * zStep;
+            if (z >= edge.start && z <= edge.end) {
+              const topIdx = vertexGrid[iv]?.[iu];
+              const bottomIdx = bottomVertexGrid[iv]?.[iu];
+              if (topIdx >= 0 && bottomIdx >= 0) {
+                topIndices.push(topIdx);
+                bottomIndices.push(bottomIdx);
+              }
+            }
+          }
+        } else {
+          // Horizontal edge (constant Z, varying X)
+          const iv = Math.round(((edge.value - rectMinZ) / rectDepth) * divV);
+          for (let iu = 0; iu <= divU; iu++) {
+            const x = rectMinX + iu * xStep;
+            if (x >= edge.start && x <= edge.end) {
+              const topIdx = vertexGrid[iv]?.[iu];
+              const bottomIdx = bottomVertexGrid[iv]?.[iu];
+              if (topIdx >= 0 && bottomIdx >= 0) {
+                topIndices.push(topIdx);
+                bottomIndices.push(bottomIdx);
+              }
+            }
           }
         }
 
-        if (isBoundary) {
-          boundaryVertices.add(iu * 10000 + iv); // Encode position as unique key
-        }
-      }
-    }
-  }
+        // Create wall quads
+        for (let i = 0; i < topIndices.length - 1; i++) {
+          const topA = topIndices[i];
+          const topB = topIndices[i + 1];
+          const bottomA = bottomIndices[i];
+          const bottomB = bottomIndices[i + 1];
 
-  console.log(`Found ${boundaryVertices.size} boundary vertex positions`);
-
-  // Extract 12 continuous border edge sequences from boundary
-  // Trace each boundary segment in perimeter order
-  const extractBorderEdges = (): Array<{
-    topIndices: number[];
-    bottomIndices: number[];
-  }> => {
-    const edges: Array<{ topIndices: number[]; bottomIndices: number[] }> = [];
-    const visited = new Set<number>();
-
-    // For each boundary vertex, trace a continuous edge segment
-    for (const encoded of boundaryVertices) {
-      if (visited.has(encoded)) continue;
-
-      const iv = encoded % 10000;
-      const iu = Math.floor(encoded / 10000);
-
-      // Trace this edge segment by following boundary vertices
-      const edgeCells: Array<[number, number]> = [];
-      let currentIu = iu;
-      let currentIv = iv;
-      let direction = 0; // 0=right, 1=down, 2=left, 3=up
-
-      const maxSteps = 200;
-      let steps = 0;
-
-      while (steps < maxSteps) {
-        edgeCells.push([currentIu, currentIv]);
-        visited.add(currentIu * 10000 + currentIv);
-
-        // Try to move to next boundary vertex
-        let foundNext = false;
-
-        // Try 4 directions in order (prefer continuing in same direction)
-        const tryDirections = [
-          direction,
-          (direction + 1) % 4,
-          (direction + 3) % 4,
-          (direction + 2) % 4,
-        ];
-
-        for (const d of tryDirections) {
-          let nextIu = currentIu;
-          let nextIv = currentIv;
-
-          if (d === 0)
-            nextIu++; // right
-          else if (d === 1)
-            nextIv++; // down
-          else if (d === 2)
-            nextIu--; // left
-          else if (d === 3) nextIv--; // up
-
-          const nextEncoded = nextIu * 10000 + nextIv;
-
-          if (
-            nextIu >= 0 &&
-            nextIu <= divU &&
-            nextIv >= 0 &&
-            nextIv <= divV &&
-            vertexGrid[nextIv]?.[nextIu] !== undefined &&
-            vertexGrid[nextIv][nextIu] >= 0 &&
-            boundaryVertices.has(nextEncoded)
-          ) {
-            currentIu = nextIu;
-            currentIv = nextIv;
-            direction = d;
-            foundNext = true;
-            break;
+          if (topA >= 0 && topB >= 0 && bottomA >= 0 && bottomB >= 0) {
+            indices.push(topA, bottomA, topB);
+            indices.push(topB, bottomA, bottomB);
           }
         }
+      });
+    };
 
-        if (!foundNext || edgeCells.length > divU + divV) {
-          break; // End of edge segment
+    // Create walls for both cuboids
+    createWallsForCuboid(c1MinX, c1MaxX, c1MinZ, c1MaxZ);
+    createWallsForCuboid(c2MinX, c2MaxX, c2MinZ, c2MaxZ);
+
+    console.log('Created simple walls for non-overlapping cuboids');
+  } else {
+    // Complex case: Extract border edges for overlapping cuboids
+    
+    // Helper to collect edge vertices in order
+    const collectEdgeVertices = (
+      cellIndices: Array<[number, number]>,
+      topGrid: number[][],
+      bottomGrid: number[][],
+    ): { topIndices: number[]; bottomIndices: number[] } => {
+      const topIndices: number[] = [];
+      const bottomIndices: number[] = [];
+
+      for (const [iu, iv] of cellIndices) {
+        const topIdx = topGrid[iv][iu];
+        const bottomIdx = bottomGrid[iv][iu];
+        if (topIdx >= 0 && bottomIdx >= 0) {
+          topIndices.push(topIdx);
+          bottomIndices.push(bottomIdx);
         }
-
-        steps++;
       }
 
-      if (edgeCells.length > 2) {
-        const edge = collectEdgeVertices(
-          edgeCells,
-          vertexGrid,
-          bottomVertexGrid,
-        );
-        if (edge.topIndices.length > 0) {
-          edges.push(edge);
+      return { topIndices, bottomIndices };
+    };
+
+    // Scan vertexGrid to find boundary vertices
+    const boundaryVertices = new Set<number>();
+
+    for (let iv = 0; iv <= divV; iv++) {
+      for (let iu = 0; iu <= divU; iu++) {
+        const vertexIdx = vertexGrid[iv][iu];
+
+        if (vertexIdx >= 0) {
+          let isBoundary = false;
+
+          const neighbors = [
+            [iu - 1, iv],
+            [iu + 1, iv],
+            [iu, iv - 1],
+            [iu, iv + 1],
+            [iu - 1, iv - 1],
+            [iu - 1, iv + 1],
+            [iu + 1, iv - 1],
+            [iu + 1, iv + 1],
+          ];
+
+          for (const [nIu, nIv] of neighbors) {
+            if (
+              nIu < 0 ||
+              nIu > divU ||
+              nIv < 0 ||
+              nIv > divV ||
+              vertexGrid[nIv]?.[nIu] === -1
+            ) {
+              isBoundary = true;
+              break;
+            }
+          }
+
+          if (isBoundary) {
+            boundaryVertices.add(iu * 10000 + iv);
+          }
         }
       }
     }
 
-    return edges;
-  };
+    console.log(`Found ${boundaryVertices.size} boundary vertex positions`);
+    
+    // Extract 12 continuous border edge sequences from boundary
+    // Trace each boundary segment in perimeter order
+    const extractBorderEdges = (): Array<{
+      topIndices: number[];
+      bottomIndices: number[];
+    }> => {
+      const edges: Array<{ topIndices: number[]; bottomIndices: number[] }> =
+        [];
+      const visited = new Set<number>();
 
-  const borderEdgesExtracted = extractBorderEdges();
-  console.log(
-    `Extracted ${borderEdgesExtracted.length} border edges from vertexGrid`,
-  );
+      // For each boundary vertex, trace a continuous edge segment
+      for (const encoded of boundaryVertices) {
+        if (visited.has(encoded)) continue;
 
-  // Create walls from extracted border edges
-  const addWallFromEdge = (
-    topEdgeIndices: number[],
-    bottomEdgeIndices: number[],
-  ) => {
-    const edgeLength = Math.min(
-      topEdgeIndices.length,
-      bottomEdgeIndices.length,
+        const iv = encoded % 10000;
+        const iu = Math.floor(encoded / 10000);
+
+        // Trace this edge segment by following boundary vertices
+        const edgeCells: Array<[number, number]> = [];
+        let currentIu = iu;
+        let currentIv = iv;
+        let direction = 0; // 0=right, 1=down, 2=left, 3=up
+
+        const maxSteps = 200;
+        let steps = 0;
+
+        while (steps < maxSteps) {
+          edgeCells.push([currentIu, currentIv]);
+          visited.add(currentIu * 10000 + currentIv);
+
+          // Try to move to next boundary vertex
+          let foundNext = false;
+
+          // Try 4 directions in order (prefer continuing in same direction)
+          const tryDirections = [
+            direction,
+            (direction + 1) % 4,
+            (direction + 3) % 4,
+            (direction + 2) % 4,
+          ];
+
+          for (const d of tryDirections) {
+            let nextIu = currentIu;
+            let nextIv = currentIv;
+
+            if (d === 0)
+              nextIu++; // right
+            else if (d === 1)
+              nextIv++; // down
+            else if (d === 2)
+              nextIu--; // left
+            else if (d === 3) nextIv--; // up
+
+            const nextEncoded = nextIu * 10000 + nextIv;
+
+            if (
+              nextIu >= 0 &&
+              nextIu <= divU &&
+              nextIv >= 0 &&
+              nextIv <= divV &&
+              vertexGrid[nextIv]?.[nextIu] !== undefined &&
+              vertexGrid[nextIv][nextIu] >= 0 &&
+              boundaryVertices.has(nextEncoded)
+            ) {
+              currentIu = nextIu;
+              currentIv = nextIv;
+              direction = d;
+              foundNext = true;
+              break;
+            }
+          }
+
+          if (!foundNext || edgeCells.length > divU + divV) {
+            break; // End of edge segment
+          }
+
+          steps++;
+        }
+
+        if (edgeCells.length > 2) {
+          const edge = collectEdgeVertices(
+            edgeCells,
+            vertexGrid,
+            bottomVertexGrid,
+          );
+          if (edge.topIndices.length > 0) {
+            edges.push(edge);
+          }
+        }
+      }
+
+      return edges;
+    };
+
+    const borderEdgesExtracted = extractBorderEdges();
+    console.log(
+      `Extracted ${borderEdgesExtracted.length} border edges from vertexGrid`,
     );
 
-    for (let i = 0; i < edgeLength - 1; i++) {
-      const topA = topEdgeIndices[i];
-      const topB = topEdgeIndices[i + 1];
-      const bottomA = bottomEdgeIndices[i];
-      const bottomB = bottomEdgeIndices[i + 1];
+    // Create walls from extracted border edges
+    const addWallFromEdge = (
+      topEdgeIndices: number[],
+      bottomEdgeIndices: number[],
+    ) => {
+      const edgeLength = Math.min(
+        topEdgeIndices.length,
+        bottomEdgeIndices.length,
+      );
 
-      if (topA >= 0 && topB >= 0 && bottomA >= 0 && bottomB >= 0) {
-        // Two triangles per quad
-        indices.push(topA, bottomA, topB);
-        indices.push(topB, bottomA, bottomB);
+      for (let i = 0; i < edgeLength - 1; i++) {
+        const topA = topEdgeIndices[i];
+        const topB = topEdgeIndices[i + 1];
+        const bottomA = bottomEdgeIndices[i];
+        const bottomB = bottomEdgeIndices[i + 1];
+
+        if (topA >= 0 && topB >= 0 && bottomA >= 0 && bottomB >= 0) {
+          // Two triangles per quad
+          indices.push(topA, bottomA, topB);
+          indices.push(topB, bottomA, bottomB);
+        }
       }
-    }
-  };
+    };
 
-  // Create all wall segments
-  borderEdgesExtracted.forEach(edge => {
-    addWallFromEdge(edge.topIndices, edge.bottomIndices);
-  });
+    // Create all wall segments
+    borderEdgesExtracted.forEach(edge => {
+      addWallFromEdge(edge.topIndices, edge.bottomIndices);
+    });
 
-  console.log('Created walls from extracted border edges');
+    console.log('Created walls from extracted border edges for overlapping cuboids');
+  }
 
   // Build mesh
   const mesh = new BABYLON.Mesh('crossStandingWave', scene);

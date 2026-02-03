@@ -164,7 +164,7 @@ export const DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS: EndAnchorageParams
   beamHeight: 0.5,
   postCountX: 3,
   postCountZ: 2,
-  postDiameter: 0.03,
+  postDiameter: 0.01,
   postOffset: 0.05,
   concreteOffsetXRight: 0.5,
   concreteOffsetXLeft: 0.5,
