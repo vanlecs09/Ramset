@@ -1,5 +1,6 @@
 import type { ComplexColumnParams, SlabParams } from '../App';
-import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
+import type { EndAnchorageParams } from '../utils/EndAnchorageParams';
+// import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
 
 export interface TowerParams {
   isFiniteConcrete: boolean;

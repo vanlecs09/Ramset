@@ -7,6 +7,7 @@ import {
   getBoundlessMaterial,
   getDimensionLabelTexture,
 } from './Material';
+import type { ConcreteParams } from './EndAnchorageParams';
 
 export class ConcreteNode extends BaseStructNodeImpl {
   private mesh?: BABYLON.Mesh;
@@ -67,14 +68,6 @@ export class ConcreteNode extends BaseStructNodeImpl {
     // Call parent to dispose axis meshes
     super.dispose();
   }
-}
-
-export interface ConcreteParams {
-  thickness: number;
-  width: number;
-  depth: number;
-  position: BABYLON.Vector3;
-  isBounded: boolean;
 }
 
 export const createConcrete = (

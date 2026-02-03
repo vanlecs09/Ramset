@@ -10,10 +10,10 @@ import type { EndAnchorageCircularColumnsNode } from '../utils/EndAnchorageCircu
 import type { BaseLapSpliceNode } from '../utils/BaseLapSpliceNode';
 import { BaseEndAnchorageNode } from '../utils/BaseEndAnchorageNode';
 import type { SlabParams } from '../App';
-import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
 import { createEnAnchorageComplexColumn } from '../utils/EndAnchorageComplexColumnNode';
 import type { EndAnchorageComplexColumnNode } from '../utils/EndAnchorageComplexColumnNode';
 import { calculateCuboidPostPositions } from '../utils/CuboidPostPositionCalculator';
+import type { EndAnchorageParams } from '../utils/EndAnchorageParams';
 
 interface TowerParams {
   isFiniteConcrete: boolean;

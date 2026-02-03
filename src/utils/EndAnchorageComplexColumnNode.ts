@@ -1,19 +1,11 @@
 import * as BABYLON from '@babylonjs/core';
 import { BaseStructNodeImpl } from './BaseNode';
-import { createConcrete, type ConcreteParams } from './ConcreteNode';
+import { createConcrete } from './ConcreteNode';
 import type { ConcreteNode } from './ConcreteNode';
-import { createPost, type PostParam } from './PostNode';
+import { createPost } from './PostNode';
 import { createUnitAxes } from './UnitAxisNode';
 import { createMomens } from './BaseEndAnchorageNode';
-
-export interface ComplexColumnParam {
-  cuboid1SizeX?: number;
-  cuboid1SizeZ?: number;
-  cuboid2SizeX?: number;
-  cuboid2SizeZ?: number;
-  cuboid2TranslateX?: number;
-  cuboid2TranslateZ?: number;
-}
+import type { ComplexColumnParam, ConcreteParams, PostParam } from './EndAnchorageParams';
 
 export class EndAnchorageComplexColumnNode extends BaseStructNodeImpl {
   private concreteGroup?: ConcreteNode;

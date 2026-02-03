@@ -2,9 +2,8 @@ import * as BABYLON from '@babylonjs/core';
 import {
   createConcrete,
   ConcreteNode,
-  type ConcreteParams,
 } from './ConcreteNode';
-import { createPost, type PostParam } from './PostNode';
+import { createPost } from './PostNode';
 import { createWaveBlock } from './WaveBuilder';
 import {
   createLineTwoArrow,
@@ -24,28 +23,7 @@ import {
   getDimensionLabelTexture,
 } from './Material';
 import { createSplitRectangle } from './SplitRectangleNode';
-
-export interface EndAnchorageParams {
-  beamWidth: number;
-  beamDepth: number;
-  beamHeight: number;
-  postCountX: number;
-  postCountZ: number;
-  postDiameter: number;
-  postOffset: number;
-  concreteOffsetXRight: number;
-  concreteOffsetXLeft: number;
-  concreteOffsetZBack: number;
-  concreteOffsetZFront: number;
-  concreteThickness: number;
-  isBoundlessConcrete?: boolean;
-}
-
-export interface TopBlockParams {
-  width: number;
-  depth: number;
-  height: number;
-}
+import type { ConcreteParams, EndAnchorageParams, PostParam, TopBlockParams } from './EndAnchorageParams';
 
 export class BaseEndAnchorageNode extends BaseStructNodeImpl {
   private concreteNode?: ConcreteNode;

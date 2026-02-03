@@ -2,9 +2,8 @@ import * as BABYLON from '@babylonjs/core';
 import {
   createConcrete,
   ConcreteNode,
-  type ConcreteParams,
 } from './ConcreteNode';
-import { createPost, type PostParam } from './PostNode';
+import { createPost } from './PostNode';
 import { createUnitAxes } from './UnitAxisNode';
 import { BaseStructNodeImpl } from './BaseNode';
 
@@ -13,6 +12,7 @@ import {
   createWaveBlockTop as createTopBlockWave,
 } from './BaseEndAnchorageNode';
 import { getSecondaryPostMaterial } from './Material';
+import type { ConcreteParams, PostParam } from './EndAnchorageParams';
 
 export class BaseLapSpliceNode extends BaseStructNodeImpl {
   private concreteNode?: ConcreteNode;

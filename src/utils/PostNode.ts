@@ -1,4 +1,5 @@
 import * as BABYLON from '@babylonjs/core';
+import type { PostParam } from './EndAnchorageParams';
 
 export interface PostNode {
   mesh?: BABYLON.Mesh;
@@ -85,9 +86,3 @@ export const createPostBatch = (
     ),
   );
 };
-
-export interface PostParam {
-  postRadius: number;
-  postHeight: number;
-  postPositions: BABYLON.Vector3[];
-}
