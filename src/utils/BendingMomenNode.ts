@@ -124,7 +124,6 @@ export const createBendingMomenNode = (
   momenValue: number,
   parent: BABYLON.TransformNode,
 ): BendingMomentNode => {
-
   const dottedLineMeshes: BABYLON.Mesh[] = [];
 
   // Normalize direction
@@ -163,8 +162,7 @@ export const createBendingMomenNode = (
   if (momenValue > 0) {
     arrowBeginPosition = position.add(normalizedDirection.scale(length));
     arrowEndPosition = arrowBeginPosition.add(normalizedDirection.scale(0.1));
-  }
-  else {
+  } else {
     arrowBeginPosition = position.add(normalizedDirection.scale(length + 0.1));
     arrowEndPosition = arrowBeginPosition.add(normalizedDirection.scale(-0.1));
   }
@@ -180,17 +178,12 @@ export const createBendingMomenNode = (
 
   // Create label if text is provided
   let label: GUI.TextBlock | null = null;
-  let text = momenValue.toString();
+  const text = momenValue.toString();
   if (text) {
     label = createBendingMomentLabel(arrowNode.arrow, text);
   }
 
-  return new BendingMomentNode(
-    parent,
-    dottedLineMeshes,
-    arrowNode,
-    label,
-  );
+  return new BendingMomentNode(parent, dottedLineMeshes, arrowNode, label);
 };
 
 /**

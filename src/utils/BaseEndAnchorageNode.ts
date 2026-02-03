@@ -47,7 +47,6 @@ export interface TopBlockParams {
   height: number;
 }
 
-
 export class BaseEndAnchorageNode extends BaseStructNodeImpl {
   private concreteNode?: ConcreteNode;
 
@@ -97,7 +96,9 @@ export const createEndAnchorage = (
   const concretePosition = concreteParams.position;
   const beamPosition = new BABYLON.Vector3(
     0,
-    concretePosition.y + topBlock.height / 2 + concreteNode.getConcreteHeight() / 2,
+    concretePosition.y +
+      topBlock.height / 2 +
+      concreteNode.getConcreteHeight() / 2,
     0,
   );
   if (concreteParams.isBounded == true) {
@@ -119,10 +120,17 @@ export const createEndAnchorage = (
     beamPosition,
   );
 
-  let splitPosition = new BABYLON.Vector3(beamPosition.x, beamPosition.y - topBlock.height / 2 + 0.001, beamPosition.z);
-  let halfWidth = topBlock.width / 2;
-  let halfDepth = topBlock.depth / 2;
-  const splitPoint1 = new BABYLON.Vector2(-halfWidth + halfWidth * 2, -halfDepth);
+  const splitPosition = new BABYLON.Vector3(
+    beamPosition.x,
+    beamPosition.y - topBlock.height / 2 + 0.001,
+    beamPosition.z,
+  );
+  const halfWidth = topBlock.width / 2;
+  const halfDepth = topBlock.depth / 2;
+  const splitPoint1 = new BABYLON.Vector2(
+    -halfWidth + halfWidth * 2,
+    -halfDepth,
+  );
   const splitPoint2 = new BABYLON.Vector2(-halfWidth + halfWidth, halfDepth);
   // Create diagonal split using the specified points
   const splitRect = createSplitRectangle(
@@ -318,8 +326,8 @@ export const createMomens = (
   scene: BABYLON.Scene,
   concretePosition: BABYLON.Vector3,
   concreteParams: ConcreteParams,
-  mainNode: BaseStructNodeImpl) => {
-
+  mainNode: BaseStructNodeImpl,
+) => {
   const basePosition = new BABYLON.Vector3(
     0,
     concretePosition.y + concreteParams.thickness / 2,
@@ -332,11 +340,10 @@ export const createMomens = (
     new BABYLON.Vector3(1, 0, 0),
     BABYLON.Color3.Black(),
     200,
-    mainNode.group
+    mainNode.group,
   );
   bendingMoment1.setLineAndArrowVisible(false);
   mainNode.addBendingMomentNode(bendingMoment1);
-
 
   const bendingMoment2 = createBendingMomenNode(
     scene,
@@ -345,7 +352,7 @@ export const createMomens = (
     new BABYLON.Vector3(0, 0, 1),
     BABYLON.Color3.Black(),
     200,
-    mainNode.group
+    mainNode.group,
   );
   bendingMoment2.setLineAndArrowVisible(false);
   mainNode.addBendingMomentNode(bendingMoment2);
@@ -357,7 +364,7 @@ export const createMomens = (
     new BABYLON.Vector3(0, 1, 0),
     BABYLON.Color3.Black(),
     200,
-    mainNode.group
+    mainNode.group,
   );
   mainNode.addBendingMomentNode(bendingMoment3);
 
@@ -373,7 +380,7 @@ export const createMomens = (
     undefined, // arcAngle (use default)
     ArcDirection.FORWARD, // Forward pointing
     torsionMat,
-    '25kNm'
+    '25kNm',
   );
   mainNode.addTorsionMomentNode(torsion);
 
@@ -387,10 +394,10 @@ export const createMomens = (
     undefined, // arcAngle (use default)
     ArcDirection.FORWARD, // Forward pointing
     torsionMat,
-    '25kNm'
+    '25kNm',
   );
   mainNode.addTorsionMomentNode(torsion2);
-}
+};
 
 function createInnerDeimensionLine(
   concretePosition: BABYLON.Vector3,

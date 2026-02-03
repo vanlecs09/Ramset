@@ -89,5 +89,5 @@ export const createPostBatch = (
 export interface PostParam {
   postRadius: number;
   postHeight: number;
-  postPositions: BABYLON.Vector3[]; 
+  postPositions: BABYLON.Vector3[];
 }

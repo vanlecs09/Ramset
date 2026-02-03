@@ -31,7 +31,9 @@ interface MaterialSet {
 /**
  * Get or create concrete material for a scene
  */
-export const getConcreteMaterial = (scene: BABYLON.Scene): BABYLON.StandardMaterial => {
+export const getConcreteMaterial = (
+  scene: BABYLON.Scene,
+): BABYLON.StandardMaterial => {
   let cache = materialCache.get(scene);
   if (!cache) {
     cache = {};
@@ -39,7 +41,10 @@ export const getConcreteMaterial = (scene: BABYLON.Scene): BABYLON.StandardMater
   }
 
   if (!cache.concreteMaterial) {
-    cache.concreteMaterial = new BABYLON.StandardMaterial('concreteMaterial', scene);
+    cache.concreteMaterial = new BABYLON.StandardMaterial(
+      'concreteMaterial',
+      scene,
+    );
     cache.concreteMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8); // light gray tint
     cache.concreteMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
     cache.concreteMaterial.alpha = 0.4; // transparency (0 = invisible, 1 = opaque)
@@ -52,7 +57,9 @@ export const getConcreteMaterial = (scene: BABYLON.Scene): BABYLON.StandardMater
 /**
  * Get or create sin block (infinite concrete) material for a scene
  */
-export const getBoundlessMaterial = (scene: BABYLON.Scene): BABYLON.StandardMaterial => {
+export const getBoundlessMaterial = (
+  scene: BABYLON.Scene,
+): BABYLON.StandardMaterial => {
   let cache = materialCache.get(scene);
   if (!cache) {
     cache = {};
@@ -60,7 +67,10 @@ export const getBoundlessMaterial = (scene: BABYLON.Scene): BABYLON.StandardMate
   }
 
   if (!cache.boundlessMaterial) {
-    cache.boundlessMaterial = new BABYLON.StandardMaterial('sinBlockMaterial', scene);
+    cache.boundlessMaterial = new BABYLON.StandardMaterial(
+      'sinBlockMaterial',
+      scene,
+    );
     cache.boundlessMaterial.diffuseColor = new BABYLON.Color3(
       214 / 255,
       217 / 255,
@@ -68,10 +78,11 @@ export const getBoundlessMaterial = (scene: BABYLON.Scene): BABYLON.StandardMate
     ); // tan/beige color
     // cache.boundlessMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
     cache.boundlessMaterial.alpha = 0.1; // semi-transparent
-    cache.boundlessMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
+    cache.boundlessMaterial.transparencyMode =
+      BABYLON.Material.MATERIAL_ALPHABLEND;
     cache.boundlessMaterial.backFaceCulling = false;
     cache.boundlessMaterial.cullBackFaces = false;
-     cache.boundlessMaterial.disableLighting = true;
+    cache.boundlessMaterial.disableLighting = true;
   }
 
   return cache.boundlessMaterial;
@@ -80,7 +91,9 @@ export const getBoundlessMaterial = (scene: BABYLON.Scene): BABYLON.StandardMate
 /**
  * Get or create concrete dimension material for a scene
  */
-export const getConcreteDimensionMaterial = (scene: BABYLON.Scene): BABYLON.StandardMaterial => {
+export const getConcreteDimensionMaterial = (
+  scene: BABYLON.Scene,
+): BABYLON.StandardMaterial => {
   let cache = materialCache.get(scene);
   if (!cache) {
     cache = {};
@@ -88,7 +101,10 @@ export const getConcreteDimensionMaterial = (scene: BABYLON.Scene): BABYLON.Stan
   }
 
   if (!cache.dimensionMaterial) {
-    cache.dimensionMaterial = new BABYLON.StandardMaterial('dimensionMaterial', scene);
+    cache.dimensionMaterial = new BABYLON.StandardMaterial(
+      'dimensionMaterial',
+      scene,
+    );
     cache.dimensionMaterial.emissiveColor = new BABYLON.Color3(0, 0, 0); // black
     cache.dimensionMaterial.disableLighting = true;
   }
@@ -99,7 +115,9 @@ export const getConcreteDimensionMaterial = (scene: BABYLON.Scene): BABYLON.Stan
 /**
  * Get or create beam material for a scene
  */
-export const getBeamMaterial = (scene: BABYLON.Scene): BABYLON.StandardMaterial => {
+export const getBeamMaterial = (
+  scene: BABYLON.Scene,
+): BABYLON.StandardMaterial => {
   let cache = materialCache.get(scene);
   if (!cache) {
     cache = {};
@@ -119,7 +137,9 @@ export const getBeamMaterial = (scene: BABYLON.Scene): BABYLON.StandardMaterial 
 /**
  * Get or create wave block material for a scene
  */
-export const getWaveBlockMaterial = (scene: BABYLON.Scene): BABYLON.StandardMaterial => {
+export const getWaveBlockMaterial = (
+  scene: BABYLON.Scene,
+): BABYLON.StandardMaterial => {
   let cache = materialCache.get(scene);
   if (!cache) {
     cache = {};
@@ -127,11 +147,19 @@ export const getWaveBlockMaterial = (scene: BABYLON.Scene): BABYLON.StandardMate
   }
 
   if (!cache.waveBlockMaterial) {
-    cache.waveBlockMaterial = new BABYLON.StandardMaterial('waveBlockMaterial', scene);
-    cache.waveBlockMaterial.diffuseColor = new BABYLON.Color3(214 / 255, 217 / 255, 200 / 255); // tan/beige
+    cache.waveBlockMaterial = new BABYLON.StandardMaterial(
+      'waveBlockMaterial',
+      scene,
+    );
+    cache.waveBlockMaterial.diffuseColor = new BABYLON.Color3(
+      214 / 255,
+      217 / 255,
+      200 / 255,
+    ); // tan/beige
     cache.waveBlockMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
     cache.waveBlockMaterial.alpha = 0.7;
-    cache.waveBlockMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
+    cache.waveBlockMaterial.transparencyMode =
+      BABYLON.Material.MATERIAL_ALPHABLEND;
   }
 
   return cache.waveBlockMaterial;
@@ -140,7 +168,9 @@ export const getWaveBlockMaterial = (scene: BABYLON.Scene): BABYLON.StandardMate
 /**
  * Get or create secondary post material for a scene
  */
-export const getSecondaryPostMaterial = (scene: BABYLON.Scene): BABYLON.StandardMaterial => {
+export const getSecondaryPostMaterial = (
+  scene: BABYLON.Scene,
+): BABYLON.StandardMaterial => {
   let cache = materialCache.get(scene);
   if (!cache) {
     cache = {};
@@ -148,9 +178,16 @@ export const getSecondaryPostMaterial = (scene: BABYLON.Scene): BABYLON.Standard
   }
 
   if (!cache.secondaryPostMaterial) {
-    cache.secondaryPostMaterial = new BABYLON.StandardMaterial('secondaryPostMaterial', scene);
+    cache.secondaryPostMaterial = new BABYLON.StandardMaterial(
+      'secondaryPostMaterial',
+      scene,
+    );
     cache.secondaryPostMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0); // black
-    cache.secondaryPostMaterial.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+    cache.secondaryPostMaterial.specularColor = new BABYLON.Color3(
+      0.1,
+      0.1,
+      0.1,
+    );
   }
 
   return cache.secondaryPostMaterial;
@@ -159,7 +196,9 @@ export const getSecondaryPostMaterial = (scene: BABYLON.Scene): BABYLON.Standard
 /**
  * Get or create torsion moment material for a scene
  */
-export const getTorsionMaterial = (scene: BABYLON.Scene): BABYLON.StandardMaterial => {
+export const getTorsionMaterial = (
+  scene: BABYLON.Scene,
+): BABYLON.StandardMaterial => {
   let cache = materialCache.get(scene);
   if (!cache) {
     cache = {};
@@ -177,7 +216,9 @@ export const getTorsionMaterial = (scene: BABYLON.Scene): BABYLON.StandardMateri
 /**
  * Get or create circular standing wave material for a scene
  */
-export const getCircularStandingWaveMaterial = (scene: BABYLON.Scene): BABYLON.StandardMaterial => {
+export const getCircularStandingWaveMaterial = (
+  scene: BABYLON.Scene,
+): BABYLON.StandardMaterial => {
   let cache = materialCache.get(scene);
   if (!cache) {
     cache = {};
@@ -194,7 +235,11 @@ export const getCircularStandingWaveMaterial = (scene: BABYLON.Scene): BABYLON.S
       217 / 255,
       200 / 255,
     ); // tan/beige color
-    cache.circularStandingWaveMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
+    cache.circularStandingWaveMaterial.specularColor = new BABYLON.Color3(
+      1,
+      1,
+      1,
+    );
     cache.circularStandingWaveMaterial.alpha = 0.4;
     cache.circularStandingWaveMaterial.backFaceCulling = false;
   }

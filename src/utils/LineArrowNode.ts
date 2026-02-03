@@ -1,6 +1,10 @@
 import * as BABYLON from '@babylonjs/core';
 import * as GUI from '@babylonjs/gui';
-import { createArrow, createLine, DIMENSION_LINE_CONSTANTS } from './GeometryHelper';
+import {
+  createArrow,
+  createLine,
+  DIMENSION_LINE_CONSTANTS,
+} from './GeometryHelper';
 
 /**
  * Class representing a line with arrow visualization.
@@ -91,7 +95,6 @@ export class LineArrowNode {
   }
 }
 
-
 export const createLineArrowNode = (
   beginPoint01: BABYLON.Vector3,
   endPoint01: BABYLON.Vector3,
@@ -100,7 +103,7 @@ export const createLineArrowNode = (
   lineMat: BABYLON.Material,
 ): LineArrowNode => {
   const group = new BABYLON.TransformNode('LineArrowGroup', scene);
-  
+
   const line = createLine(
     beginPoint01,
     endPoint01,
@@ -110,7 +113,7 @@ export const createLineArrowNode = (
     lineMat,
   );
   line.parent = group;
-  
+
   const direction = endPoint01.subtract(beginPoint01).normalize();
   // Create arrows at measurement points
   const arrow = createArrow(

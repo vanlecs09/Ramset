@@ -333,7 +333,6 @@ export const createLine = (
   return line;
 };
 
-
 export const createLineTwoArrow = (
   beginPoint01: BABYLON.Vector3,
   endPoint01: BABYLON.Vector3,

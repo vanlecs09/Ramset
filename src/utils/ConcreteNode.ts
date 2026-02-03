@@ -102,7 +102,7 @@ export const createConcrete = (
     scene,
   );
   concrete.position = params.position;
-  concrete.material = getConcreteMaterial(scene);;
+  concrete.material = getConcreteMaterial(scene);
   concrete.receiveShadows = true;
 
   if (parent) {
@@ -111,20 +111,26 @@ export const createConcrete = (
 
   const sinBlocks = !isBounded
     ? createBoundlessBlocks(
-      scene,
-      params.width,
-      params.depth,
-      params.thickness,
-      params.position,
-      parent,
-    )
+        scene,
+        params.width,
+        params.depth,
+        params.thickness,
+        params.position,
+        parent,
+      )
     : [];
 
   // Create dimension lines if requested
   let dimensionLines: DimensionLineNode | undefined;
   if (showDimensions) {
-    dimensionLines = createDimension(scene, 
-      concrete, params, showLapSpliceDimension, dimensionLines, parent);
+    dimensionLines = createDimension(
+      scene,
+      concrete,
+      params,
+      showLapSpliceDimension,
+      dimensionLines,
+      parent,
+    );
   }
 
   concreteNode.setMesh(concrete);
@@ -145,7 +151,6 @@ const createBoundlessBlocks = (
   concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
   parent?: BABYLON.TransformNode,
 ): BABYLON.Mesh[] => {
-
   // Create the main mesh (wavy surfaces + inner faces)
   const mainMesh = createSurroundingConcreteMesh(
     scene,
@@ -229,30 +234,30 @@ const createSurroundingConcreteMesh = (
             u + concretePosition.x,
             v,
             blockDepth +
-            waveDisplacement +
-            (concretePosition.z + concreteDepth / 2),
+              waveDisplacement +
+              (concretePosition.z + concreteDepth / 2),
           );
         } else if (direction === '-z') {
           positions.push(
             u + concretePosition.x,
             v,
             -blockDepth -
-            waveDisplacement +
-            (concretePosition.z - concreteDepth / 2),
+              waveDisplacement +
+              (concretePosition.z - concreteDepth / 2),
           );
         } else if (direction === 'x') {
           positions.push(
             blockDepth +
-            waveDisplacement +
-            (concretePosition.x + concreteWidth / 2),
+              waveDisplacement +
+              (concretePosition.x + concreteWidth / 2),
             v,
             u + concretePosition.z,
           );
         } else if (direction === '-x') {
           positions.push(
             -blockDepth -
-            waveDisplacement +
-            (concretePosition.x - concreteWidth / 2),
+              waveDisplacement +
+              (concretePosition.x - concreteWidth / 2),
             v,
             u + concretePosition.z,
           );
@@ -446,7 +451,10 @@ const createWallMesh = (
     const outerWidth = blockWidth + blockDepth * 2;
 
     // Select edge based on wall type
-    const v = wallType === 'bottom' ? concretePosition.y - concreteThickness / 2 : concretePosition.y + concreteThickness / 2;
+    const v =
+      wallType === 'bottom'
+        ? concretePosition.y - concreteThickness / 2
+        : concretePosition.y + concreteThickness / 2;
 
     for (let iu = 0; iu <= divU; iu++) {
       const u = (iu / divU - 0.5) * outerWidth;
@@ -456,23 +464,31 @@ const createWallMesh = (
         edgePositions.push(
           u + concretePosition.x,
           v,
-          blockDepth + waveDisplacement + (concretePosition.z + concreteDepth / 2),
+          blockDepth +
+            waveDisplacement +
+            (concretePosition.z + concreteDepth / 2),
         );
       } else if (direction === '-z') {
         edgePositions.push(
           u + concretePosition.x,
           v,
-          -blockDepth - waveDisplacement + (concretePosition.z - concreteDepth / 2),
+          -blockDepth -
+            waveDisplacement +
+            (concretePosition.z - concreteDepth / 2),
         );
       } else if (direction === 'x') {
         edgePositions.push(
-          blockDepth + waveDisplacement + (concretePosition.x + concreteWidth / 2),
+          blockDepth +
+            waveDisplacement +
+            (concretePosition.x + concreteWidth / 2),
           v,
           u + concretePosition.z,
         );
       } else if (direction === '-x') {
         edgePositions.push(
-          -blockDepth - waveDisplacement + (concretePosition.x - concreteWidth / 2),
+          -blockDepth -
+            waveDisplacement +
+            (concretePosition.x - concreteWidth / 2),
           v,
           u + concretePosition.z,
         );
@@ -527,14 +543,22 @@ const createWallMesh = (
 
   directions.forEach((direction, index) => {
     const blockWidth = widths[index];
-    const wavyEdge = createWavyEdgeVertices(blockWidth, blockThickness, direction);
+    const wavyEdge = createWavyEdgeVertices(
+      blockWidth,
+      blockThickness,
+      direction,
+    );
     const innerEdge = createInnerEdgeVertices(blockWidth, direction);
 
     const startVertex = positions.length / 3;
 
     // Add wavy edge vertices
     for (let i = 0; i < wavyEdge.positions.length; i += 3) {
-      positions.push(wavyEdge.positions[i], wavyEdge.positions[i + 1], wavyEdge.positions[i + 2]);
+      positions.push(
+        wavyEdge.positions[i],
+        wavyEdge.positions[i + 1],
+        wavyEdge.positions[i + 2],
+      );
     }
     for (let i = 0; i < wavyEdge.uvs.length; i++) {
       uvs.push(wavyEdge.uvs[i]);
@@ -542,7 +566,11 @@ const createWallMesh = (
 
     // Add inner edge vertices
     for (let i = 0; i < innerEdge.positions.length; i += 3) {
-      positions.push(innerEdge.positions[i], innerEdge.positions[i + 1], innerEdge.positions[i + 2]);
+      positions.push(
+        innerEdge.positions[i],
+        innerEdge.positions[i + 1],
+        innerEdge.positions[i + 2],
+      );
     }
     for (let i = 0; i < innerEdge.uvs.length; i++) {
       uvs.push(innerEdge.uvs[i]);
@@ -579,10 +607,17 @@ const createWallMesh = (
 
   return mesh;
 };
-function createDimension(scene: BABYLON.Scene, concrete: BABYLON.Mesh, params: ConcreteParams, showLapSpliceDimension: boolean, dimensionLines: DimensionLineNode | undefined, parent: BABYLON.TransformNode | undefined) {
+function createDimension(
+  scene: BABYLON.Scene,
+  concrete: BABYLON.Mesh,
+  params: ConcreteParams,
+  showLapSpliceDimension: boolean,
+  dimensionLines: DimensionLineNode | undefined,
+  parent: BABYLON.TransformNode | undefined,
+) {
   const dimensionMat = new BABYLON.StandardMaterial(
     'dimensionMat_concrete',
-    scene
+    scene,
   );
   dimensionMat.emissiveColor = new BABYLON.Color3(0, 0, 0); // black
   dimensionMat.disableLighting = true;
@@ -602,7 +637,7 @@ function createDimension(scene: BABYLON.Scene, concrete: BABYLON.Mesh, params: C
   const offset = 0.1;
   const dimensionGroup = new BABYLON.TransformNode(
     'dimensionGroup_concrete',
-    scene
+    scene,
   );
   const labels: GUI.TextBlock[] = [];
 
@@ -623,7 +658,7 @@ function createDimension(scene: BABYLON.Scene, concrete: BABYLON.Mesh, params: C
       dimensionGroup,
       advancedTexture,
       0,
-      30
+      30,
     );
     if (widthLabel) labels.push(widthLabel.label);
 
@@ -640,7 +675,7 @@ function createDimension(scene: BABYLON.Scene, concrete: BABYLON.Mesh, params: C
       dimensionGroup,
       advancedTexture,
       -30,
-      0
+      0,
     );
     if (depthLabel) labels.push(depthLabel.label);
   }
@@ -658,7 +693,7 @@ function createDimension(scene: BABYLON.Scene, concrete: BABYLON.Mesh, params: C
     dimensionGroup,
     advancedTexture,
     -30,
-    0
+    0,
   );
   if (heightDimensionNode) labels.push(heightDimensionNode.label);
 
@@ -675,4 +710,3 @@ function createDimension(scene: BABYLON.Scene, concrete: BABYLON.Mesh, params: C
   }
   return dimensionLines;
 }
-

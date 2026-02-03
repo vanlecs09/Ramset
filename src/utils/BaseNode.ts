@@ -1,8 +1,5 @@
 import * as BABYLON from '@babylonjs/core';
-import type {
-  DimensionLabelNode,
-  DimensionLineNode,
-} from './GeometryHelper';
+import type { DimensionLabelNode, DimensionLineNode } from './GeometryHelper';
 import type { BendingMomentNode } from './BendingMomenNode';
 import type { TorsionMomentNode } from './TorsionMomentNode';
 import type { UnitAxisNode, AxisLabelNode } from './UnitAxisNode';

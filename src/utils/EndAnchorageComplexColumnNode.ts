@@ -7,7 +7,6 @@ import { createUnitAxes } from './UnitAxisNode';
 import { createMomens } from './BaseEndAnchorageNode';
 
 export interface ComplexColumnParam {
-
   cuboid1SizeX?: number;
   cuboid1SizeZ?: number;
   cuboid2SizeX?: number;
@@ -70,7 +69,7 @@ export const createEnAnchorageComplexColumn = (
   scene: BABYLON.Scene,
   concreteParams: ConcreteParams,
   params: ComplexColumnParam,
-  postParam: PostParam
+  postParam: PostParam,
 ): EndAnchorageComplexColumnNode => {
   // Extract parameters with defaults
   const cuboid1SizeX = params.cuboid1SizeX ?? 2;
@@ -121,8 +120,6 @@ export const createEnAnchorageComplexColumn = (
     0,
   );
 
-
-
   // 3. Create posts around the perimeter of cuboids
   postParam.postPositions.forEach((postPos: BABYLON.Vector3, index: number) => {
     // Position post at concrete top surface with adjusted Y
@@ -159,10 +156,8 @@ export const createEnAnchorageComplexColumn = (
   // 5. Create moments
   createMomens(scene, concretePosition, concreteParams, complexColumn);
 
-
   standingWave.parent = columnGroup;
   complexColumn.addWaveBlock(standingWave);
-
 
   return complexColumn;
 };
@@ -314,7 +309,7 @@ const createCrossStandingWave = (
   const collectEdgeVertices = (
     cellIndices: Array<[number, number]>, // array of [iu, iv] positions
     topGrid: number[][],
-    bottomGrid: number[][]
+    bottomGrid: number[][],
   ): { topIndices: number[]; bottomIndices: number[] } => {
     const topIndices: number[] = [];
     const bottomIndices: number[] = [];
@@ -358,8 +353,10 @@ const createCrossStandingWave = (
         for (const [nIu, nIv] of neighbors) {
           // If neighbor is outside grid or is -1 (outside cross), this is boundary
           if (
-            nIu < 0 || nIu > divU ||
-            nIv < 0 || nIv > divV ||
+            nIu < 0 ||
+            nIu > divU ||
+            nIv < 0 ||
+            nIv > divV ||
             vertexGrid[nIv]?.[nIu] === -1
           ) {
             isBoundary = true;
@@ -378,7 +375,10 @@ const createCrossStandingWave = (
 
   // Extract 12 continuous border edge sequences from boundary
   // Trace each boundary segment in perimeter order
-  const extractBorderEdges = (): Array<{ topIndices: number[]; bottomIndices: number[] }> => {
+  const extractBorderEdges = (): Array<{
+    topIndices: number[];
+    bottomIndices: number[];
+  }> => {
     const edges: Array<{ topIndices: number[]; bottomIndices: number[] }> = [];
     const visited = new Set<number>();
 
@@ -406,22 +406,32 @@ const createCrossStandingWave = (
         let foundNext = false;
 
         // Try 4 directions in order (prefer continuing in same direction)
-        const tryDirections = [direction, (direction + 1) % 4, (direction + 3) % 4, (direction + 2) % 4];
+        const tryDirections = [
+          direction,
+          (direction + 1) % 4,
+          (direction + 3) % 4,
+          (direction + 2) % 4,
+        ];
 
         for (const d of tryDirections) {
           let nextIu = currentIu;
           let nextIv = currentIv;
 
-          if (d === 0) nextIu++; // right
-          else if (d === 1) nextIv++; // down
-          else if (d === 2) nextIu--; // left
+          if (d === 0)
+            nextIu++; // right
+          else if (d === 1)
+            nextIv++; // down
+          else if (d === 2)
+            nextIu--; // left
           else if (d === 3) nextIv--; // up
 
           const nextEncoded = nextIu * 10000 + nextIv;
 
           if (
-            nextIu >= 0 && nextIu <= divU &&
-            nextIv >= 0 && nextIv <= divV &&
+            nextIu >= 0 &&
+            nextIu <= divU &&
+            nextIv >= 0 &&
+            nextIv <= divV &&
             vertexGrid[nextIv]?.[nextIu] !== undefined &&
             vertexGrid[nextIv][nextIu] >= 0 &&
             boundaryVertices.has(nextEncoded)
@@ -442,7 +452,11 @@ const createCrossStandingWave = (
       }
 
       if (edgeCells.length > 2) {
-        const edge = collectEdgeVertices(edgeCells, vertexGrid, bottomVertexGrid);
+        const edge = collectEdgeVertices(
+          edgeCells,
+          vertexGrid,
+          bottomVertexGrid,
+        );
         if (edge.topIndices.length > 0) {
           edges.push(edge);
         }
@@ -453,14 +467,19 @@ const createCrossStandingWave = (
   };
 
   const borderEdgesExtracted = extractBorderEdges();
-  console.log(`Extracted ${borderEdgesExtracted.length} border edges from vertexGrid`);
+  console.log(
+    `Extracted ${borderEdgesExtracted.length} border edges from vertexGrid`,
+  );
 
   // Create walls from extracted border edges
   const addWallFromEdge = (
     topEdgeIndices: number[],
-    bottomEdgeIndices: number[]
+    bottomEdgeIndices: number[],
   ) => {
-    const edgeLength = Math.min(topEdgeIndices.length, bottomEdgeIndices.length);
+    const edgeLength = Math.min(
+      topEdgeIndices.length,
+      bottomEdgeIndices.length,
+    );
 
     for (let i = 0; i < edgeLength - 1; i++) {
       const topA = topEdgeIndices[i];
@@ -477,7 +496,7 @@ const createCrossStandingWave = (
   };
 
   // Create all wall segments
-  borderEdgesExtracted.forEach((edge) => {
+  borderEdgesExtracted.forEach(edge => {
     addWallFromEdge(edge.topIndices, edge.bottomIndices);
   });
 
@@ -493,8 +512,15 @@ const createCrossStandingWave = (
   BABYLON.VertexData.ComputeNormals(positions, indices, normals);
   vertexData.normals = normals;
 
-  let waveBlockMaterial = new BABYLON.StandardMaterial('waveBlockMaterial', scene);
-  waveBlockMaterial.diffuseColor = new BABYLON.Color3(214 / 255, 217 / 255, 200 / 255); // tan/beige
+  const waveBlockMaterial = new BABYLON.StandardMaterial(
+    'waveBlockMaterial',
+    scene,
+  );
+  waveBlockMaterial.diffuseColor = new BABYLON.Color3(
+    214 / 255,
+    217 / 255,
+    200 / 255,
+  ); // tan/beige
   waveBlockMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
   waveBlockMaterial.alpha = 0.4;
   // waveBlockMaterial.disableLighting = true;
@@ -507,4 +533,3 @@ const createCrossStandingWave = (
 
   return mesh;
 };
-

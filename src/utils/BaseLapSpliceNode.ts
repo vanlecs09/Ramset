@@ -1,10 +1,17 @@
 import * as BABYLON from '@babylonjs/core';
-import { createConcrete, ConcreteNode, type ConcreteParams } from './ConcreteNode';
+import {
+  createConcrete,
+  ConcreteNode,
+  type ConcreteParams,
+} from './ConcreteNode';
 import { createPost, type PostParam } from './PostNode';
 import { createUnitAxes } from './UnitAxisNode';
 import { BaseStructNodeImpl } from './BaseNode';
 
-import { createMomens, createWaveBlockTop as createTopBlockWave } from './BaseEndAnchorageNode';
+import {
+  createMomens,
+  createWaveBlockTop as createTopBlockWave,
+} from './BaseEndAnchorageNode';
 import { getSecondaryPostMaterial } from './Material';
 
 export class BaseLapSpliceNode extends BaseStructNodeImpl {
@@ -64,7 +71,7 @@ export const createLapsplice = (
     // postDiameter: number;
     // isFiniteConcrete: boolean;
   },
-  postParam : PostParam
+  postParam: PostParam,
 ): BaseLapSpliceNode => {
   const slabGroup = new BABYLON.TransformNode('slab', scene);
   const mainNode = new BaseLapSpliceNode(slabGroup);
@@ -75,8 +82,8 @@ export const createLapsplice = (
     concreteParam,
     slabGroup,
     concreteParam.isBounded,
-    true, 
-    true
+    true,
+    true,
   );
   mainNode.setConcreteGroup(concreteNode);
 
@@ -85,11 +92,10 @@ export const createLapsplice = (
   const slabPosition = new BABYLON.Vector3(
     concreteParam.position.x,
     concreteParam.position.y +
-    slabHeigth / 2 +
-    concreteNode.getConcreteHeight() / 2,
+      slabHeigth / 2 +
+      concreteNode.getConcreteHeight() / 2,
     concreteParam.position.z,
   );
-
 
   createTopBlockWave(
     mainNode as unknown as BaseStructNodeImpl,
@@ -133,13 +139,18 @@ export const createLapsplice = (
   );
   mainNode.setUnitAxisNode(axisNode);
 
-  createMomens(scene, concreteParam.position, {
-    thickness: concreteParam.thickness,
-    width: concreteParam.width,
-    depth: concreteParam.depth,
-    position: concreteParam.position,
-    isBounded: !concreteParam.isBounded,
-  }, mainNode);
+  createMomens(
+    scene,
+    concreteParam.position,
+    {
+      thickness: concreteParam.thickness,
+      width: concreteParam.width,
+      depth: concreteParam.depth,
+      position: concreteParam.position,
+      isBounded: !concreteParam.isBounded,
+    },
+    mainNode,
+  );
 
   // 4. Create secondary posts inside concrete (black color, high density)
   addSecondaryPostsInsideConcrete(

@@ -1,12 +1,20 @@
 import * as BABYLON from '@babylonjs/core';
-import { createConcrete, ConcreteNode, type ConcreteParams } from './ConcreteNode';
+import {
+  createConcrete,
+  ConcreteNode,
+  type ConcreteParams,
+} from './ConcreteNode';
 import { createPost, type PostParam } from './PostNode';
 import { createCircularStandingWave } from './WaveBuilder';
 
 import { createLineTwoArrow, DimensionLineNode } from './GeometryHelper';
 import { createUnitAxes } from './UnitAxisNode';
 import { BaseEndAnchorageNode, createMomens } from './BaseEndAnchorageNode';
-import { getConcreteMaterial, getConcreteDimensionMaterial, getCircularStandingWaveMaterial } from './Material';
+import {
+  getConcreteMaterial,
+  getConcreteDimensionMaterial,
+  getCircularStandingWaveMaterial,
+} from './Material';
 
 export interface BaseStructureGroup {
   group: BABYLON.TransformNode;
@@ -51,7 +59,6 @@ export class EndAnchorageCircularColumnsNode extends BaseEndAnchorageNode {
     this.standingWaveMesh = mesh;
   }
 
-
   dispose(): void {
     // Dispose concrete group and all its resources
     if (this.concreteGroup) {
@@ -83,7 +90,6 @@ export interface CircleColumnsParam {
   columnHeight: number;
   columnRadius: number;
 }
-
 
 export interface CircularColumnParams {
   concreteParam: ConcreteParams;
@@ -163,7 +169,8 @@ export const createCircularColumns = (
   // Create posts
   params.postParam.postPositions.forEach((postPos: any, index: number) => {
     // Handle both PostPosition and Vector3 types
-    const position = postPos.position instanceof BABYLON.Vector3 ? postPos.position : postPos;
+    const position =
+      postPos.position instanceof BABYLON.Vector3 ? postPos.position : postPos;
     const posIndex = postPos.index !== undefined ? postPos.index : index;
 
     const adjustedPostPosition = new BABYLON.Vector3(
@@ -194,7 +201,12 @@ export const createCircularColumns = (
   );
   mainNode.setUnitAxisNode(axisNode);
 
-  createMomens(scene, params.concreteParam.position, params.concreteParam, mainNode);
+  createMomens(
+    scene,
+    params.concreteParam.position,
+    params.concreteParam,
+    mainNode,
+  );
   if (params.concreteParam.isBounded) {
     createInnerDeimensionLine(
       params.concreteParam.position,
@@ -207,7 +219,6 @@ export const createCircularColumns = (
 
   return mainNode;
 };
-
 
 function createInnerDeimensionLine(
   concretePosition: BABYLON.Vector3,

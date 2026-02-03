@@ -27,7 +27,7 @@ export const createSplitRectangle = (
   width: number,
   depth: number,
   position: BABYLON.Vector3,
-  splitPoint1: BABYLON.Vector2,//
+  splitPoint1: BABYLON.Vector2, //
   splitPoint2: BABYLON.Vector2,
   leftColor: BABYLON.Color3 = new BABYLON.Color3(0.5, 0.5, 0.5), // Gray
   rightColor: BABYLON.Color3 = new BABYLON.Color3(1, 0.5, 0), // Orange
@@ -39,17 +39,17 @@ export const createSplitRectangle = (
   // Calculate half dimensions
   const halfWidth = width / 2;
   const halfDepth = depth / 2;
-  
+
   // Get coordinates for both split points
-  const [x1, z1] = [splitPoint1.x, splitPoint1.y]//getPointCoordinates(splitPoint1);
-  const [x2, z2] = [splitPoint2.x, splitPoint2.y]//getPointCoordinates(splitPoint2);
+  const [x1, z1] = [splitPoint1.x, splitPoint1.y]; //getPointCoordinates(splitPoint1);
+  const [x2, z2] = [splitPoint2.x, splitPoint2.y]; //getPointCoordinates(splitPoint2);
 
   // Define the 4 corners of the rectangle
   const corners = [
     [-halfWidth, -halfDepth], // Bottom-left (0)
-    [halfWidth, -halfDepth],  // Bottom-right (1)
-    [halfWidth, halfDepth],   // Top-right (2)
-    [-halfWidth, halfDepth],  // Top-left (3)
+    [halfWidth, -halfDepth], // Bottom-right (1)
+    [halfWidth, halfDepth], // Top-right (2)
+    [-halfWidth, halfDepth], // Top-left (3)
   ];
 
   // Helper function to determine which side of the line a point is on
@@ -62,12 +62,12 @@ export const createSplitRectangle = (
   const cornerSides = corners.map(([x, z]) => getSide(x, z));
 
   // Create split point vertices
-  const splitPoint1Vertex: [number, number] = [x1, z1] ;
-  const splitPoint2Vertex: [number, number] = [x2, z2] ;
+  const splitPoint1Vertex: [number, number] = [x1, z1];
+  const splitPoint2Vertex: [number, number] = [x2, z2];
 
   // Build triangulation based on which corners are on which side
   // We need to create polygons on each side of the diagonal line
-  
+
   // Collect vertices for left side (negative side values)
   const leftVertices: [number, number][] = [];
   const rightVertices: [number, number][] = [];
@@ -94,11 +94,10 @@ export const createSplitRectangle = (
 
   // Sort vertices by angle from center for proper triangulation
   const sortByAngle = (vertices: [number, number][]) => {
-    const center = vertices.reduce(
-      (acc, v) => [acc[0] + v[0], acc[1] + v[1]],
-      [0, 0]
-    ).map(v => v / vertices.length) as [number, number];
-    
+    const center = vertices
+      .reduce((acc, v) => [acc[0] + v[0], acc[1] + v[1]], [0, 0])
+      .map(v => v / vertices.length) as [number, number];
+
     return vertices.sort((a, b) => {
       const angleA = Math.atan2(a[1] - center[1], a[0] - center[0]);
       const angleB = Math.atan2(b[1] - center[1], b[0] - center[0]);
@@ -153,4 +152,3 @@ export const createSplitRectangle = (
 
   return mesh;
 };
-
