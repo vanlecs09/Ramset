@@ -312,7 +312,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     // Light
     const light = new BABYLON.HemisphericLight(
       "light",
-      new BABYLON.Vector3(0, 1, 0),
+      new BABYLON.Vector3(1, 1, 0),
       scene
     );
     light.intensity = 0.9;

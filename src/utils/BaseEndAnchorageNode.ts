@@ -23,6 +23,7 @@ import {
   getTorsionMaterial,
   getDimensionLabelTexture,
 } from './Material';
+import { createSplitRectangle } from './SplitRectangleNode';
 
 export interface EndAnchorageParams {
   beamWidth: number;
@@ -76,7 +77,7 @@ export class BaseEndAnchorageNode extends BaseStructNodeImpl {
 export const createEndAnchorage = (
   scene: BABYLON.Scene,
   concreteParams: ConcreteParams,
-  beamParams: TopBlockParams,
+  topBlock: TopBlockParams,
   postParam: PostParam,
 ): BaseEndAnchorageNode => {
   const anchorageTrans = new BABYLON.TransformNode('endAnchorage', scene);
@@ -96,13 +97,13 @@ export const createEndAnchorage = (
   const concretePosition = concreteParams.position;
   const beamPosition = new BABYLON.Vector3(
     0,
-    concretePosition.y + beamParams.height / 2 + concreteNode.getConcreteHeight() / 2,
+    concretePosition.y + topBlock.height / 2 + concreteNode.getConcreteHeight() / 2,
     0,
   );
   if (concreteParams.isBounded == true) {
     createInnerDeimensionLine(
       concretePosition,
-      beamParams,
+      topBlock,
       concreteParams,
       beamPosition,
       scene,
@@ -112,11 +113,30 @@ export const createEndAnchorage = (
 
   createWaveBlockTop(
     mainNode,
-    beamParams.width,
-    beamParams.depth,
-    beamParams.height,
+    topBlock.width,
+    topBlock.depth,
+    topBlock.height,
     beamPosition,
   );
+
+  let splitPosition = new BABYLON.Vector3(beamPosition.x, beamPosition.y - topBlock.height / 2 + 0.001, beamPosition.z);
+  let halfWidth = topBlock.width / 2;
+  let halfDepth = topBlock.depth / 2;
+  const splitPoint1 = new BABYLON.Vector2(-halfWidth + halfWidth * 2, -halfDepth);
+  const splitPoint2 = new BABYLON.Vector2(-halfWidth + halfWidth, halfDepth);
+  // Create diagonal split using the specified points
+  const splitRect = createSplitRectangle(
+    scene,
+    topBlock.width,
+    topBlock.depth,
+    splitPosition,
+    splitPoint1,
+    splitPoint2,
+    new BABYLON.Color3(0.5, 0.5, 0.5), // Gray
+    new BABYLON.Color3(1, 0.5, 0), // Orange
+  );
+  splitRect.parent = mainNode.group;
+  mainNode.addWaveBlock(splitRect);
 
   // Update posts
   // const postHeight = 0.3;
