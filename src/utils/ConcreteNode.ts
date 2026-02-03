@@ -83,6 +83,7 @@ export const createConcrete = (
   parent?: BABYLON.TransformNode,
   isBounded: boolean = true,
   showDimensions: boolean = true,
+  showLapSpliceDimension: boolean = false,
 ): ConcreteNode => {
   // Create a transform node to group concrete elements
   const concreteTransformNode = new BABYLON.TransformNode(
@@ -110,13 +111,13 @@ export const createConcrete = (
 
   const sinBlocks = !isBounded
     ? createBoundlessBlocks(
-        scene,
-        params.width,
-        params.depth,
-        params.thickness,
-        params.position,
-        parent,
-      )
+      scene,
+      params.width,
+      params.depth,
+      params.thickness,
+      params.position,
+      parent,
+    )
     : [];
 
   // Create dimension lines if requested
@@ -135,9 +136,11 @@ export const createConcrete = (
 
     // Apply concrete position to transform bounding box from local to world space
     const minX = min.x + params.position.x;
+    const maxX = max.x + params.position.x;
     const minY = min.y + params.position.y;
     const maxY = max.y + params.position.y;
     const minZ = min.z + params.position.z;
+    const maxZ = max.z + params.position.z;
 
     const offset = 0.1;
     const dimensionGroup = new BABYLON.TransformNode(
@@ -149,39 +152,41 @@ export const createConcrete = (
     // Use global AdvancedDynamicTexture for dimension labels
     const advancedTexture = getDimensionLabelTexture();
 
-    // // Width dimension (X axis) - offset from Z min edge
-    // const widthLabel = createDimensionWithLabel(
-    //   'width',
-    //   scene,
-    //   new BABYLON.Vector3(minX, maxY + offset, minZ - offset),
-    //   new BABYLON.Vector3(maxX, maxY + offset, minZ - offset),
-    //   new BABYLON.Vector3(minX, maxY, minZ),
-    //   new BABYLON.Vector3(maxX, maxY, minZ),
-    //   dimensionMat,
-    //   params.width,
-    //   dimensionGroup,
-    //   advancedTexture,
-    //   0,
-    //   30,
-    // );
-    // if (widthLabel) labels.push(widthLabel.label);
+    if (showLapSpliceDimension) {
+      // Width dimension (X axis) - offset from Z min edge
+      const widthLabel = createDimensionWithLabel(
+        'width',
+        scene,
+        new BABYLON.Vector3(minX, minY - offset, minZ - offset),
+        new BABYLON.Vector3(maxX, minY - offset, minZ - offset),
+        new BABYLON.Vector3(minX, minY, minZ),
+        new BABYLON.Vector3(maxX, minY, minZ),
+        dimensionMat,
+        params.width,
+        dimensionGroup,
+        advancedTexture,
+        0,
+        30,
+      );
+      if (widthLabel) labels.push(widthLabel.label);
 
-    // // Depth dimension (Z axis) - offset from X max edge
-    // const depthLabel = createDimensionWithLabel(
-    //   'depth',
-    //   scene,
-    //   new BABYLON.Vector3(minX - offset, maxY + offset, minZ),
-    //   new BABYLON.Vector3(minX - offset, maxY + offset, maxZ),
-    //   new BABYLON.Vector3(minX, maxY, minZ),
-    //   new BABYLON.Vector3(minX, maxY, maxZ),
-    //   dimensionMat,
-    //   params.depth,
-    //   dimensionGroup,
-    //   advancedTexture,
-    //   -30,
-    //   0,
-    // );
-    // if (depthLabel) labels.push(depthLabel.label);
+      // Depth dimension (Z axis) - offset from X max edge
+      const depthLabel = createDimensionWithLabel(
+        'depth',
+        scene,
+        new BABYLON.Vector3(minX - offset, minY - offset, minZ),
+        new BABYLON.Vector3(minX - offset, minY - offset, maxZ),
+        new BABYLON.Vector3(minX, minY, minZ),
+        new BABYLON.Vector3(minX, minY, maxZ),
+        dimensionMat,
+        params.depth,
+        dimensionGroup,
+        advancedTexture,
+        -30,
+        0,
+      );
+      if (depthLabel) labels.push(depthLabel.label);
+    }
 
     // Height dimension (Y axis) - offset from X min, Z min corner
     const heightDimensionNode = createDimensionWithLabel(
@@ -315,30 +320,30 @@ const createSurroundingConcreteMesh = (
             u + concretePosition.x,
             v,
             blockDepth +
-              waveDisplacement +
-              (concretePosition.z + concreteDepth / 2),
+            waveDisplacement +
+            (concretePosition.z + concreteDepth / 2),
           );
         } else if (direction === '-z') {
           positions.push(
             u + concretePosition.x,
             v,
             -blockDepth -
-              waveDisplacement +
-              (concretePosition.z - concreteDepth / 2),
+            waveDisplacement +
+            (concretePosition.z - concreteDepth / 2),
           );
         } else if (direction === 'x') {
           positions.push(
             blockDepth +
-              waveDisplacement +
-              (concretePosition.x + concreteWidth / 2),
+            waveDisplacement +
+            (concretePosition.x + concreteWidth / 2),
             v,
             u + concretePosition.z,
           );
         } else if (direction === '-x') {
           positions.push(
             -blockDepth -
-              waveDisplacement +
-              (concretePosition.x - concreteWidth / 2),
+            waveDisplacement +
+            (concretePosition.x - concreteWidth / 2),
             v,
             u + concretePosition.z,
           );

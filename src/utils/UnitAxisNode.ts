@@ -7,8 +7,8 @@ import { BaseNodeImpl } from './BaseNode';
  * Default values for axis visualization
  */
 export const AXIS_CONSTANTS = {
-  AXIS_RADIUS: 0.005,
-  ARROW_SIZE: 0.03,
+  AXIS_RADIUS: 0.002,
+  ARROW_SIZE: 0.02,
   LABEL_FONT_SIZE: 24,
   LABEL_OFFSET_X: 20,
   LABEL_OFFSET_Y: 0,

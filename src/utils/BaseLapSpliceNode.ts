@@ -74,7 +74,9 @@ export const createLapsplice = (
     scene,
     concreteParam,
     slabGroup,
-    !concreteParam.isBounded,
+    concreteParam.isBounded,
+    true, 
+    true
   );
   mainNode.setConcreteGroup(concreteNode);
 

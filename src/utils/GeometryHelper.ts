@@ -9,7 +9,7 @@ import { createLineArrowNode } from './LineArrowNode';
 /** Default values for dimension line rendering */
 export const DIMENSION_LINE_CONSTANTS = {
   LINE_THICKNESS: 0.005,
-  ARROW_SIZE: 0.02,
+  ARROW_SIZE: 0.015,
   ARROW_DIAMETER: 0.02,
   LABEL_FONT_SIZE: 20,
   LABEL_DECIMAL_PLACES: 2,
@@ -242,6 +242,11 @@ export const createDimensionWithLabel = (
     result.label.linkOffsetX = labelOffsetX;
     result.label.linkOffsetY = labelOffsetY;
 
+    // Calculate rotation angle to align label with line direction
+    const lineDirection = arrow2Position.subtract(arrow1Position);
+    const angle = Math.atan2(lineDirection.y, lineDirection.x);
+    result.label.rotation = angle;
+
     return {
       label: result.label,
       lineMesh: result.lineMesh,
@@ -358,8 +363,11 @@ export const createLineTwoArrow = (
 
   texture.addControl(label);
   label.linkWithMesh(line);
-  // label.linkOffsetY = 20
-  // label.linkOffsetX = 20
+
+  // Calculate rotation angle to align label with line direction
+  const lineDirection = endPoint01.subtract(beginPoint01);
+  const angle = Math.atan2(lineDirection.y, lineDirection.x);
+  label.rotation = angle;
 
   const direction = endPoint01.subtract(beginPoint01).normalize();
   // Create arrows at measurement points

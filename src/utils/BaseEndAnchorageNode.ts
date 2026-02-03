@@ -353,7 +353,7 @@ export const createMomens = (
     undefined, // arcAngle (use default)
     ArcDirection.FORWARD, // Forward pointing
     torsionMat,
-    '25kg'
+    '25kNm'
   );
   mainNode.addTorsionMomentNode(torsion);
 
@@ -367,7 +367,7 @@ export const createMomens = (
     undefined, // arcAngle (use default)
     ArcDirection.FORWARD, // Forward pointing
     torsionMat,
-    '25kg'
+    '25kNm'
   );
   mainNode.addTorsionMomentNode(torsion2);
 }
