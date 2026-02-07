@@ -2,9 +2,8 @@ import * as BABYLON from '@babylonjs/core';
 import {
   createConcrete,
   ConcreteNode,
-  type ConcreteParams,
 } from './ConcreteNode';
-import { createPost, type PostParam } from './PostNode';
+import { createPost } from './PostNode';
 import { createCircularStandingWave } from './WaveBuilder';
 
 import { createLineTwoArrow, DimensionLineNode } from './GeometryHelper';
@@ -15,6 +14,7 @@ import {
   getConcreteDimensionMaterial,
   getCircularStandingWaveMaterial,
 } from './Material';
+import type { ConcreteParams, PostParam } from './EndAnchorageParams';
 
 export interface BaseStructureGroup {
   group: BABYLON.TransformNode;
@@ -128,43 +128,31 @@ export const createCircularColumns = (
   const concreteTopY = 0;
   const gapDistance = 0;
 
-  // Create cylinder
-  const cylinder = BABYLON.MeshBuilder.CreateCylinder(
-    'towerCylinder',
-    {
-      height: params.circleColumnsParam.columnHeight,
-      diameter: params.circleColumnsParam.columnRadius * 2,
-    },
-    scene,
-  );
-  cylinder.position.y =
-    concreteTopY + gapDistance + params.circleColumnsParam.columnHeight / 2;
-
-  cylinder.material = getConcreteMaterial(scene);
-  cylinder.receiveShadows = true;
-  cylinder.parent = towerGroup;
-  mainNode.setCircularColumn(cylinder);
-
   // Create standing wave on top of cylinder
   const wavePosition = new BABYLON.Vector3(
     0,
-    concreteTopY + gapDistance + params.circleColumnsParam.columnHeight + 0.05,
+    concreteTopY + gapDistance + params.circleColumnsParam.columnHeight / 2,
     0,
   );
 
-  const circularStandingWaveMaterial = getCircularStandingWaveMaterial(scene);
+  const material = getCircularStandingWaveMaterial(scene);
+  // circularStandingWaveMaterial.disableLighting = true;
+  material.backFaceCulling = false;
+  material.cullBackFaces = false;
 
   const standingWave = createCircularStandingWave(
     scene,
     wavePosition,
     params.circleColumnsParam.columnRadius,
+    params.circleColumnsParam.columnHeight,
+    material,
     0.1,
-    circularStandingWaveMaterial,
-    0.02,
-    4,
+    10,
   );
   standingWave.parent = towerGroup;
   mainNode.setStandingWaveMesh(standingWave);
+
+  // const debugPoints = debugMeshVertices(standingWave, scene, 0.005, new BABYLON.Color3(1, 0, 0));
 
   // Create posts
   params.postParam.postPositions.forEach((postPos: any, index: number) => {

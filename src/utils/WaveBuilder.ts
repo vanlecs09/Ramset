@@ -1,6 +1,85 @@
 import * as BABYLON from '@babylonjs/core';
 import { getWaveBlockMaterial } from './Material';
 
+
+/**
+ * Debug helper: Visualizes all vertices in a mesh as small spheres
+ * @param mesh - The mesh to debug
+ * @param scene - Babylon.js scene
+ * @param pointSize - Size of the debug point spheres (default 0.02)
+ * @param color - Color of the debug points (default red)
+ * @returns Array of debug sphere meshes
+ */
+export const debugMeshVertices = (
+  mesh: BABYLON.Mesh,
+  scene: BABYLON.Scene,
+  pointSize: number = 0.02,
+  color: BABYLON.Color3 = new BABYLON.Color3(1, 0, 0),
+): BABYLON.Mesh[] => {
+  const positions = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+  const debugSpheres: BABYLON.Mesh[] = [];
+
+  if (!positions) {
+    console.warn('No positions found in mesh');
+    return debugSpheres;
+  }
+
+  // Create material for debug points
+  const debugMaterial = new BABYLON.StandardMaterial('debugPointMaterial', scene);
+  debugMaterial.diffuseColor = color;
+  debugMaterial.emissiveColor = color.scale(0.5);
+
+  // Create a sphere for each vertex
+  for (let i = 0; i < positions.length; i += 3) {
+    const x = positions[i];
+    const y = positions[i + 1];
+    const z = positions[i + 2];
+
+    const sphere = BABYLON.MeshBuilder.CreateSphere(
+      `debugPoint_${i / 3}`,
+      { diameter: pointSize, segments: 8 },
+      scene,
+    );
+    sphere.position = new BABYLON.Vector3(x, y, z);
+    sphere.material = debugMaterial;
+    debugSpheres.push(sphere);
+  }
+
+  console.log(`Created ${debugSpheres.length} debug points for mesh vertices`);
+  return debugSpheres;
+};
+
+/**
+ * Debug helper: Remove all debug visualization spheres
+ * @param debugSpheres - Array of debug sphere meshes to remove
+ */
+export const removeDebugVertices = (debugSpheres: BABYLON.Mesh[]): void => {
+  debugSpheres.forEach(sphere => sphere.dispose());
+  console.log(`Removed ${debugSpheres.length} debug points`);
+};
+
+/**
+ * Debug helper: Log mesh vertex information to console
+ * @param mesh - The mesh to analyze
+ */
+export const logMeshInfo = (mesh: BABYLON.Mesh): void => {
+  const positions = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+  const indices = mesh.getIndices();
+  
+  console.log('=== Mesh Debug Info ===');
+  console.log(`Mesh name: ${mesh.name}`);
+  console.log(`Total vertices: ${positions ? positions.length / 3 : 0}`);
+  console.log(`Total indices: ${indices ? indices.length : 0}`);
+  console.log(`Total triangles: ${indices ? indices.length / 3 : 0}`);
+  
+  if (positions) {
+    console.log('First 5 vertices:');
+    for (let i = 0; i < Math.min(5, positions.length / 3); i++) {
+      console.log(`  Vertex ${i}: (${positions[i * 3]}, ${positions[i * 3 + 1]}, ${positions[i * 3 + 2]})`);
+    }
+  }
+};
+
 export const createWaveBlock = (
   scene: BABYLON.Scene,
   name: string,
@@ -233,8 +312,8 @@ const addBlockVertices = (
  * @param radius - Radius of the circular wave pattern
  * @param height - Height of the wave oscillation
  * @param material - Material to apply to the wave
- * @param waveAmplitude - Amplitude of the wave (default 0.05)
- * @param waveFrequency - Frequency of the wave pattern (default 5)
+ * @param amplitude - Amplitude of the wave (default 0.05)
+ * @param frequency - Frequency of the wave pattern (default 5)
  * @returns Babylon.js Mesh representing the 3D standing wave
  */
 export const createCircularStandingWave = (
@@ -243,15 +322,14 @@ export const createCircularStandingWave = (
   radius: number,
   height: number,
   material: BABYLON.StandardMaterial,
-  waveAmplitude: number = 0.05,
-  waveFrequency: number = 5,
+  amplitude: number = 0.05,
+  frequency: number = 5,
 ): BABYLON.Mesh => {
   const positions: number[] = [];
   const indices: number[] = [];
-  const uvs: number[] = [];
-
-  const divTheta = 64; // Angular divisions (circumference segments)
-  const divRadius = 16; // Radial divisions
+  const uvs: number[] = [];  const normals: number[] = []; // Pre-allocate normals array for manual control
+  const divTheta = 32; // Angular divisions (circumference segments)
+  const divRadius = 256; // Radial divisions
 
   // Outer face vertices (wavy surface)
   for (let ir = 0; ir <= divRadius; ir++) {
@@ -260,16 +338,15 @@ export const createCircularStandingWave = (
     for (let itheta = 0; itheta <= divTheta; itheta++) {
       const theta = (itheta / divTheta) * Math.PI * 2; // Full circle
 
-      // Calculate standing wave height based on radius and angle
-      // This creates concentric circular waves
-      const radialWave = Math.sin((ir / divRadius) * Math.PI) * waveAmplitude;
-      const angularWave = Math.cos(theta * waveFrequency) * waveAmplitude;
+         const radialWave = Math.sin((ir / divRadius) * Math.PI) * amplitude;
+      const angularWave = Math.cos(theta * frequency) * amplitude;
       const waviness = (radialWave + angularWave) / 2;
 
+      // const waviness = amplitude * Math.sin( 2.0 * Math.PI * ( 1/frequency - r/(radius/2)));
       // Calculate position
       const x = Math.cos(theta) * r;
       const z = Math.sin(theta) * r;
-      const y = height / 2 + waviness * height;
+      const y = position.y + height/2 + waviness;
 
       positions.push(position.x + x, position.y + y, position.z + z);
 
@@ -330,41 +407,69 @@ export const createCircularStandingWave = (
     }
   }
 
-  // Side walls connecting outer and inner surfaces
-  for (let ir = 0; ir < divRadius; ir++) {
-    const outerA = ir * ring;
-    const outerB = (ir + 1) * ring;
-    const innerA = offset + ir * ring;
-    const innerB = offset + (ir + 1) * ring;
+  // Side wall - circular perimeter connecting top and bottom surfaces
+  // Generate NEW vertex positions for the wall instead of reusing via indices
+  for (let itheta = 0; itheta < divTheta; itheta++) {
+    // Get indices of outermost ring vertices (at radius = divRadius)
+    const topA = divRadius * ring + itheta;
+    const topB = divRadius * ring + itheta + 1;
+    const bottomA = offset + divRadius * ring + itheta;
+    const bottomB = offset + divRadius * ring + itheta + 1;
 
-    // Center wall (first radial ring)
-    indices.push(outerA, innerA, outerB);
-    indices.push(innerA, innerB, outerB);
+    // Get original positions from existing vertices
+    const topAX = positions[topA * 3];
+    const topAY = positions[topA * 3 + 1];
+    const topAZ = positions[topA * 3 + 2];
+
+    const topBX = positions[topB * 3];
+    const topBY = positions[topB * 3 + 1];
+    const topBZ = positions[topB * 3 + 2];
+
+    const bottomAX = positions[bottomA * 3];
+    const bottomAY = positions[bottomA * 3 + 1];
+    const bottomAZ = positions[bottomA * 3 + 2];
+
+    const bottomBX = positions[bottomB * 3];
+    const bottomBY = positions[bottomB * 3 + 1];
+    const bottomBZ = positions[bottomB * 3 + 2];
+
+    // Calculate normal vectors pointing radially outward (cylindrical normals)
+    const thetaA = (itheta / divTheta) * Math.PI * 2;
+    const thetaB = ((itheta + 1) / divTheta) * Math.PI * 2;
+    
+    const normalAX = Math.cos(thetaA);
+    const normalAZ = Math.sin(thetaA);
+    
+    const normalBX = Math.cos(thetaB);
+    const normalBZ = Math.sin(thetaB);
+
+    // Create NEW vertices for this wall segment (4 new vertices per segment)
+    const newTopA = positions.length / 3;
+    positions.push(topAX, topAY, topAZ);
+    normals.push(normalAX, 0, normalAZ); // Cylindrical normal (no Y component)
+    uvs.push(itheta / divTheta, 0);
+
+    const newTopB = positions.length / 3;
+    positions.push(topBX, topBY, topBZ);
+    normals.push(normalBX, 0, normalBZ); // Cylindrical normal (no Y component)
+    uvs.push((itheta + 1) / divTheta, 0);
+
+    const newBottomA = positions.length / 3;
+    positions.push(bottomAX, bottomAY, bottomAZ);
+    normals.push(normalAX, 0, normalAZ); // Cylindrical normal (no Y component)
+    uvs.push(itheta / divTheta, 1);
+
+    const newBottomB = positions.length / 3;
+    positions.push(bottomBX, bottomBY, bottomBZ);
+    normals.push(normalBX, 0, normalBZ); // Cylindrical normal (no Y component)
+    uvs.push((itheta + 1) / divTheta, 1);
+
+    // Create two triangles using the NEW vertices
+    indices.push(newTopA, newBottomA, newTopB);
+    indices.push(newTopB, newBottomA, newBottomB);
   }
 
-  for (let ir = 0; ir < divRadius; ir++) {
-    const outerA = ir * ring + divTheta;
-    const outerB = (ir + 1) * ring + divTheta;
-    const innerA = offset + ir * ring + divTheta;
-    const innerB = offset + (ir + 1) * ring + divTheta;
-
-    // Outer wall (last radial ring)
-    indices.push(outerA, outerB, innerA);
-    indices.push(innerA, outerB, innerB);
-  }
-
-  // Angular side walls
-  for (let itheta = 0; itheta <= divTheta; itheta++) {
-    for (let ir = 0; ir < divRadius; ir++) {
-      const outerA = ir * ring + itheta;
-      const outerB = (ir + 1) * ring + itheta;
-      const innerA = offset + ir * ring + itheta;
-      const innerB = offset + (ir + 1) * ring + itheta;
-
-      indices.push(outerA, outerB, innerA);
-      indices.push(innerA, outerB, innerB);
-    }
-  }
+  console.log('Created circular perimeter wall with new geometry and cylindrical normals');
 
   // Create mesh
   const mesh = new BABYLON.Mesh('circularStandingWave', scene);
@@ -372,10 +477,21 @@ export const createCircularStandingWave = (
   mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs);
   mesh.setIndices(indices);
 
-  // Compute normals
-  const normalsArray: number[] = [];
-  BABYLON.VertexData.ComputeNormals(positions, indices, normalsArray);
-  mesh.setVerticesData(BABYLON.VertexBuffer.NormalKind, normalsArray);
+  // Compute normals for all vertices first
+  const finalNormals: number[] = [];
+  BABYLON.VertexData.ComputeNormals(positions, indices, finalNormals);
+  
+  // Now overwrite normals for wall vertices with our manually calculated cylindrical normals
+  // Wall vertices start after all top and bottom surface vertices
+  const topBottomVertexCount = (divRadius + 1) * (divTheta + 1) * 2;
+  const wallNormalStartIndex = topBottomVertexCount * 3;
+  
+  // Copy manually calculated wall normals from our normals array
+  for (let i = 0; i < normals.length; i++) {
+    finalNormals[wallNormalStartIndex + i] = normals[i];
+  }
+  
+  mesh.setVerticesData(BABYLON.VertexBuffer.NormalKind, finalNormals);
 
   mesh.material = material;
 

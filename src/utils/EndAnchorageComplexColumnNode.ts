@@ -220,7 +220,7 @@ const createCrossStandingWave = (
   // Calculate wave displacement
   const getWaveDisplacement = (iu: number, iv: number): number => {
     const xWave = Math.sin((iu / divU) * Math.PI * freq) * amp;
-    const zWave = Math.cos((iv / divV) * Math.PI * freq) * amp * 0.7;
+    const zWave = Math.cos((iv / divV) * Math.PI * freq) * amp;
     // const zWave = 0;
     return xWave + zWave;
   };
