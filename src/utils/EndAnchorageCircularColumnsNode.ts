@@ -208,20 +208,20 @@ export const createCircularColumns = (
   return mainNode;
 };
 
-function createInnerDeimensionLine(
+export const  createInnerDeimensionLine =(
   concretePosition: BABYLON.Vector3,
   concreteParams: ConcreteParams,
   beamPosition: BABYLON.Vector3,
   scene: BABYLON.Scene,
-  anchorageNode: BaseEndAnchorageNode,
-) {
+  mainnode: BaseEndAnchorageNode,
+) => {
   const dimensionMaterial = getConcreteDimensionMaterial(scene);
 
   const dimensionNodes = new BABYLON.TransformNode(
     'beamDimensionsDistance',
     scene,
   );
-  dimensionNodes.parent = anchorageNode.group;
+  dimensionNodes.parent = mainnode.group;
   // const beamWidthMeasure = Math.abs(beamParams.beamWidth / 2);szz//s
   {
     const beginPos = new BABYLON.Vector3(
@@ -246,12 +246,12 @@ function createInnerDeimensionLine(
         // beamWidthMeasure
       );
 
-      const dimensionLineNode1 = new DimensionLineNode(anchorageNode.group);
+      const dimensionLineNode1 = new DimensionLineNode(mainnode.group);
       dimensionLineNode1.addMesh(result1.line!);
       if (result1.label) dimensionLineNode1.addLabel(result1.label);
       dimensionLineNode1.addMesh(result1.arrow[0]!);
       dimensionLineNode1.addMesh(result1.arrow[1]!);
-      anchorageNode.addDimensionLine(dimensionLineNode1);
+      mainnode.addDimensionLine(dimensionLineNode1);
     }
   }
 
@@ -278,12 +278,12 @@ function createInnerDeimensionLine(
         // beamWidthMeasure
       );
 
-      const dimensionLineNode2 = new DimensionLineNode(anchorageNode.group);
+      const dimensionLineNode2 = new DimensionLineNode(mainnode.group);
       dimensionLineNode2.addMesh(result2.line!);
       if (result2.label) dimensionLineNode2.addLabel(result2.label);
       dimensionLineNode2.addMesh(result2.arrow[0]!);
       dimensionLineNode2.addMesh(result2.arrow[1]!);
-      anchorageNode.addDimensionLine(dimensionLineNode2);
+      mainnode.addDimensionLine(dimensionLineNode2);
     }
   }
 
@@ -310,12 +310,12 @@ function createInnerDeimensionLine(
         // beamWidthMeasure
       );
 
-      const dimensionLineNode3 = new DimensionLineNode(anchorageNode.group);
+      const dimensionLineNode3 = new DimensionLineNode(mainnode.group);
       dimensionLineNode3.addMesh(result3.line!);
       if (result3.label) dimensionLineNode3.addLabel(result3.label);
       dimensionLineNode3.addMesh(result3.arrow[0]!);
       dimensionLineNode3.addMesh(result3.arrow[1]!);
-      anchorageNode.addDimensionLine(dimensionLineNode3);
+      mainnode.addDimensionLine(dimensionLineNode3);
     }
   }
 
@@ -341,12 +341,12 @@ function createInnerDeimensionLine(
         dimensionMaterial!,
         // beamWidthMeasure
       );
-      const dimensionLineNode4 = new DimensionLineNode(anchorageNode.group);
+      const dimensionLineNode4 = new DimensionLineNode(mainnode.group);
       dimensionLineNode4.addMesh(result4.line!);
       if (result4.label) dimensionLineNode4.addLabel(result4.label);
       dimensionLineNode4.addMesh(result4.arrow[0]!);
       dimensionLineNode4.addMesh(result4.arrow[1]!);
-      anchorageNode.addDimensionLine(dimensionLineNode4);
+      mainnode.addDimensionLine(dimensionLineNode4);
     }
   }
 }

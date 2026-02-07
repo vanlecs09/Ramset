@@ -6,6 +6,7 @@ import { createPost } from './PostNode';
 import { createUnitAxes } from './UnitAxisNode';
 import { createMomens } from './BaseEndAnchorageNode';
 import type { ComplexColumnParam, ConcreteParams, PostParam } from './EndAnchorageParams';
+import { createInnerDeimensionLine } from './EndAnchorageCircularColumnsNode';
 
 export class EndAnchorageComplexColumnNode extends BaseStructNodeImpl {
   private concreteGroup?: ConcreteNode;
@@ -76,7 +77,7 @@ export const createEnAnchorageComplexColumn = (
   const isBounded = concreteParams.isBounded;
 
   const columnGroup = new BABYLON.TransformNode('complexColumn', scene);
-  const complexColumn = new EndAnchorageComplexColumnNode(columnGroup);
+  const mainNode = new EndAnchorageComplexColumnNode(columnGroup);
 
   // 1. Create concrete base using ConcreteBuilder
   const concreteGroup = createConcrete(
@@ -85,7 +86,7 @@ export const createEnAnchorageComplexColumn = (
     columnGroup,
     !isBounded,
   );
-  complexColumn.setConcreteGroup(concreteGroup);
+  mainNode.setConcreteGroup(concreteGroup);
 
   // 2. Create 2 cuboids that cross each other on top
   // const cuboidMaterial = new BABYLON.StandardMaterial('cuboidMaterial', scene);
@@ -112,6 +113,10 @@ export const createEnAnchorageComplexColumn = (
     0,
   );
 
+  standingWave.parent = columnGroup;
+  mainNode.addWaveBlock(standingWave);
+
+
   // 3. Create posts around the perimeter of cuboids
   postParam.postPositions.forEach((postPos: BABYLON.Vector3, index: number) => {
     // Position post at concrete top surface with adjusted Y
@@ -131,27 +136,35 @@ export const createEnAnchorageComplexColumn = (
       columnGroup,
       `complexColumnPost_${index}`,
     );
-    complexColumn.addPost(postGroup.mesh!);
+    mainNode.addPost(postGroup.mesh!);
   });
 
   // 4. Create unit axis node
   const axisNode = createUnitAxes(
     scene,
-    complexColumn.group,
+    mainNode.group,
     new BABYLON.Vector3(0, 0, 0),
     new BABYLON.Vector3(1, 0, 0),
     new BABYLON.Vector3(0, 0, 1),
     new BABYLON.Vector3(0, 1, 0),
   );
-  complexColumn.setUnitAxisNode(axisNode);
+  mainNode.setUnitAxisNode(axisNode);
 
   // 5. Create moments
-  createMomens(scene, concretePosition, concreteParams, complexColumn);
+  createMomens(scene, concretePosition, concreteParams, mainNode);
 
-  standingWave.parent = columnGroup;
-  complexColumn.addWaveBlock(standingWave);
 
-  return complexColumn;
+  if (concreteParams.isBounded) {
+    createInnerDeimensionLine(
+      concreteParams.position,
+      concreteParams,
+      new BABYLON.Vector3(0, 0, 0),
+      scene,
+      mainNode,
+    );
+  }
+
+  return mainNode;
 };
 
 /**
@@ -383,7 +396,7 @@ const createCrossStandingWave = (
     console.log('Created simple walls for non-overlapping cuboids');
   } else {
     // Complex case: Extract border edges for overlapping cuboids
-    
+
     // Helper to collect edge vertices in order
     const collectEdgeVertices = (
       cellIndices: Array<[number, number]>,
@@ -447,7 +460,7 @@ const createCrossStandingWave = (
     }
 
     console.log(`Found ${boundaryVertices.size} boundary vertex positions`);
-    
+
     // Extract 12 continuous border edge sequences from boundary
     // Trace each boundary segment in perimeter order
     const extractBorderEdges = (): Array<{
@@ -610,3 +623,4 @@ const createCrossStandingWave = (
 
   return mesh;
 };
+

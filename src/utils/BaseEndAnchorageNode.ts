@@ -24,6 +24,7 @@ import {
 } from './Material';
 import { createSplitRectangle } from './SplitRectangleNode';
 import type { ConcreteParams, EndAnchorageParams, PostParam, TopBlockParams } from './EndAnchorageParams';
+import { createInnerDeimensionLine } from './EndAnchorageCircularColumnsNode';
 
 export class BaseEndAnchorageNode extends BaseStructNodeImpl {
   private concreteNode?: ConcreteNode;
@@ -82,7 +83,6 @@ export const createEndAnchorage = (
   if (concreteParams.isBounded == true) {
     createInnerDeimensionLine(
       concretePosition,
-      topBlock,
       concreteParams,
       beamPosition,
       scene,
@@ -338,7 +338,7 @@ export const createMomens = (
   const bendingMoment3 = createBendingMomenNode(
     scene,
     basePosition,
-    1,
+    0.75,
     new BABYLON.Vector3(0, 1, 0),
     BABYLON.Color3.Black(),
     200,
@@ -377,144 +377,3 @@ export const createMomens = (
   mainNode.addTorsionMomentNode(torsion2);
 };
 
-function createInnerDeimensionLine(
-  concretePosition: BABYLON.Vector3,
-  beamParams: TopBlockParams,
-  concreteParams: ConcreteParams,
-  beamPosition: BABYLON.Vector3,
-  scene: BABYLON.Scene,
-  anchorageNode: BaseEndAnchorageNode,
-) {
-  const dimensionNodes = new BABYLON.TransformNode(
-    'beamDimensionsDistance',
-    scene,
-  );
-  dimensionNodes.parent = anchorageNode.group;
-  // const beamWidthMeasure = Math.abs(beamParams.beamWidth / 2);szz//s
-  {
-    const beginPos = new BABYLON.Vector3(
-      beamPosition.x + beamParams.width / 2,
-      concretePosition.y + concreteParams.thickness / 2,
-      beamPosition.z - beamParams.depth / 2,
-    );
-    const endPos = new BABYLON.Vector3(
-      concretePosition.x + concreteParams.width / 2,
-      concretePosition.y + concreteParams.thickness / 2,
-      beamPosition.z - beamParams.depth / 2,
-    );
-    const length = BABYLON.Vector3.Distance(beginPos, endPos);
-    if (length > 0) {
-      const result1 = createLineTwoArrow(
-        beginPos,
-        endPos,
-        'beamWidthArrow',
-        scene,
-        dimensionNodes,
-        getConcreteDimensionMaterial(scene),
-        // beamWidthMeasure
-      );
-
-      const dimensionLineNode1 = new DimensionLineNode(anchorageNode.group);
-      dimensionLineNode1.addMesh(result1.line!);
-      if (result1.label) dimensionLineNode1.addLabel(result1.label);
-      dimensionLineNode1.addMesh(result1.arrow[0]!);
-      dimensionLineNode1.addMesh(result1.arrow[1]!);
-      anchorageNode.addDimensionLine(dimensionLineNode1);
-    }
-  }
-
-  {
-    const beginPos = new BABYLON.Vector3(
-      beamPosition.x - beamParams.width / 2,
-      concretePosition.y + concreteParams.thickness / 2,
-      beamPosition.z - beamParams.depth / 2,
-    );
-    const endPos = new BABYLON.Vector3(
-      concretePosition.x - concreteParams.width / 2,
-      concretePosition.y + concreteParams.thickness / 2,
-      beamPosition.z - beamParams.depth / 2,
-    );
-    const length = BABYLON.Vector3.Distance(beginPos, endPos);
-    if (length > 0) {
-      const result2 = createLineTwoArrow(
-        beginPos,
-        endPos,
-        'beamWidthArrow',
-        scene,
-        dimensionNodes,
-        getConcreteDimensionMaterial(scene),
-        // beamWidthMeasure
-      );
-
-      const dimensionLineNode2 = new DimensionLineNode(anchorageNode.group);
-      dimensionLineNode2.addMesh(result2.line!);
-      if (result2.label) dimensionLineNode2.addLabel(result2.label);
-      dimensionLineNode2.addMesh(result2.arrow[0]!);
-      dimensionLineNode2.addMesh(result2.arrow[1]!);
-      anchorageNode.addDimensionLine(dimensionLineNode2);
-    }
-  }
-
-  {
-    const beginPos = new BABYLON.Vector3(
-      beamPosition.x + beamParams.width / 2,
-      concretePosition.y + concreteParams.thickness / 2,
-      beamPosition.z - beamParams.depth / 2,
-    );
-    const endPos = new BABYLON.Vector3(
-      beamPosition.x + beamParams.width / 2,
-      concretePosition.y + concreteParams.thickness / 2,
-      concretePosition.z - concreteParams.depth / 2,
-    );
-    const length = BABYLON.Vector3.Distance(beginPos, endPos);
-    if (length > 0) {
-      const result3 = createLineTwoArrow(
-        beginPos,
-        endPos,
-        'beamWidthArrow',
-        scene,
-        dimensionNodes,
-        getConcreteDimensionMaterial(scene),
-        // beamWidthMeasure
-      );
-
-      const dimensionLineNode3 = new DimensionLineNode(anchorageNode.group);
-      dimensionLineNode3.addMesh(result3.line!);
-      if (result3.label) dimensionLineNode3.addLabel(result3.label);
-      dimensionLineNode3.addMesh(result3.arrow[0]!);
-      dimensionLineNode3.addMesh(result3.arrow[1]!);
-      anchorageNode.addDimensionLine(dimensionLineNode3);
-    }
-  }
-
-  {
-    const beginePos = new BABYLON.Vector3(
-      beamPosition.x + beamParams.width / 2,
-      concretePosition.y + concreteParams.thickness / 2,
-      beamPosition.z + beamParams.depth / 2,
-    );
-    const endPos = new BABYLON.Vector3(
-      beamPosition.x + beamParams.width / 2,
-      concretePosition.y + concreteParams.thickness / 2,
-      concretePosition.z + concreteParams.depth / 2,
-    );
-    const length = BABYLON.Vector3.Distance(beginePos, endPos);
-    if (length > 0) {
-      const result4 = createLineTwoArrow(
-        beginePos,
-        endPos,
-        'beamWidthArrow',
-        scene,
-        dimensionNodes,
-        getConcreteDimensionMaterial(scene),
-        // beamWidthMeasure
-      );
-      const dimensionLineNode4 = new DimensionLineNode(anchorageNode.group);
-      dimensionLineNode4.addMesh(result4.line!);
-      if (result4.label) dimensionLineNode4.addLabel(result4.label);
-      dimensionLineNode4.addMesh(result4.arrow[0]!);
-      dimensionLineNode4.addMesh(result4.arrow[1]!);
-      anchorageNode.addDimensionLine(dimensionLineNode4);
-    }
-  }
-}

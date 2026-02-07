@@ -328,7 +328,7 @@ export const createCircularStandingWave = (
   const positions: number[] = [];
   const indices: number[] = [];
   const uvs: number[] = [];  const normals: number[] = []; // Pre-allocate normals array for manual control
-  const divTheta = 32; // Angular divisions (circumference segments)
+  const divTheta = 128; // Angular divisions (circumference segments)
   const divRadius = 256; // Radial divisions
 
   // Outer face vertices (wavy surface)
