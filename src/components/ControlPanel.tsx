@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import '../styles/ControlPanel.css';
 import type { SlabParams } from '../App';
-import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
+// import type { EndAnchorageParams } from '../utils/BaseEndAnchorageNode';
 import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_LAPSPLICE_SLAB_PARAMS, DEFAULT_LAPSPLICE_BEAM_PARAMS, DEFAULT_LAPSPLICE_WALL_PARAMS, DEFAULT_LAPSPLICE_COLUMN_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS, DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS } from '../constants/defaultParams';
+import type { EndAnchorageParams } from '../utils/EndAnchorageParams';
 
 interface ComplexColumnParams {
   isFiniteConcrete: boolean;
@@ -112,6 +113,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [lapspliceSlabConcreteOffsetXLeft, setLapspliceSlabConcreteOffsetXLeft] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.concreteOffsetXLeft);
   const [lapspliceSlabConcreteOffsetZBack, setLapspliceSlabConcreteOffsetZBack] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.concreteOffsetZBack);
   const [lapspliceSlabConcreteOffsetZFront, setLapspliceSlabConcreteOffsetZFront] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.concreteOffsetZFront);
+  const [lapspliceSlabConcreteDx, setLapspliceSlabConcreteDx] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.concreteDx);
+  const [lapspliceSlabConcreteDz, setLapspliceSlabConcreteDz] = useState(DEFAULT_LAPSPLICE_SLAB_PARAMS.concreteDz);
 
   // Lapsplice Beam parameters
   const [beamIsFiniteConcrete, setBeamIsFiniteConcrete] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.isFiniteConcrete);
@@ -126,6 +129,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [beamConcreteOffsetXLeft, setBeamConcreteOffsetXLeft] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.concreteOffsetXLeft);
   const [beamConcreteOffsetZBack, setBeamConcreteOffsetZBack] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.concreteOffsetZBack);
   const [beamConcreteOffsetZFront, setBeamConcreteOffsetZFront] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.concreteOffsetZFront);
+  const [beamConcreteDx, setBeamConcreteDx] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.concreteDx);
+  const [beamConcreteDz, setBeamConcreteDz] = useState(DEFAULT_LAPSPLICE_BEAM_PARAMS.concreteDz);
 
   // Lapsplice Wall parameters
   const [wallIsFiniteConcrete, setWallIsFiniteConcrete] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.isFiniteConcrete);
@@ -140,6 +145,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [wallConcreteOffsetXLeft, setWallConcreteOffsetXLeft] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.concreteOffsetXLeft);
   const [wallConcreteOffsetZBack, setWallConcreteOffsetZBack] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.concreteOffsetZBack);
   const [wallConcreteOffsetZFront, setWallConcreteOffsetZFront] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.concreteOffsetZFront);
+  const [wallConcreteDx, setWallConcreteDx] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.concreteDx);
+  const [wallConcreteDz, setWallConcreteDz] = useState(DEFAULT_LAPSPLICE_WALL_PARAMS.concreteDz);
 
   // Lapsplice Column parameters
   const [lapColumnIsFiniteConcrete, setLapColumnIsFiniteConcrete] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.isFiniteConcrete);
@@ -154,6 +161,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [lapColumnConcreteOffsetXLeft, setLapColumnConcreteOffsetXLeft] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.concreteOffsetXLeft);
   const [lapColumnConcreteOffsetZBack, setLapColumnConcreteOffsetZBack] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.concreteOffsetZBack);
   const [lapColumnConcreteOffsetZFront, setLapColumnConcreteOffsetZFront] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.concreteOffsetZFront);
+  const [lapColumnConcreteDx, setLapColumnConcreteDx] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.concreteDx);
+  const [lapColumnConcreteDz, setLapColumnConcreteDz] = useState(DEFAULT_LAPSPLICE_COLUMN_PARAMS.concreteDz);
 
   // End Anchorage parameters
   const [anchorageBeamWidth, setAnchorageBeamWidth] = useState(DEFAULT_END_ANCHORAGE_PARAMS.beamWidth);
@@ -556,6 +565,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
       concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
       concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
+      concreteDx: lapspliceSlabConcreteDx,
+      concreteDz: lapspliceSlabConcreteDz,
     });
   };
 
@@ -575,6 +586,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
       concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
       concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
+      concreteDx: lapspliceSlabConcreteDx,
+      concreteDz: lapspliceSlabConcreteDz,
     });
   };
 
@@ -594,6 +607,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
       concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
       concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
+      concreteDx: lapspliceSlabConcreteDx,
+      concreteDz: lapspliceSlabConcreteDz,
     });
   };
 
@@ -613,6 +628,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
       concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
       concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
+      concreteDx: lapspliceSlabConcreteDx,
+      concreteDz: lapspliceSlabConcreteDz,
     });
   };
 
@@ -632,6 +649,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
       concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
       concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
+      concreteDx: lapspliceSlabConcreteDx,
+      concreteDz: lapspliceSlabConcreteDz,
     });
   };
 
@@ -651,6 +670,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
       concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
       concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
+      concreteDx: lapspliceSlabConcreteDx,
+      concreteDz: lapspliceSlabConcreteDz,
     });
   };
 
@@ -670,6 +691,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
       concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
       concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
+      concreteDx: lapspliceSlabConcreteDx,
+      concreteDz: lapspliceSlabConcreteDz,
     });
   };
 
@@ -689,6 +712,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
       concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
       concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
+      concreteDx: lapspliceSlabConcreteDx,
+      concreteDz: lapspliceSlabConcreteDz,
     });
   };
 
@@ -708,6 +733,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
       concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
       concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
+      concreteDx: lapspliceSlabConcreteDx,
+      concreteDz: lapspliceSlabConcreteDz,
     });
   };
 
@@ -727,6 +754,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: value,
       concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
       concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
+      concreteDx: lapspliceSlabConcreteDx,
+      concreteDz: lapspliceSlabConcreteDz,
     });
   };
 
@@ -746,6 +775,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
       concreteOffsetZBack: value,
       concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
+      concreteDx: lapspliceSlabConcreteDx,
+      concreteDz: lapspliceSlabConcreteDz,
     });
   };
 
@@ -765,6 +796,50 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
       concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
       concreteOffsetZFront: value,
+      concreteDx: lapspliceSlabConcreteDx,
+      concreteDz: lapspliceSlabConcreteDz,
+    });
+  };
+
+  const handleLapspliceSlabConcreteDxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setLapspliceSlabConcreteDx(value);
+    onLapspliceSlabParamsChange({
+      isFiniteConcrete: lapspliceSlabIsFiniteConcrete,
+      concreteThickness: lapspliceSlabConcreteThickness,
+      slabWidth: lapspliceSlabWidth,
+      slabDepth: lapspliceSlabDepth,
+      postCountX: lapspliceSlabPostCountX,
+      postCountZ: lapspliceSlabPostCountZ,
+      postDiameter: lapspliceSlabPostDiameter,
+      postOffset: lapspliceSlabPostOffset,
+      concreteOffsetXRight: lapspliceSlabConcreteOffsetXRight,
+      concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
+      concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
+      concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
+      concreteDx: value,
+      concreteDz: lapspliceSlabConcreteDz,
+    });
+  };
+
+  const handleLapspliceSlabConcreteDzChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setLapspliceSlabConcreteDz(value);
+    onLapspliceSlabParamsChange({
+      isFiniteConcrete: lapspliceSlabIsFiniteConcrete,
+      concreteThickness: lapspliceSlabConcreteThickness,
+      slabWidth: lapspliceSlabWidth,
+      slabDepth: lapspliceSlabDepth,
+      postCountX: lapspliceSlabPostCountX,
+      postCountZ: lapspliceSlabPostCountZ,
+      postDiameter: lapspliceSlabPostDiameter,
+      postOffset: lapspliceSlabPostOffset,
+      concreteOffsetXRight: lapspliceSlabConcreteOffsetXRight,
+      concreteOffsetXLeft: lapspliceSlabConcreteOffsetXLeft,
+      concreteOffsetZBack: lapspliceSlabConcreteOffsetZBack,
+      concreteOffsetZFront: lapspliceSlabConcreteOffsetZFront,
+      concreteDx: lapspliceSlabConcreteDx,
+      concreteDz: value,
     });
   };
 
@@ -785,6 +860,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: wallConcreteOffsetXLeft,
       concreteOffsetZBack: wallConcreteOffsetZBack,
       concreteOffsetZFront: wallConcreteOffsetZFront,
+      concreteDx: wallConcreteDx,
+      concreteDz: wallConcreteDz,
     });
   };
 
@@ -804,6 +881,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: wallConcreteOffsetXLeft,
       concreteOffsetZBack: wallConcreteOffsetZBack,
       concreteOffsetZFront: wallConcreteOffsetZFront,
+      concreteDx: wallConcreteDx,
+      concreteDz: wallConcreteDz,
     });
   };
 
@@ -823,6 +902,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: wallConcreteOffsetXLeft,
       concreteOffsetZBack: wallConcreteOffsetZBack,
       concreteOffsetZFront: wallConcreteOffsetZFront,
+      concreteDx: wallConcreteDx,
+      concreteDz: wallConcreteDz,
     });
   };
 
@@ -842,6 +923,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: wallConcreteOffsetXLeft,
       concreteOffsetZBack: wallConcreteOffsetZBack,
       concreteOffsetZFront: wallConcreteOffsetZFront,
+      concreteDx: wallConcreteDx,
+      concreteDz: wallConcreteDz,
     });
   };
 
@@ -861,6 +944,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: wallConcreteOffsetXLeft,
       concreteOffsetZBack: wallConcreteOffsetZBack,
       concreteOffsetZFront: wallConcreteOffsetZFront,
+      concreteDx: wallConcreteDx,
+      concreteDz: wallConcreteDz,
     });
   };
 
@@ -880,6 +965,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: wallConcreteOffsetXLeft,
       concreteOffsetZBack: wallConcreteOffsetZBack,
       concreteOffsetZFront: wallConcreteOffsetZFront,
+      concreteDx: wallConcreteDx,
+      concreteDz: wallConcreteDz,
     });
   };
 
@@ -899,6 +986,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: wallConcreteOffsetXLeft,
       concreteOffsetZBack: wallConcreteOffsetZBack,
       concreteOffsetZFront: wallConcreteOffsetZFront,
+      concreteDx: wallConcreteDx,
+      concreteDz: wallConcreteDz,
     });
   };
 
@@ -918,6 +1007,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: wallConcreteOffsetXLeft,
       concreteOffsetZBack: wallConcreteOffsetZBack,
       concreteOffsetZFront: wallConcreteOffsetZFront,
+      concreteDx: wallConcreteDx,
+      concreteDz: wallConcreteDz,
     });
   };
 
@@ -937,6 +1028,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: wallConcreteOffsetXLeft,
       concreteOffsetZBack: wallConcreteOffsetZBack,
       concreteOffsetZFront: wallConcreteOffsetZFront,
+      concreteDx: wallConcreteDx,
+      concreteDz: wallConcreteDz,
     });
   };
 
@@ -956,6 +1049,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: value,
       concreteOffsetZBack: wallConcreteOffsetZBack,
       concreteOffsetZFront: wallConcreteOffsetZFront,
+      concreteDx: wallConcreteDx,
+      concreteDz: wallConcreteDz,
     });
   };
 
@@ -975,6 +1070,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: wallConcreteOffsetXLeft,
       concreteOffsetZBack: value,
       concreteOffsetZFront: wallConcreteOffsetZFront,
+      concreteDx: wallConcreteDx,
+      concreteDz: wallConcreteDz,
     });
   };
 
@@ -994,6 +1091,50 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: wallConcreteOffsetXLeft,
       concreteOffsetZBack: wallConcreteOffsetZBack,
       concreteOffsetZFront: value,
+      concreteDx: wallConcreteDx,
+      concreteDz: wallConcreteDz,
+    });
+  };
+
+  const handleWallConcreteDxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setWallConcreteDx(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: wallIsFiniteConcrete,
+      concreteThickness: wallConcreteThickness,
+      slabWidth: wallWidth,
+      slabDepth: wallDepth,
+      postCountX: wallPostCountX,
+      postCountZ: wallPostCountZ,
+      postDiameter: wallPostDiameter,
+      postOffset: wallPostOffset,
+      concreteOffsetXRight: wallConcreteOffsetXRight,
+      concreteOffsetXLeft: wallConcreteOffsetXLeft,
+      concreteOffsetZBack: wallConcreteOffsetZBack,
+      concreteOffsetZFront: wallConcreteOffsetZFront,
+      concreteDx: value,
+      concreteDz: wallConcreteDz,
+    });
+  };
+
+  const handleWallConcreteDzChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setWallConcreteDz(value);
+    onLapspliceWallParamsChange({
+      isFiniteConcrete: wallIsFiniteConcrete,
+      concreteThickness: wallConcreteThickness,
+      slabWidth: wallWidth,
+      slabDepth: wallDepth,
+      postCountX: wallPostCountX,
+      postCountZ: wallPostCountZ,
+      postDiameter: wallPostDiameter,
+      postOffset: wallPostOffset,
+      concreteOffsetXRight: wallConcreteOffsetXRight,
+      concreteOffsetXLeft: wallConcreteOffsetXLeft,
+      concreteOffsetZBack: wallConcreteOffsetZBack,
+      concreteOffsetZFront: wallConcreteOffsetZFront,
+      concreteDx: wallConcreteDx,
+      concreteDz: value,
     });
   };
 
@@ -1014,6 +1155,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
       concreteOffsetZBack: lapColumnConcreteOffsetZBack,
       concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+      concreteDx: lapColumnConcreteDx,
+      concreteDz: lapColumnConcreteDz,
     });
   };
 
@@ -1033,6 +1176,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
       concreteOffsetZBack: lapColumnConcreteOffsetZBack,
       concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+      concreteDx: lapColumnConcreteDx,
+      concreteDz: lapColumnConcreteDz,
     });
   };
 
@@ -1052,6 +1197,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
       concreteOffsetZBack: lapColumnConcreteOffsetZBack,
       concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+      concreteDx: lapColumnConcreteDx,
+      concreteDz: lapColumnConcreteDz,
     });
   };
 
@@ -1071,6 +1218,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
       concreteOffsetZBack: lapColumnConcreteOffsetZBack,
       concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+      concreteDx: lapColumnConcreteDx,
+      concreteDz: lapColumnConcreteDz,
     });
   };
 
@@ -1090,6 +1239,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
       concreteOffsetZBack: lapColumnConcreteOffsetZBack,
       concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+      concreteDx: lapColumnConcreteDx,
+      concreteDz: lapColumnConcreteDz,
     });
   };
 
@@ -1109,6 +1260,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
       concreteOffsetZBack: lapColumnConcreteOffsetZBack,
       concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+      concreteDx: lapColumnConcreteDx,
+      concreteDz: lapColumnConcreteDz,
     });
   }
 
@@ -1128,6 +1281,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
       concreteOffsetZBack: lapColumnConcreteOffsetZBack,
       concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+      concreteDx: lapColumnConcreteDx,
+      concreteDz: lapColumnConcreteDz,
     });
   };
 
@@ -1147,6 +1302,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: value,
       concreteOffsetZBack: lapColumnConcreteOffsetZBack,
       concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+      concreteDx: lapColumnConcreteDx,
+      concreteDz: lapColumnConcreteDz,
     });
   };
 
@@ -1166,6 +1323,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
       concreteOffsetZBack: value,
       concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+      concreteDx: lapColumnConcreteDx,
+      concreteDz: lapColumnConcreteDz,
     });
   };
 
@@ -1185,6 +1344,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
       concreteOffsetZBack: lapColumnConcreteOffsetZBack,
       concreteOffsetZFront: value,
+      concreteDx: lapColumnConcreteDx,
+      concreteDz: lapColumnConcreteDz,
     });
   };
 
@@ -1204,6 +1365,50 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
       concreteOffsetZBack: lapColumnConcreteOffsetZBack,
       concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+      concreteDx: lapColumnConcreteDx,
+      concreteDz: lapColumnConcreteDz,
+    });
+  };
+
+  const handleLapColumnConcreteDxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setLapColumnConcreteDx(value);
+    onLapspliceColumnParamsChange({
+      isFiniteConcrete: lapColumnIsFiniteConcrete,
+      concreteThickness: lapColumnConcreteThickness,
+      slabWidth: lapColumnWidth,
+      slabDepth: lapColumnDepth,
+      postCountX: lapColumnPostCountX,
+      postCountZ: lapColumnPostCountZ,
+      postDiameter: lapColumnPostDiameter,
+      postOffset: lapColumnPostOffset,
+      concreteOffsetXRight: lapColumnConcreteOffsetXRight,
+      concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
+      concreteOffsetZBack: lapColumnConcreteOffsetZBack,
+      concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+      concreteDx: value,
+      concreteDz: lapColumnConcreteDz,
+    });
+  };
+
+  const handleLapColumnConcreteDzChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setLapColumnConcreteDz(value);
+    onLapspliceColumnParamsChange({
+      isFiniteConcrete: lapColumnIsFiniteConcrete,
+      concreteThickness: lapColumnConcreteThickness,
+      slabWidth: lapColumnWidth,
+      slabDepth: lapColumnDepth,
+      postCountX: lapColumnPostCountX,
+      postCountZ: lapColumnPostCountZ,
+      postDiameter: lapColumnPostDiameter,
+      postOffset: lapColumnPostOffset,
+      concreteOffsetXRight: lapColumnConcreteOffsetXRight,
+      concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
+      concreteOffsetZBack: lapColumnConcreteOffsetZBack,
+      concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+      concreteDx: lapColumnConcreteDx,
+      concreteDz: value,
     });
   };
 
@@ -2116,6 +2321,28 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               placeholder="Enter Concrete Offset Z-"
             />
           </div>
+
+          <div className="control-group">
+            <label>Concrete Offset dX</label>
+            <input
+              type="number"
+              value={lapspliceSlabConcreteDx}
+              onChange={handleLapspliceSlabConcreteDxChange}
+              step="0.05"
+              placeholder="Enter concrete offset dX"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset dZ</label>
+            <input
+              type="number"
+              value={lapspliceSlabConcreteDz}
+              onChange={handleLapspliceSlabConcreteDzChange}
+              step="0.05"
+              placeholder="Enter concrete offset dZ"
+            />
+          </div>
         </>
       )}
 
@@ -2141,6 +2368,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     concreteOffsetXLeft: beamConcreteOffsetXLeft,
                     concreteOffsetZBack: beamConcreteOffsetZBack,
                     concreteOffsetZFront: beamConcreteOffsetZFront,
+                    concreteDx: beamConcreteDx,
+                    concreteDz: beamConcreteDz,
                   });
                 }}
               />
@@ -2169,6 +2398,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   concreteOffsetXLeft: beamConcreteOffsetXLeft,
                   concreteOffsetZBack: beamConcreteOffsetZBack,
                   concreteOffsetZFront: beamConcreteOffsetZFront,
+                  concreteDx: beamConcreteDx,
+                  concreteDz: beamConcreteDz,
                 });
               }}
               step="0.1"
@@ -2198,6 +2429,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   concreteOffsetXLeft: beamConcreteOffsetXLeft,
                   concreteOffsetZBack: beamConcreteOffsetZBack,
                   concreteOffsetZFront: beamConcreteOffsetZFront,
+                  concreteDx: beamConcreteDx,
+                  concreteDz: beamConcreteDz,
                 });
               }}
               step="0.1"
@@ -2227,6 +2460,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   concreteOffsetXLeft: beamConcreteOffsetXLeft,
                   concreteOffsetZBack: beamConcreteOffsetZBack,
                   concreteOffsetZFront: beamConcreteOffsetZFront,
+                  concreteDx: beamConcreteDx,
+                  concreteDz: beamConcreteDz,
                 });
               }}
               step="0.1"
@@ -2256,6 +2491,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   concreteOffsetXLeft: beamConcreteOffsetXLeft,
                   concreteOffsetZBack: beamConcreteOffsetZBack,
                   concreteOffsetZFront: beamConcreteOffsetZFront,
+                  concreteDx: beamConcreteDx,
+                  concreteDz: beamConcreteDz,
                 });
               }}
               step="1"
@@ -2285,6 +2522,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   concreteOffsetXLeft: beamConcreteOffsetXLeft,
                   concreteOffsetZBack: beamConcreteOffsetZBack,
                   concreteOffsetZFront: beamConcreteOffsetZFront,
+                  concreteDx: beamConcreteDx,
+                  concreteDz: beamConcreteDz,
                 });
               }}
               step="1"
@@ -2309,11 +2548,13 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   postCountX: beamPostCountX,
                   postCountZ: beamPostCountZ,
                   postDiameter: value,
-                  postOffset: beamPostOffset,
+ postOffset: beamPostOffset,
                   concreteOffsetXRight: beamConcreteOffsetXRight,
                   concreteOffsetXLeft: beamConcreteOffsetXLeft,
                   concreteOffsetZBack: beamConcreteOffsetZBack,
                   concreteOffsetZFront: beamConcreteOffsetZFront,
+                  concreteDx: beamConcreteDx,
+                  concreteDz: beamConcreteDz,
                 });
               }}
               step="0.01"
@@ -2343,6 +2584,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   concreteOffsetXLeft: beamConcreteOffsetXLeft,
                   concreteOffsetZBack: beamConcreteOffsetZBack,
                   concreteOffsetZFront: beamConcreteOffsetZFront,
+                  concreteDx: beamConcreteDx,
+                  concreteDz: beamConcreteDz,
                 });
               }}
               step="0.01"
@@ -2373,6 +2616,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   concreteOffsetXLeft: beamConcreteOffsetXLeft,
                   concreteOffsetZBack: beamConcreteOffsetZBack,
                   concreteOffsetZFront: beamConcreteOffsetZFront,
+                  concreteDx: beamConcreteDx,
+                  concreteDz: beamConcreteDz,
                 });
               }}
               step="0.1"
@@ -2402,6 +2647,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   concreteOffsetXLeft: value,
                   concreteOffsetZBack: beamConcreteOffsetZBack,
                   concreteOffsetZFront: beamConcreteOffsetZFront,
+                  concreteDx: beamConcreteDx,
+                  concreteDz: beamConcreteDz,
                 });
               }}
               step="0.1"
@@ -2431,6 +2678,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   concreteOffsetXLeft: beamConcreteOffsetXLeft,
                   concreteOffsetZBack: value,
                   concreteOffsetZFront: beamConcreteOffsetZFront,
+                  concreteDx: beamConcreteDx,
+                  concreteDz: beamConcreteDz,
                 });
               }}
               step="0.1"
@@ -2460,11 +2709,73 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   concreteOffsetXLeft: beamConcreteOffsetXLeft,
                   concreteOffsetZBack: beamConcreteOffsetZBack,
                   concreteOffsetZFront: value,
+                  concreteDx: beamConcreteDx,
+                  concreteDz: beamConcreteDz,
                 });
               }}
               step="0.1"
               min="0.1"
               placeholder="Enter Concrete Offset Z-"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset dX</label>
+            <input
+              type="number"
+              value={beamConcreteDx}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                setBeamConcreteDx(value);
+                onLapspliceBeamParamsChange({
+                  isFiniteConcrete: beamIsFiniteConcrete,
+                  concreteThickness: beamConcreteThickness,
+                  slabWidth: beamWidth,
+                  slabDepth: beamDepth,
+                  postCountX: beamPostCountX,
+                  postCountZ: beamPostCountZ,
+                  postDiameter: beamPostDiameter,
+                  postOffset: beamPostOffset,
+                  concreteOffsetXRight: beamConcreteOffsetXRight,
+                  concreteOffsetXLeft: beamConcreteOffsetXLeft,
+                  concreteOffsetZBack: beamConcreteOffsetZBack,
+                  concreteOffsetZFront: beamConcreteOffsetZFront,
+                  concreteDx: value,
+                  concreteDz: beamConcreteDz,
+                });
+              }}
+              step="0.05"
+              placeholder="Enter concrete offset dX"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset dZ</label>
+            <input
+              type="number"
+              value={beamConcreteDz}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                setBeamConcreteDz(value);
+                onLapspliceBeamParamsChange({
+                  isFiniteConcrete: beamIsFiniteConcrete,
+                  concreteThickness: beamConcreteThickness,
+                  slabWidth: beamWidth,
+                  slabDepth: beamDepth,
+                  postCountX: beamPostCountX,
+                  postCountZ: beamPostCountZ,
+                  postDiameter: beamPostDiameter,
+                  postOffset: beamPostOffset,
+                  concreteOffsetXRight: beamConcreteOffsetXRight,
+                  concreteOffsetXLeft: beamConcreteOffsetXLeft,
+                  concreteOffsetZBack: beamConcreteOffsetZBack,
+                  concreteOffsetZFront: beamConcreteOffsetZFront,
+                  concreteDx: beamConcreteDx,
+                  concreteDz: value,
+                });
+              }}
+              step="0.05"
+              placeholder="Enter concrete offset dZ"
             />
           </div>
         </>
@@ -2615,6 +2926,28 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               placeholder="Enter Concrete Offset Z-"
             />
           </div>
+
+          <div className="control-group">
+            <label>Concrete Offset dX</label>
+            <input
+              type="number"
+              value={wallConcreteDx}
+              onChange={handleWallConcreteDxChange}
+              step="0.05"
+              placeholder="Enter concrete offset dX"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset dZ</label>
+            <input
+              type="number"
+              value={wallConcreteDz}
+              onChange={handleWallConcreteDzChange}
+              step="0.05"
+              placeholder="Enter concrete offset dZ"
+            />
+          </div>
         </>
       )}
 
@@ -2640,6 +2973,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     concreteOffsetXLeft: lapColumnConcreteOffsetXLeft,
                     concreteOffsetZBack: lapColumnConcreteOffsetZBack,
                     concreteOffsetZFront: lapColumnConcreteOffsetZFront,
+                    concreteDx: lapColumnConcreteDx,
+                    concreteDz: lapColumnConcreteDz,
                   });
                 }}
               />
@@ -2777,6 +3112,28 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               step="0.1"
               min="0.1"
               placeholder="Enter Concrete Offset Z-"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset dX</label>
+            <input
+              type="number"
+              value={lapColumnConcreteDx}
+              onChange={handleLapColumnConcreteDxChange}
+              step="0.05"
+              placeholder="Enter concrete offset dX"
+            />
+          </div>
+
+          <div className="control-group">
+            <label>Concrete Offset dZ</label>
+            <input
+              type="number"
+              value={lapColumnConcreteDz}
+              onChange={handleLapColumnConcreteDzChange}
+              step="0.05"
+              placeholder="Enter concrete offset dZ"
             />
           </div>
         </>

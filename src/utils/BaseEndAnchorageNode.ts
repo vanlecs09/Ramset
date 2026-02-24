@@ -23,7 +23,7 @@ import {
   getDimensionLabelTexture,
 } from './Material';
 import { createSplitRectangle } from './SplitRectangleNode';
-import type { ConcreteParams, EndAnchorageParams, PostParam, TopBlockParams } from './EndAnchorageParams';
+import type { ConcreteParams, PostParam, TopBlockParams } from './EndAnchorageParams';
 import { createInnerDeimensionLine } from './EndAnchorageCircularColumnsNode';
 
 export class BaseEndAnchorageNode extends BaseStructNodeImpl {

@@ -65,9 +65,9 @@ export const createLapsplice = (
   scene: BABYLON.Scene,
   // postPositions: RectanglePostPosition[],
   concreteParam: ConcreteParams,
-  slabParam: {
-    slabWidth: number;
-    slabDepth: number;
+  topConcreteParam: {
+    width: number;
+    depth: number;
     // postDiameter: number;
     // isFiniteConcrete: boolean;
   },
@@ -88,21 +88,21 @@ export const createLapsplice = (
   mainNode.setConcreteGroup(concreteNode);
 
   // 2. Create wave blocks extending from the right face of concrete
-  const slabHeigth = 0.3;
-  const slabPosition = new BABYLON.Vector3(
-    concreteParam.position.x,
+  const topConreteHeight = 0.3;
+  const topConcretePosition = new BABYLON.Vector3(
+    0,
     concreteParam.position.y +
-      slabHeigth / 2 +
+      topConreteHeight / 2 +
       concreteNode.getConcreteHeight() / 2,
-    concreteParam.position.z,
+    0,
   );
 
   createTopBlockWave(
     mainNode as unknown as BaseStructNodeImpl,
-    slabParam.slabWidth,
-    slabParam.slabDepth,
-    slabHeigth,
-    slabPosition,
+    topConcreteParam.width,
+    topConcreteParam.depth,
+    topConreteHeight,
+    topConcretePosition,
   );
   // 3. Create posts connecting concrete to wave blocks
   const postHeight = 0.3;

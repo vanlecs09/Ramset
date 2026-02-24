@@ -3,7 +3,8 @@ import './App.css';
 import ConstructionViewer from './components/ConstructionViewer';
 import { ControlPanel } from './components/ControlPanel';
 import { DEFAULT_TOWER_PARAMS, DEFAULT_COMPLEX_COLUMN_PARAMS, DEFAULT_LAPSPLICE_SLAB_PARAMS, DEFAULT_LAPSPLICE_BEAM_PARAMS, DEFAULT_LAPSPLICE_WALL_PARAMS, DEFAULT_LAPSPLICE_COLUMN_PARAMS, DEFAULT_END_ANCHORAGE_PARAMS, DEFAULT_END_ANCHORAGE_SLAB_PARAMS, DEFAULT_END_ANCHORAGE_WALL_PARAMS, DEFAULT_END_ANCHORAGE_RECTANGULAR_COLUMN_PARAMS } from './constants/defaultParams';
-import type { EndAnchorageParams } from './utils/BaseEndAnchorageNode';
+import type { EndAnchorageParams } from './utils/EndAnchorageParams';
+// import type { EndAnchorageParams } from './utils/BaseEndAnchorageNode';
 
 export interface CircularColumnParams {
   isFiniteConcrete: boolean;
@@ -53,10 +54,12 @@ export interface SlabParams {
   concreteOffsetXLeft: number;
   concreteOffsetZBack: number;
   concreteOffsetZFront: number;
+  concreteDx: number;
+  concreteDz: number;
 }
 
 function App() {
-  const [currentModel, setCurrentModel] = useState<'circularColumns' | 'complexColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn'>('complexColumn');
+  const [currentModel, setCurrentModel] = useState<'endAnchorageCircularColumns' | 'complexColumn' | 'lapspliceSlab' | 'lapspliceBeam' | 'lapspliceWall' | 'lapspliceColumn' | 'endAnchorageBeam' | 'endAnchorageSlab' | 'endAnchorageWall' | 'endAnchorageRectangularColumn'>('endAnchorageCircularColumns');
   const [towerParams, setTowerParams] = useState<CircularColumnParams>(DEFAULT_TOWER_PARAMS);
   const [complexColumnParams, setComplexColumnParams] = useState<ComplexColumnParams>(DEFAULT_COMPLEX_COLUMN_PARAMS);
   const [lapspliceSlabParams, setLapspliceSlabParams] = useState<SlabParams>(DEFAULT_LAPSPLICE_SLAB_PARAMS);

@@ -64,6 +64,8 @@ export const DEFAULT_LAPSPLICE_SLAB_PARAMS: SlabParams = {
   concreteOffsetXLeft: 0.5,
   concreteOffsetZBack: 0.25 / 2,
   concreteOffsetZFront: 0.25 / 2,
+  concreteDx: 0,
+  concreteDz: 0,
 };
 
 export const DEFAULT_LAPSPLICE_BEAM_PARAMS: SlabParams = {
@@ -79,6 +81,8 @@ export const DEFAULT_LAPSPLICE_BEAM_PARAMS: SlabParams = {
   concreteOffsetXLeft: 0.2,
   concreteOffsetZBack: 0.3,
   concreteOffsetZFront: 0.3,
+  concreteDx: 0,
+  concreteDz: 0,
 };
 
 export const DEFAULT_LAPSPLICE_WALL_PARAMS: SlabParams = {
@@ -94,6 +98,8 @@ export const DEFAULT_LAPSPLICE_WALL_PARAMS: SlabParams = {
   concreteOffsetXLeft: 0.5,
   concreteOffsetZBack: 0.25 / 2,
   concreteOffsetZFront: 0.25 / 2,
+  concreteDx: 0,
+  concreteDz: 0,
 };
 
 export const DEFAULT_LAPSPLICE_COLUMN_PARAMS: SlabParams = {
@@ -109,6 +115,8 @@ export const DEFAULT_LAPSPLICE_COLUMN_PARAMS: SlabParams = {
   concreteOffsetXLeft: 0.25,
   concreteOffsetZBack: 0.25,
   concreteOffsetZFront: 0.25,
+  concreteDx: 0,
+  concreteDz: 0,
 };
 
 export const DEFAULT_END_ANCHORAGE_PARAMS: EndAnchorageParams = {

@@ -82,11 +82,11 @@ interface ConcreteOffsets {
   concreteThickness: number;
 }
 
-const calculateConcreteLayout = (offsets: ConcreteOffsets): ConcreteLayout => {
+const calculateConcreteLayout = (offsets: ConcreteOffsets, dx: number = 0, dz: number = 0): ConcreteLayout => {
   const concreteWidth = offsets.concreteOffsetXRight + offsets.concreteOffsetXLeft;
   const concreteDepth = offsets.concreteOffsetZBack + offsets.concreteOffsetZFront;
-  const centerXPos = (offsets.concreteOffsetXRight - offsets.concreteOffsetXLeft) / 2;
-  const centerZPos = (offsets.concreteOffsetZBack - offsets.concreteOffsetZFront) / 2;
+  const centerXPos = (offsets.concreteOffsetXRight - offsets.concreteOffsetXLeft) / 2 + dx;
+  const centerZPos = (offsets.concreteOffsetZBack - offsets.concreteOffsetZFront) / 2 + dz;
   // Top face of concrete is at Y = 2, so center position is 2 - (thickness/2)
   const concreteTopY = 0;
   const concreteCenterY = concreteTopY - (offsets.concreteThickness / 2);
@@ -159,6 +159,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     concreteOffsetXLeft: 0.1,
     concreteOffsetZBack: 0.5,
     concreteOffsetZFront: 0.5,
+    concreteDx: 0,
+    concreteDz: 0,
   },
   lapspliceBeamParams = {
     isFiniteConcrete: true,
@@ -173,6 +175,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     concreteOffsetXLeft: 0.2,
     concreteOffsetZBack: 0.3,
     concreteOffsetZFront: 0.3,
+    concreteDx: 0,
+    concreteDz: 0,
   },
   lapspliceWallParams = {
     isFiniteConcrete: true,
@@ -187,6 +191,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     concreteOffsetXLeft: 0.5,
     concreteOffsetZBack: 0.125,
     concreteOffsetZFront: 0.125,
+    concreteDx: 0,
+    concreteDz: 0,
   },
   lapspliceColumnParams = {
     isFiniteConcrete: true,
@@ -201,6 +207,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     concreteOffsetXLeft: 0.25,
     concreteOffsetZBack: 0.25,
     concreteOffsetZFront: 0.25,
+    concreteDx: 0,
+    concreteDz: 0,
   },
   endAnchorageBeamParams = {
     beamWidth: 0.3,
@@ -616,7 +624,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         concreteOffsetZBack: lapspliceSlabParams.concreteOffsetZBack,
         concreteOffsetZFront: lapspliceSlabParams.concreteOffsetZFront,
         concreteThickness: lapspliceSlabParams.concreteThickness,
-      });
+      }, lapspliceSlabParams.concreteDx, lapspliceSlabParams.concreteDz);
 
       // Calculate post positions first
       let halfConcreteDepth = concreteDepth / 2;
@@ -639,13 +647,13 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       };
 
       let slabParam = {
-        slabWidth: lapspliceSlabParams.slabWidth,
-        slabDepth: lapspliceSlabParams.slabDepth,
+        width: lapspliceSlabParams.slabWidth,
+        depth: lapspliceSlabParams.slabDepth,
         postDiameter: lapspliceSlabParams.postDiameter,
         isFiniteConcrete: lapspliceSlabParams.isFiniteConcrete
       };
 
-      let slabPostParam = {
+      let postParams = {
         postRadius: lapspliceSlabParams.postDiameter / 2,
         postHeight: 0.3,
         postPositions: postPositions.map(pos => pos.position),
@@ -661,7 +669,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         scene,
         concreteParam,
         slabParam,
-        slabPostParam
+        postParams
       );
       // Rotate the group by 90 degrees on X-axis
       lapspliceSlabRef.current.group.rotation.x = Math.PI / 2;
@@ -676,7 +684,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         concreteOffsetZBack: lapspliceBeamParams.concreteOffsetZBack,
         concreteOffsetZFront: lapspliceBeamParams.concreteOffsetZFront,
         concreteThickness: lapspliceBeamParams.concreteThickness,
-      });
+      }, lapspliceBeamParams.concreteDx, lapspliceBeamParams.concreteDz);
 
       // Calculate post positions first
       let halfConcreteDepth = concreteDepth / 2;
@@ -699,10 +707,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       };
 
       let beamParam = {
-        slabWidth: lapspliceBeamParams.slabWidth,
-        slabDepth: lapspliceBeamParams.slabDepth,
-        postDiameter: lapspliceBeamParams.postDiameter,
-        isFiniteConcrete: lapspliceBeamParams.isFiniteConcrete
+        width: lapspliceBeamParams.slabWidth,
+        depth: lapspliceBeamParams.slabDepth,
       };
 
       let beamPostParam = {
@@ -735,7 +741,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         concreteOffsetZBack: lapspliceWallParams.concreteOffsetZBack,
         concreteOffsetZFront: lapspliceWallParams.concreteOffsetZFront,
         concreteThickness: lapspliceWallParams.concreteThickness,
-      });
+      }, lapspliceWallParams.concreteDx, lapspliceWallParams.concreteDz);
 
       // Calculate post positions first
       let halfConcreteDepth = concreteDepth / 2;
@@ -758,10 +764,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       };
 
       let wallParam = {
-        slabWidth: lapspliceWallParams.slabWidth,
-        slabDepth: lapspliceWallParams.slabDepth,
-        postDiameter: lapspliceWallParams.postDiameter,
-        isFiniteConcrete: lapspliceWallParams.isFiniteConcrete
+        width: lapspliceWallParams.slabWidth,
+        depth: lapspliceWallParams.slabDepth,
       };
 
       let wallPostParam = {
@@ -791,7 +795,7 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
         concreteOffsetZBack: lapspliceColumnParams.concreteOffsetZBack,
         concreteOffsetZFront: lapspliceColumnParams.concreteOffsetZFront,
         concreteThickness: lapspliceColumnParams.concreteThickness,
-      });
+      }, lapspliceColumnParams.concreteDx, lapspliceColumnParams.concreteDz);
 
       // Calculate post positions first
       let halfConcreteDepth = concreteDepth / 2;
@@ -814,8 +818,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
       };
 
       let columnParam = {
-        slabWidth: lapspliceColumnParams.slabWidth,
-        slabDepth: lapspliceColumnParams.slabDepth,
+        width: lapspliceColumnParams.slabWidth,
+        depth: lapspliceColumnParams.slabDepth,
         postDiameter: lapspliceColumnParams.postDiameter,
         isFiniteConcrete: lapspliceColumnParams.isFiniteConcrete
       };
@@ -1071,6 +1075,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     lapspliceSlabParams.concreteOffsetXLeft,
     lapspliceSlabParams.concreteOffsetZBack,
     lapspliceSlabParams.concreteOffsetZFront,
+    lapspliceSlabParams.concreteDx,
+    lapspliceSlabParams.concreteDz,
 
     lapspliceBeamParams.isFiniteConcrete,
     lapspliceBeamParams.concreteThickness,
@@ -1084,6 +1090,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     lapspliceBeamParams.concreteOffsetXLeft,
     lapspliceBeamParams.concreteOffsetZBack,
     lapspliceBeamParams.concreteOffsetZFront,
+    lapspliceBeamParams.concreteDx,
+    lapspliceBeamParams.concreteDz,
 
     lapspliceWallParams.isFiniteConcrete,
     lapspliceWallParams.concreteThickness,
@@ -1097,6 +1105,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     lapspliceWallParams.concreteOffsetXLeft,
     lapspliceWallParams.concreteOffsetZBack,
     lapspliceWallParams.concreteOffsetZFront,
+    lapspliceWallParams.concreteDx,
+    lapspliceWallParams.concreteDz,
 
     lapspliceColumnParams.isFiniteConcrete,
     lapspliceColumnParams.concreteThickness,
@@ -1110,6 +1120,8 @@ export const ConstructionViewer: React.FC<ConstructionViewerProps> = ({
     lapspliceColumnParams.concreteOffsetXLeft,
     lapspliceColumnParams.concreteOffsetZBack,
     lapspliceColumnParams.concreteOffsetZFront,
+    lapspliceColumnParams.concreteDx,
+    lapspliceColumnParams.concreteDz,
 
     endAnchorageBeamParams.beamWidth,
     endAnchorageBeamParams.beamDepth,
