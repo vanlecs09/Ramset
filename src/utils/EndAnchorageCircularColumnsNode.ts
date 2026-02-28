@@ -140,17 +140,17 @@ export const createCircularColumns = (
   material.backFaceCulling = false;
   material.cullBackFaces = false;
 
-  const standingWave = createCircularStandingWave(
+  const circlularColumn = createCircularStandingWave(
     scene,
     wavePosition,
     params.circleColumnsParam.columnRadius,
     params.circleColumnsParam.columnHeight,
     material,
-    0.1,
-    10,
+    0.025,
+    20,
   );
-  standingWave.parent = towerGroup;
-  mainNode.setStandingWaveMesh(standingWave);
+  circlularColumn.parent = towerGroup;
+  mainNode.setStandingWaveMesh(circlularColumn);
 
   // const debugPoints = debugMeshVertices(standingWave, scene, 0.005, new BABYLON.Color3(1, 0, 0));
 

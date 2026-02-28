@@ -89,46 +89,52 @@ export const createConcrete = (
 
   const concreteNode = new ConcreteNode(concreteTransformNode);
 
-  const concrete = BABYLON.MeshBuilder.CreateBox(
-    'concrete',
-    { width: params.width, height: params.thickness, depth: params.depth },
-    scene,
-  );
-  concrete.position = params.position;
-  concrete.material = getConcreteMaterial(scene);
-  concrete.receiveShadows = true;
+  if (isBounded) {
+    const concrete = BABYLON.MeshBuilder.CreateBox(
+      'concrete',
+      { width: params.width, height: params.thickness, depth: params.depth },
+      scene,
+    );
+    concrete.position = params.position;
+    concrete.material = getConcreteMaterial(scene);
+    concrete.receiveShadows = true;
+    if (parent) {
+      concrete.parent = parent as BABYLON.Node;
+    }
 
-  if (parent) {
-    concrete.parent = parent as BABYLON.Node;
+    // Create dimension lines if requested
+    let dimensionLines: DimensionLineNode | undefined;
+    if (showDimensions) {
+      dimensionLines = createDimension(
+        scene,
+        concrete,
+        params,
+        showLapSpliceDimension,
+        dimensionLines,
+        parent,
+      );
+    }
+    concreteNode.setMesh(concrete);
+    concreteNode.addDimensionLine(dimensionLines!);
   }
+
 
   const sinBlocks = !isBounded
     ? createBoundlessBlocks(
-        scene,
-        params.width,
-        params.depth,
-        params.thickness,
-        params.position,
-        parent,
-      )
+      scene,
+      params.width,
+      params.depth,
+      params.thickness,
+      params.position,
+      parent,
+    )
     : [];
 
-  // Create dimension lines if requested
-  let dimensionLines: DimensionLineNode | undefined;
-  if (showDimensions) {
-    dimensionLines = createDimension(
-      scene,
-      concrete,
-      params,
-      showLapSpliceDimension,
-      dimensionLines,
-      parent,
-    );
-  }
 
-  concreteNode.setMesh(concrete);
+
+
   concreteNode.setInfiniteBlocks(sinBlocks);
-  concreteNode.addDimensionLine(dimensionLines!);
+
   concreteNode.setConcreteWidth(params.width);
   concreteNode.setConcreteDepth(params.depth);
   concreteNode.setConcreteHeight(params.thickness);
@@ -144,7 +150,7 @@ const createBoundlessBlocks = (
   concretePosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 0, 0),
   parent?: BABYLON.TransformNode,
 ): BABYLON.Mesh[] => {
-  // Create the main mesh (wavy surfaces + inner faces)
+  // Create the main mesh (4 wavy outer surfaces)
   const mainMesh = createSurroundingConcreteMesh(
     scene,
     'infiniteBlock_main',
@@ -219,38 +225,38 @@ const createSurroundingConcreteMesh = (
       const v =
         (iv / divV) * blockHeight + (concretePosition.y - blockHeight / 2);
       for (let iu = 0; iu <= divU; iu++) {
-        const u = (iu / divU - 0.5) * outerWidth;
-        const waveDisplacement = Math.sin((iu / divU) * Math.PI * freq) * amp;
+        const u = (iu / divU - 0.5) * outerWidth;const waveDisplacement = Math.sin((iu / divU) * Math.PI * freq) * amp;
+        
 
         if (direction === 'z') {
           positions.push(
             u + concretePosition.x,
             v,
             blockDepth +
-              waveDisplacement +
-              (concretePosition.z + concreteDepth / 2),
+            waveDisplacement +
+            (concretePosition.z + concreteDepth / 2),
           );
         } else if (direction === '-z') {
           positions.push(
             u + concretePosition.x,
             v,
             -blockDepth -
-              waveDisplacement +
-              (concretePosition.z - concreteDepth / 2),
+            waveDisplacement +
+            (concretePosition.z - concreteDepth / 2),
           );
         } else if (direction === 'x') {
           positions.push(
             blockDepth +
-              waveDisplacement +
-              (concretePosition.x + concreteWidth / 2),
+            waveDisplacement +
+            (concretePosition.x + concreteWidth / 2),
             v,
             u + concretePosition.z,
           );
         } else if (direction === '-x') {
           positions.push(
             -blockDepth -
-              waveDisplacement +
-              (concretePosition.x - concreteWidth / 2),
+            waveDisplacement +
+            (concretePosition.x - concreteWidth / 2),
             v,
             u + concretePosition.z,
           );
@@ -283,115 +289,6 @@ const createSurroundingConcreteMesh = (
   addWavyOuterSurface(concreteDepth, concreteThickness, blockThickness, 'x');
   addWavyOuterSurface(concreteDepth, concreteThickness, blockThickness, '-x');
 
-  // Add inner faces (flat surfaces that match the 4 faces of concrete)
-  const concreteMinY = concretePosition.y - concreteThickness / 2;
-  const concreteMinX = concretePosition.x - concreteWidth / 2;
-  const concreteMaxX = concretePosition.x + concreteWidth / 2;
-  const concreteMinZ = concretePosition.z - concreteDepth / 2;
-  const concreteMaxZ = concretePosition.z + concreteDepth / 2;
-
-  // Front face (z = concreteMaxZ)
-  const frontStart = vertexCount;
-  for (let iv = 0; iv <= divV; iv++) {
-    const y = concreteMinY + (iv / divV) * concreteThickness;
-    for (let iu = 0; iu <= divU; iu++) {
-      const x = concreteMinX + (iu / divU) * concreteWidth;
-      positions.push(x, y, concreteMaxZ);
-      uvs.push(iu / divU, iv / divV);
-    }
-  }
-
-  // Back face (z = concreteMinZ)
-  const backStart = vertexCount;
-  vertexCount += (divV + 1) * (divU + 1);
-  for (let iv = 0; iv <= divV; iv++) {
-    const y = concreteMinY + (iv / divV) * concreteThickness;
-    for (let iu = 0; iu <= divU; iu++) {
-      const x = concreteMinX + (iu / divU) * concreteWidth;
-      positions.push(x, y, concreteMinZ);
-      uvs.push(iu / divU, iv / divV);
-    }
-  }
-
-  // Right face (x = concreteMaxX)
-  const rightStart = vertexCount;
-  vertexCount += (divV + 1) * (divU + 1);
-  for (let iv = 0; iv <= divV; iv++) {
-    const y = concreteMinY + (iv / divV) * concreteThickness;
-    for (let iu = 0; iu <= divU; iu++) {
-      const z = concreteMinZ + (iu / divU) * concreteDepth;
-      positions.push(concreteMaxX, y, z);
-      uvs.push(iu / divU, iv / divV);
-    }
-  }
-
-  // Left face (x = concreteMinX)
-  const leftStart = vertexCount;
-  vertexCount += (divV + 1) * (divU + 1);
-  for (let iv = 0; iv <= divV; iv++) {
-    const y = concreteMinY + (iv / divV) * concreteThickness;
-    for (let iu = 0; iu <= divU; iu++) {
-      const z = concreteMinZ + (iu / divU) * concreteDepth;
-      positions.push(concreteMinX, y, z);
-      uvs.push(iu / divU, iv / divV);
-    }
-  }
-
-  // Add indices for inner faces
-  const ring = divU + 1;
-
-  // Front face triangles
-  for (let iv = 0; iv < divV; iv++) {
-    for (let iu = 0; iu < divU; iu++) {
-      const a = frontStart + iv * ring + iu;
-      const b = a + 1;
-      const c = a + ring;
-      const d = c + 1;
-
-      indices.push(a, c, b);
-      indices.push(b, c, d);
-    }
-  }
-
-  // Back face triangles
-  for (let iv = 0; iv < divV; iv++) {
-    for (let iu = 0; iu < divU; iu++) {
-      const a = backStart + iv * ring + iu;
-      const b = a + 1;
-      const c = a + ring;
-      const d = c + 1;
-
-      indices.push(a, b, c);
-      indices.push(b, d, c);
-    }
-  }
-
-  // Right face triangles
-  for (let iv = 0; iv < divV; iv++) {
-    for (let iu = 0; iu < divU; iu++) {
-      const a = rightStart + iv * ring + iu;
-      const b = a + 1;
-      const c = a + ring;
-      const d = c + 1;
-
-      indices.push(a, c, b);
-      indices.push(b, c, d);
-    }
-  }
-
-  // Left face triangles
-  for (let iv = 0; iv < divV; iv++) {
-    for (let iu = 0; iu < divU; iu++) {
-      const a = leftStart + iv * ring + iu;
-      const b = a + 1;
-      const c = a + ring;
-      const d = c + 1;
-
-      indices.push(a, b, c);
-      indices.push(b, d, c);
-    }
-  }
-
   const mesh = new BABYLON.Mesh(name, scene);
   mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
   mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs);
@@ -419,174 +316,85 @@ const createWallMesh = (
   const amp = 0.02;
   const freq = 10 * concreteWidth;
   const divU = 50;
+  const divV = 50;
 
   const positions: number[] = [];
   const indices: number[] = [];
   const uvs: number[] = [];
 
-  const concreteMinY = concretePosition.y - concreteThickness / 2;
-  const concreteMaxY = concretePosition.y + concreteThickness / 2;
-  const concreteMinX = concretePosition.x - concreteWidth / 2;
-  const concreteMaxX = concretePosition.x + concreteWidth / 2;
-  const concreteMinZ = concretePosition.z - concreteDepth / 2;
-  const concreteMaxZ = concretePosition.z + concreteDepth / 2;
+  // Y position for this horizontal plane
+  const yPos =
+    wallType === 'bottom'
+      ? concretePosition.y - concreteThickness / 2
+      : concretePosition.y + concreteThickness / 2;
 
-  const ring = divU + 1;
+  // Total dimensions including blockThickness
+  const totalWidth = concreteWidth + blockThickness * 2;
+  const totalDepth = concreteDepth + blockThickness * 2;
 
-  // Create wavy surface vertices for walls
-  const createWavyEdgeVertices = (
-    blockWidth: number,
-    blockDepth: number,
-    direction: 'z' | '-z' | 'x' | '-x',
-  ): { positions: number[]; uvs: number[] } => {
-    const edgePositions: number[] = [];
-    const edgeUvs: number[] = [];
-    const outerWidth = blockWidth + blockDepth * 2;
-
-    // Select edge based on wall type
-    const v =
-      wallType === 'bottom'
-        ? concretePosition.y - concreteThickness / 2
-        : concretePosition.y + concreteThickness / 2;
-
+  // Create a grid of vertices on the XZ plane
+  for (let iv = 0; iv <= divV; iv++) {
     for (let iu = 0; iu <= divU; iu++) {
-      const u = (iu / divU - 0.5) * outerWidth;
-      const waveDisplacement = Math.sin((iu / divU) * Math.PI * freq) * amp;
-
-      if (direction === 'z') {
-        edgePositions.push(
-          u + concretePosition.x,
-          v,
-          blockDepth +
-            waveDisplacement +
-            (concretePosition.z + concreteDepth / 2),
-        );
-      } else if (direction === '-z') {
-        edgePositions.push(
-          u + concretePosition.x,
-          v,
-          -blockDepth -
-            waveDisplacement +
-            (concretePosition.z - concreteDepth / 2),
-        );
-      } else if (direction === 'x') {
-        edgePositions.push(
-          blockDepth +
-            waveDisplacement +
-            (concretePosition.x + concreteWidth / 2),
-          v,
-          u + concretePosition.z,
-        );
-      } else if (direction === '-x') {
-        edgePositions.push(
-          -blockDepth -
-            waveDisplacement +
-            (concretePosition.x - concreteWidth / 2),
-          v,
-          u + concretePosition.z,
-        );
+      const uNorm = iu / divU; // 0 to 1
+      const vNorm = iv / divV; // 0 to 1
+      
+      // Position in XZ plane (centered at concretePosition)
+      let x = (uNorm - 0.5) * totalWidth + concretePosition.x;
+      let z = (vNorm - 0.5) * totalDepth + concretePosition.z;
+      
+      // Apply wave displacement only to perimeter vertices
+      let waveDisplacement = 0;
+      
+      // Check if vertex is on the perimeter
+      if (iu === 0 || iu === divU || iv === 0 || iv === divV) {
+        // Determine which edge and apply wave
+        if (iv === 0) {
+          // Front edge (z min)
+          waveDisplacement = Math.sin(uNorm * Math.PI * freq) * amp;
+          z = (concretePosition.z - totalDepth / 2) - waveDisplacement;
+        } else if (iv === divV) {
+          // Back edge (z max)
+          waveDisplacement = Math.sin(uNorm * Math.PI * freq) * amp;
+          z = (concretePosition.z + totalDepth / 2) + waveDisplacement;
+        } else if (iu === 0) {
+          // Left edge (x min)
+          waveDisplacement = Math.sin(vNorm * Math.PI * freq) * amp;
+          x = (concretePosition.x - totalWidth / 2) - waveDisplacement;
+        } else if (iu === divU) {
+          // Right edge (x max)
+          waveDisplacement = Math.sin(vNorm * Math.PI * freq) * amp;
+          x = (concretePosition.x + totalWidth / 2) + waveDisplacement;
+        }
       }
-      edgeUvs.push(iu / divU, 0);
+      
+      positions.push(x, yPos, z);
+      uvs.push(uNorm, vNorm);
     }
+  }
 
-    return { positions: edgePositions, uvs: edgeUvs };
-  };
-
-  // Create inner surface edge vertices
-  const createInnerEdgeVertices = (
-    blockWidth: number,
-    direction: 'z' | '-z' | 'x' | '-x',
-  ): { positions: number[]; uvs: number[] } => {
-    const edgePositions: number[] = [];
-    const edgeUvs: number[] = [];
-    const y = wallType === 'bottom' ? concreteMinY : concreteMaxY;
-
-    if (direction === 'z') {
-      for (let iu = 0; iu <= divU; iu++) {
-        const x = concreteMinX + (iu / divU) * blockWidth;
-        edgePositions.push(x, y, concreteMaxZ);
-        edgeUvs.push(iu / divU, 0);
-      }
-    } else if (direction === '-z') {
-      for (let iu = 0; iu <= divU; iu++) {
-        const x = concreteMinX + (iu / divU) * blockWidth;
-        edgePositions.push(x, y, concreteMinZ);
-        edgeUvs.push(iu / divU, 0);
-      }
-    } else if (direction === 'x') {
-      for (let iu = 0; iu <= divU; iu++) {
-        const z = concreteMinZ + (iu / divU) * concreteDepth;
-        edgePositions.push(concreteMaxX, y, z);
-        edgeUvs.push(iu / divU, 0);
-      }
-    } else if (direction === '-x') {
-      for (let iu = 0; iu <= divU; iu++) {
-        const z = concreteMinZ + (iu / divU) * concreteDepth;
-        edgePositions.push(concreteMinX, y, z);
-        edgeUvs.push(iu / divU, 0);
-      }
-    }
-
-    return { positions: edgePositions, uvs: edgeUvs };
-  };
-
-  // Build wall vertices and indices for each direction
-  const directions: Array<'z' | '-z' | 'x' | '-x'> = ['z', 'x', '-z', '-x'];
-  const widths = [concreteWidth, concreteWidth, concreteDepth, concreteDepth];
-
-  directions.forEach((direction, index) => {
-    const blockWidth = widths[index];
-    const wavyEdge = createWavyEdgeVertices(
-      blockWidth,
-      blockThickness,
-      direction,
-    );
-    const innerEdge = createInnerEdgeVertices(blockWidth, direction);
-
-    const startVertex = positions.length / 3;
-
-    // Add wavy edge vertices
-    for (let i = 0; i < wavyEdge.positions.length; i += 3) {
-      positions.push(
-        wavyEdge.positions[i],
-        wavyEdge.positions[i + 1],
-        wavyEdge.positions[i + 2],
-      );
-    }
-    for (let i = 0; i < wavyEdge.uvs.length; i++) {
-      uvs.push(wavyEdge.uvs[i]);
-    }
-
-    // Add inner edge vertices
-    for (let i = 0; i < innerEdge.positions.length; i += 3) {
-      positions.push(
-        innerEdge.positions[i],
-        innerEdge.positions[i + 1],
-        innerEdge.positions[i + 2],
-      );
-    }
-    for (let i = 0; i < innerEdge.uvs.length; i++) {
-      uvs.push(innerEdge.uvs[i]);
-    }
-
-    // Create wall triangles between wavy and inner edges
-    const edgeVertexCount = ring; // Single row for each wall type
+  // Create triangles for the grid
+  const ring = divU + 1;
+  for (let iv = 0; iv < divV; iv++) {
     for (let iu = 0; iu < divU; iu++) {
-      const wavyA = startVertex + iu;
-      const wavyB = wavyA + 1;
-      const innerA = startVertex + edgeVertexCount + iu;
-      const innerB = innerA + 1;
+      const a = iv * ring + iu;
+      const b = a + 1;
+      const c = a + ring;
+      const d = c + 1;
 
+      // Winding order depends on top/bottom
       if (wallType === 'bottom') {
-        indices.push(wavyA, innerA, wavyB);
-        indices.push(wavyB, innerA, innerB);
+        // Bottom face: normal points down
+        indices.push(a, c, b);
+        indices.push(b, c, d);
       } else {
-        indices.push(wavyA, wavyB, innerA);
-        indices.push(wavyB, innerB, innerA);
+        // Top face: normal points up
+        indices.push(a, b, c);
+        indices.push(b, d, c);
       }
     }
-  });
+  }
 
+  // Create the mesh
   const mesh = new BABYLON.Mesh(name, scene);
   mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
   mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs);

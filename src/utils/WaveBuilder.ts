@@ -322,8 +322,8 @@ export const createCircularStandingWave = (
   radius: number,
   height: number,
   material: BABYLON.StandardMaterial,
-  amplitude: number = 0.05,
-  frequency: number = 5,
+  amplitude: number = 0.025,
+  frequency: number = 20,
 ): BABYLON.Mesh => {
   const positions: number[] = [];
   const indices: number[] = [];
